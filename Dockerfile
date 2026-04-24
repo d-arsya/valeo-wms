@@ -16,17 +16,6 @@ RUN composer install \
 #     --no-progress \
 #     --optimize-autoloader
 
-FROM node:20-alpine AS frontend
-WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci
-
-COPY resources/ resources/
-COPY vite.config.* ./
-COPY tsconfig.json ./
-
-RUN npm run build
-
 FROM dunglas/frankenphp:php8.5 AS app
 
 WORKDIR /app
@@ -40,8 +29,6 @@ RUN apt-get update && apt-get install -y \
 COPY . .
 
 COPY --from=vendor /app/vendor ./vendor
-
-COPY --from=frontend /app/public/build ./public/build
 
 RUN php artisan route:cache \
     && php artisan view:cache || true
