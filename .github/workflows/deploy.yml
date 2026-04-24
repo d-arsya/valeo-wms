@@ -1,0 +1,46 @@
+name: Deploy to VPS on Push
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: ARSYAD
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/${{github.event.repository.name }}:latest
+    
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment: ARSYAD
+
+    steps:
+      - name: Deploy on VPS
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.HOST_IP }}
+          username: ${{ secrets.HOST_USERNAME }}
+          password: ${{ secrets.HOST_PASSWORD }}
+          port: ${{ secrets.HOST_PORT }}
+          script: |
+            cd /media/${{ github.event.repository.name }}
+            docker compose pull
+            docker compose up -d
+            docker compose exec -t ${{ github.event.repository.name }} php artisan migrate:fresh --seed --force
