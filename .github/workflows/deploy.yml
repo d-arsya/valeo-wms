@@ -35,10 +35,10 @@ jobs:
       - name: Deploy on VPS
         uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ secrets.HOST_IP }}
-          username: ${{ secrets.HOST_USERNAME }}
-          password: ${{ secrets.HOST_PASSWORD }}
-          port: ${{ secrets.HOST_PORT }}
+          host: ${{ secrets.SSH_IP }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SSH_PORT }}
           script: |
             cd /media/${{ github.event.repository.name }}
             docker compose pull
