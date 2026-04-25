@@ -50,12 +50,25 @@ Seluruh domain bisnis WMS: tidak ada satu pun model, migration, controller, atau
 
 ---
 
-## 3. DATABASE SCHEMA (Critical Path — BE harus selesai ini PERTAMA)
+## 3. DATABASE SCHEMA (Normalized Structure)
+
+### Tabel: `brands`
+`id, name (unique), created_at, updated_at`
+
+### Tabel: `categories`
+`id, name (unique), created_at, updated_at`
+
+### Tabel: `racks`
+`id, code (unique), created_at, updated_at`
+
+### Tabel: `bins`
+`id, rack_id (FK), code (unique), created_at, updated_at`
 
 ### Tabel: `spareparts`
 ```
-id, material_number (unique), part_name, specification, brand, category,
-rack_location, bin_number, safety_stock (int), actual_stock (int),
+id, material_number (unique), part_name, specification, 
+brand_id (FK), category_id (FK), bin_id (FK),
+safety_stock (int), actual_stock (int),
 last_po_number, last_supplier, last_gr_date (date), price_per_unit (decimal),
 status (enum: OK, ATTENTION, NG — computed via Observer),
 qr_code_path (string nullable),
@@ -64,8 +77,8 @@ created_at, updated_at
 
 ### Tabel: `activity_logs`
 ```
-id, sparepart_id (FK), control_id (string unique — auto-generated),
-type (enum: IN, OUT), quantity (int), pic_name (string),
+id, sparepart_id (FK), user_id (FK), control_id (string unique — auto-generated),
+type (enum: IN, OUT), quantity (int), 
 remarks (string nullable), po_number (string nullable — untuk IN),
 gr_date (date nullable — untuk IN), price_per_unit (decimal nullable — untuk IN),
 performed_at (timestamp), created_at, updated_at
@@ -308,6 +321,10 @@ app/
 │   ├── User.php                    ← existing
 │   ├── Sparepart.php               ← [NEW-BE]
 │   ├── ActivityLog.php             ← [NEW-BE]
+│   ├── Brand.php                   ← [NEW-BE]
+│   ├── Category.php                ← [NEW-BE]
+│   ├── Rack.php                    ← [NEW-BE]
+│   ├── Bin.php                     ← [NEW-BE]
 │   └── Traits/
 │       └── HasStockStatus.php      ← [NEW-BE]
 └── Observers/
