@@ -104,13 +104,7 @@ performed_at (timestamp), created_at, updated_at
 | # | Task | Agent | Prerequisite |
 |---|---|---|---|
 | B-1 | `FormRequests`: StoreSparepart, UpdateSparepart | 🟦 BE | SYNC-1 |
-| B-2 | `SparepartController` (Index, Store, Show, Update, Destroy) | 🟦 BE | B-1 |
-| B-3 | `FormRequests`: StockOutRequest, StockInRequest | 🟦 BE | SYNC-1 |
-| B-4 | `StockOutController` (Single Action `__invoke`) | 🟦 BE | B-3 |
-| B-5 | `StockInController` (Single Action `__invoke`) | 🟦 BE | B-3 |
-| B-6 | `QrCodeController` — generate & download QR label | 🟦 BE | B-2 |
-| B-7 | `ReportController` — filter + export PDF | 🟦 BE | B-4, B-5 |
-| B-8 | Update `routes/web.php` — daftarkan semua route WMS | 🟦 BE | B-2..B-7 |
+| B-2 | `SparepartController` (Resource: Index, Store, Show, Update, Destroy) | 🟦 BE | B-1 |
 
 ### Phase 1 — Frontend Core (Paralel dengan Phase 1 BE, gunakan mock data untuk UI)
 | # | Task | Agent | Prerequisite |
@@ -176,10 +170,10 @@ main (protected)
 **File ownership kamu:**
 - `app/Models/` — semua model domain WMS
 - `app/Models/Traits/` — trait dekomposisi model
-- `app/Http/Controllers/Sparepart/` — CRUD controllers
-- `app/Http/Controllers/Stock/` — StockIn, StockOut controllers
-- `app/Http/Controllers/QrCode/` — QR controller
-- `app/Http/Controllers/Report/` — Report controller
+- `app/Http/Controllers/SparepartController.php` ← Resource controller
+- `app/Http/Controllers/Stock/` — StockIn, StockOut controllers (Single Action if complex)
+- `app/Http/Controllers/QrCodeController.php`
+- `app/Http/Controllers/ReportController.php`
 - `app/Http/Requests/` — semua FormRequests
 - `app/Actions/` — Action classes (logika antar model)
 - `app/Observers/` — Model observers
@@ -299,19 +293,12 @@ app/
 ├── Http/
 │   ├── Controllers/
 │   │   ├── Settings/               ← existing, jangan diubah
-│   │   ├── Sparepart/
-│   │   │   ├── IndexController.php ← [NEW-BE]
-│   │   │   ├── StoreController.php ← [NEW-BE]
-│   │   │   ├── ShowController.php  ← [NEW-BE]
-│   │   │   ├── UpdateController.php← [NEW-BE]
-│   │   │   └── DestroyController.php← [NEW-BE]
+│   │   ├── SparepartController.php ← [NEW-BE] Resource
 │   │   ├── Stock/
 │   │   │   ├── StockOutController.php← [NEW-BE]
 │   │   │   └── StockInController.php← [NEW-BE]
-│   │   ├── QrCode/
-│   │   │   └── GenerateController.php← [NEW-BE]
-│   │   └── Report/
-│   │       └── ExportController.php← [NEW-BE]
+│   │   ├── QrCodeController.php    ← [NEW-BE]
+│   │   └── ReportController.php    ← [NEW-BE]
 │   └── Requests/
 │       ├── StoreSparepartRequest.php← [NEW-BE]
 │       ├── UpdateSparepartRequest.php← [NEW-BE]
