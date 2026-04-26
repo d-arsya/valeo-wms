@@ -105,6 +105,11 @@ performed_at (timestamp), created_at, updated_at
 |---|---|---|---|
 | B-1 | `FormRequests`: StoreSparepart, UpdateSparepart | 🟦 BE | SYNC-1 |
 | B-2 | `SparepartController` (Resource: Index, Store, Show, Update, Destroy) | 🟦 BE | B-1 |
+| B-3 | `FormRequests`: StockOutRequest, StockInRequest | 🟦 BE | SYNC-1 |
+| B-4 | `StockController` (in/out logic) | 🟦 BE | B-3 |
+| B-5 | `QrCodeController` — on-demand label generation (QR + Info) | 🟦 BE | B-2 |
+| B-6 | `ReportController` — filter + export PDF | 🟦 BE | B-4 |
+| B-7 | Update `routes/web.php` — register all WMS routes | 🟦 BE | B-2..B-6 |
 
 ### Phase 1 — Frontend Core (Paralel dengan Phase 1 BE, gunakan mock data untuk UI)
 | # | Task | Agent | Prerequisite |
@@ -141,10 +146,10 @@ main (protected)
 │   ├── feat/be-model-sparepart          ← P0-2
 │   ├── feat/be-model-activitylog        ← P0-3
 │   ├── feat/be-crud-sparepart           ← B-1, B-2
-│   ├── feat/be-stock-control            ← B-3, B-4, B-5
-│   ├── feat/be-qrcode                   ← B-6
-│   ├── feat/be-report-pdf               ← B-7
-│   └── feat/be-routes                   ← B-8
+│   ├── feat/be-stock-control            ← B-3, B-4
+│   ├── feat/be-qrcode                   ← B-5
+│   ├── feat/be-report-pdf               ← B-6
+│   └── feat/be-routes                   ← B-7
 └── frontend
     ├── feat/fe-layout-nav               ← F-1
     ├── feat/fe-sparepart-index          ← F-2
