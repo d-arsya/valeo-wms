@@ -18,7 +18,7 @@ Untuk menjaga file tetap ramping (<300 baris), AI Agent harus mendistribusikan l
 * **Observers:** Semua logika *side-effect* (seperti mengirim email setelah register, logging audit trail, atau manipulasi file) **wajib** diletakkan di `Model Observers`.
 
 ### B. Controller & Routing
-* **Single Action Controllers:** Gunakan `__invoke()` untuk logic yang kompleks guna memastikan controller tetap di bawah 300 baris.
+* **Resource Controllers:** Gunakan standard Laravel Resource Controller untuk operasi CRUD sederhana. Jika logic dalam salah satu method menjadi terlalu kompleks atau menyebabkan file melebihi 300 baris, pecah rute tersebut menjadi **Single Action Controller** menggunakan `__invoke()`.
 * **Form Requests:** Validasi **dilarang keras** ada di dalam Controller. Gunakan `php artisan make:request` untuk semua validasi dan otorisasi level request.
 * **Fluent Middleware:** Gunakan konfigurasi middleware di `bootstrap/app.php` (gaya Laravel 11+) untuk menyederhanakan proteksi rute.
 
@@ -49,6 +49,7 @@ Agent harus mengikuti instruksi ini secara literal:
 
 1.  **Code Splitting:** "Jika file `.php` mendekati 250 baris, identifikasi bagian mana yang bisa dipindah ke `Trait`, `Observer`, atau `Casts`."
 2.  **Naming Convention:** * Model Traits: `Models/Traits/Has[FeatureName].php`
+    * Resource Controller: `Http/Controllers/[Entity]Controller.php`
     * Single Action: `Http/Controllers/[Entity]/[ActionName]Controller.php`
 3.  **Strict No-Service Policy:** "Jangan buat folder `Services/` atau `Repositories/`. Gunakan `Query Scopes` untuk filter data dan `Actions` atau `Job Classes` untuk logic antar model."
 4.  **UI Consistency:** "Gunakan Shadcn UI untuk semua elemen input dan feedback. Pastikan `className` Tailwind tidak menumpuk; gunakan helper `cn()` untuk penggabungan class."
