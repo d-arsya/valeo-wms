@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\SparepartController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\QrCodeController;
 
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
@@ -23,6 +24,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/out/{sparepart}', [StockController::class, 'outForm'])->name('out.form');
         Route::post('/out/{sparepart}', [StockController::class, 'out'])->name('out');
     });
+
+    // QR Label
+    Route::get('spareparts/{sparepart}/label', QrCodeController::class)->name('spareparts.label');
 });
 
 require __DIR__.'/settings.php';
