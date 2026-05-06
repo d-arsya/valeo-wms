@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { Plus, Search, Warehouse } from 'lucide-react';
+import { SparepartsTable } from '@/components/features/spareparts/spareparts-table';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,15 +14,12 @@ import {
 import { Input } from '@/components/ui/input';
 import spareparts from '@/routes/spareparts';
 import type { PaginatedResponse, Sparepart } from '@/types';
-import { mockSpareparts } from '@/components/features/spareparts/mock-spareparts';
-import { SparepartsSummaryCards } from '@/components/features/spareparts/spareparts-summary-cards';
-import { SparepartsTable } from '@/components/features/spareparts/spareparts-table';
 
 type Props = {
-    spareparts?: PaginatedResponse<Sparepart>;
+    spareparts: PaginatedResponse<Sparepart>;
 };
 
-export default function Index({ spareparts: response = mockSpareparts }: Props) {
+export default function Index({ spareparts: response }: Props) {
     const rows = response.data;
     const lowStockCount = rows.filter((item) => item.status !== 'OK').length;
     const totalActualStock = rows.reduce((sum, item) => sum + item.actual_stock, 0);
@@ -57,12 +55,6 @@ export default function Index({ spareparts: response = mockSpareparts }: Props) 
                         </Link>
                     </Button>
                 </div>
-
-                <SparepartsSummaryCards
-                    total={response.total}
-                    lowStockCount={lowStockCount}
-                    totalActualStock={totalActualStock}
-                />
 
                 <Card className="gap-0 overflow-hidden">
                     <CardHeader className="border-b border-border/60 pb-4">

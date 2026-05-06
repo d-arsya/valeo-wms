@@ -1,11 +1,11 @@
 import { Link } from '@inertiajs/react';
 import { ArrowRight } from 'lucide-react';
-import { StockStatusBadge } from '@/components/features/spareparts/stock-status-badge';
 import {
     formatCurrency,
     formatDate,
     getBinLabel,
 } from '@/components/features/spareparts/spareparts-utils';
+import { StockStatusBadge } from '@/components/features/spareparts/stock-status-badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import spareparts from '@/routes/spareparts';
