@@ -17,7 +17,7 @@ export type FilterValues = {
     categoryId: string;
 };
 
-type Props = {
+interface Props {
     values: FilterValues;
     onChange: (field: keyof FilterValues, value: string) => void;
     brands: Pick<Brand, 'id' | 'name'>[];
@@ -25,7 +25,7 @@ type Props = {
     onApply: (event?: FormEvent<HTMLFormElement>) => void;
     onReset: () => void;
     hasFilters: boolean;
-};
+}
 
 export function SparepartFilters({
     values,

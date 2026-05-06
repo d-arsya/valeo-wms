@@ -11,9 +11,9 @@ import { cn } from '@/lib/utils';
 import spareparts from '@/routes/spareparts';
 import type { Sparepart } from '@/types';
 
-type Props = {
+interface Props {
     rows: Sparepart[];
-};
+}
 
 export function SparepartsTable({ rows }: Props) {
     return (
@@ -144,13 +144,6 @@ export function SparepartsTable({ rows }: Props) {
                                             >
                                                 Detail
                                                 <ArrowRight className="size-4" />
-                                            </Link>
-                                        </Button>
-                                        <Button asChild size="sm" className="h-8 px-3">
-                                            <Link
-                                                href={spareparts.edit(sparepart.id)}
-                                            >
-                                                Edit
                                             </Link>
                                         </Button>
                                     </div>

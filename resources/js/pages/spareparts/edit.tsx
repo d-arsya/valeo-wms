@@ -1,17 +1,15 @@
-import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
+import { Head, useForm } from '@inertiajs/react';
 import { SparepartForm  } from '@/components/features/spareparts/sparepart-form';
 import type {SparepartFormValues} from '@/components/features/spareparts/sparepart-form';
-import { Button } from '@/components/ui/button';
 import spareparts from '@/routes/spareparts';
 import type { Bin, Brand, Category, Sparepart } from '@/types';
 
-type Props = {
+interface Props {
     sparepart: Sparepart;
     brands: Pick<Brand, 'id' | 'name'>[];
     categories: Pick<Category, 'id' | 'name'>[];
     bins: Bin[];
-};
+}
 
 function mapSparepartToValues(sparepart: Sparepart): SparepartFormValues {
     return {
@@ -52,12 +50,6 @@ export default function Edit({ sparepart, brands, categories, bins }: Props) {
             <Head title={`Edit ${sparepart.material_number}`} />
 
             <div className="space-y-6 p-4 md:p-6">
-                <Button variant="ghost" asChild className="w-fit px-0 text-muted-foreground hover:bg-transparent hover:text-foreground">
-                    <Link href={spareparts.index()}>
-                        <ArrowLeft className="size-4" />
-                        Kembali ke daftar
-                    </Link>
-                </Button>
 
                 <SparepartForm
                     title={`Edit sparepart ${sparepart.material_number}`}
@@ -71,7 +63,7 @@ export default function Edit({ sparepart, brands, categories, bins }: Props) {
                     onSubmit={handleSubmit}
                     onChange={form.setData}
                     submitLabel="Update sparepart"
-                    cancelHref={spareparts.index().url}
+                    cancelHref={spareparts.show(sparepart.id).url}
                 />
             </div>
         </>

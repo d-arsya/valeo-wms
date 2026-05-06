@@ -21,7 +21,7 @@ export type SparepartFormValues = {
     actual_stock: string;
 };
 
-type Props = {
+interface Props {
     title: string;
     description: string;
     values: SparepartFormValues;
@@ -34,7 +34,7 @@ type Props = {
     onChange: (field: keyof SparepartFormValues, value: string) => void;
     submitLabel: string;
     cancelHref: string;
-};
+}
 
 /**
  * Form master sparepart dipakai ulang untuk halaman create dan edit.

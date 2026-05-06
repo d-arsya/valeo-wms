@@ -1,11 +1,13 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { AlertTriangle, ArrowLeft, Edit3, MapPin, Package, Trash2 } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Edit3, MapPin, Package, Printer, QrCode, Trash2 } from 'lucide-react';
 import { formatCurrency, formatDate, formatDateTime, getBinLabel } from '@/components/features/spareparts/spareparts-utils';
 import { StockStatusBadge } from '@/components/features/spareparts/stock-status-badge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import spareparts from '@/routes/spareparts';
+import { form as stockInForm } from '@/routes/stock/in';
+import { form as stockOutForm } from '@/routes/stock/out';
 import type { ActivityLog, Sparepart } from '@/types';
 import type { User } from '@/types/auth';
 
@@ -13,9 +15,9 @@ type SparepartDetail = Sparepart & {
     activityLogs: Array<ActivityLog & { user?: User | null }>;
 };
 
-type Props = {
+interface Props {
     sparepart: SparepartDetail;
-};
+}
 
 function renderActivityBadge(type: ActivityLog['type']) {
     return type === 'IN' ? (
@@ -43,12 +45,13 @@ export default function Show({ sparepart }: Props) {
             <Head title={sparepart.material_number} />
 
             <div className="space-y-6 p-4 md:p-6">
-                        <Button variant="ghost" asChild className="w-fit px-0 text-muted-foreground hover:bg-transparent hover:text-foreground">
-                            <Link href={spareparts.index()}>
-                                <ArrowLeft className="size-4" />
-                                Kembali ke daftar
-                            </Link>
-                        </Button>
+                <Button variant="ghost" asChild className="w-fit px-0 text-muted-foreground hover:bg-transparent hover:text-foreground">
+                    <Link href={spareparts.index()}>
+                        <ArrowLeft className="size-4" />
+                        Kembali ke daftar
+                    </Link>
+                </Button>
+
                 <div className="flex flex-col gap-4 rounded-2xl border border-border/60 bg-card p-6 shadow-sm lg:flex-row lg:items-center lg:justify-between">
                     <div className="space-y-3">
 
@@ -62,8 +65,30 @@ export default function Show({ sparepart }: Props) {
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-2 sm:flex-row">
+                    <div className="flex flex-wrap gap-2">
+                        <Button asChild variant="secondary">
+                            <Link href={stockOutForm(sparepart.id)}>
+                                Stock OUT
+                            </Link>
+                        </Button>
+                        <Button asChild variant="secondary">
+                            <Link href={stockInForm(sparepart.id)}>
+                                Stock IN
+                            </Link>
+                        </Button>
                         <Button asChild variant="outline">
+                            <Link href={spareparts.label(sparepart.id)}>
+                                <QrCode className="size-4" />
+                                Generate QR
+                            </Link>
+                        </Button>
+                        <Button asChild variant="outline">
+                            <Link href={spareparts.label(sparepart.id, { query: { print: '1' } })} target="_blank" rel="noreferrer">
+                                <Printer className="size-4" />
+                                Print Label
+                            </Link>
+                        </Button>
+                        <Button asChild >
                             <Link href={spareparts.edit(sparepart.id)}>
                                 <Edit3 className="size-4" />
                                 Edit sparepart
@@ -182,11 +207,7 @@ function DetailItem({
     label,
     value,
     emphasize = false,
-}: {
-    label: string;
-    value: string;
-    emphasize?: boolean;
-}) {
+}: DetailItemProps) {
     return (
         <div className="rounded-xl border border-border/60 p-4">
             <p className="text-sm text-muted-foreground">{label}</p>
@@ -195,6 +216,12 @@ function DetailItem({
             </p>
         </div>
     );
+}
+
+interface DetailItemProps {
+    label: string;
+    value: string;
+    emphasize?: boolean;
 }
 
 Show.layout = {

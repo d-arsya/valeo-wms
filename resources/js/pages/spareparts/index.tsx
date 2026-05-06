@@ -16,7 +16,7 @@ import {
 import spareparts from '@/routes/spareparts';
 import type { Brand, Category, PaginatedResponse, Sparepart } from '@/types';
 
-type Props = {
+interface Props {
     spareparts: PaginatedResponse<Sparepart>;
     filters: {
         search?: string | null;
@@ -25,7 +25,7 @@ type Props = {
     };
     brands: Pick<Brand, 'id' | 'name'>[];
     categories: Pick<Category, 'id' | 'name'>[];
-};
+}
 
 function buildQuery(values: FilterValues) {
     return {

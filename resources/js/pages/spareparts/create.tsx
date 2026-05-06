@@ -4,11 +4,11 @@ import type {SparepartFormValues} from '@/components/features/spareparts/sparepa
 import spareparts from '@/routes/spareparts';
 import type { Bin, Brand, Category } from '@/types';
 
-type Props = {
+interface Props {
     brands: Pick<Brand, 'id' | 'name'>[];
     categories: Pick<Category, 'id' | 'name'>[];
     bins: Bin[];
-};
+}
 
 const initialValues: SparepartFormValues = {
     material_number: '',
