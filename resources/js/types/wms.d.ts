@@ -1,3 +1,5 @@
+import type { User } from './auth';
+
 export type StockStatus = 'OK' | 'ATTENTION' | 'NG';
 
 export type StockControlType = 'IN' | 'OUT';
@@ -73,6 +75,7 @@ export interface Sparepart {
     brand?: Brand | null;
     category?: Category | null;
     bin?: Bin | null;
+    activityLogs?: ActivityLog[];
 }
 
 export interface ActivityLog {
@@ -90,4 +93,5 @@ export interface ActivityLog {
     created_at: string;
     updated_at: string;
     sparepart?: Sparepart | null;
+    user?: User | null;
 }
