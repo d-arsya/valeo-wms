@@ -1,98 +1,138 @@
-import { Head, Link } from '@inertiajs/react';
-import { Plus, Search, Warehouse } from 'lucide-react';
-import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
+import { Head, Link, router } from '@inertiajs/react';
+import { Plus, Warehouse } from 'lucide-react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
+import type { FilterValues } from '@/components/features/spareparts/spareparts-filters';
+import { SparepartFilters } from '@/components/features/spareparts/spareparts-filters';
+import { SparepartsTable } from '@/components/features/spareparts/spareparts-table';
+import { Pagination } from '@/components/pagination';
 import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
-    CardDescription,
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import spareparts from '@/routes/spareparts';
-import type { PaginatedResponse, Sparepart } from '@/types';
-import { mockSpareparts } from '@/components/features/spareparts/mock-spareparts';
-import { SparepartsSummaryCards } from '@/components/features/spareparts/spareparts-summary-cards';
-import { SparepartsTable } from '@/components/features/spareparts/spareparts-table';
+import type { Brand, Category, PaginatedResponse, Sparepart } from '@/types';
 
-type Props = {
-    spareparts?: PaginatedResponse<Sparepart>;
-};
+interface Props {
+    spareparts: PaginatedResponse<Sparepart>;
+    filters: {
+        search?: string | null;
+        brand_id?: string | null;
+        category_id?: string | null;
+    };
+    brands: Pick<Brand, 'id' | 'name'>[];
+    categories: Pick<Category, 'id' | 'name'>[];
+}
 
-export default function Index({ spareparts: response = mockSpareparts }: Props) {
+function buildQuery(values: FilterValues) {
+    return {
+        ...(values.search ? { search: values.search.trim() } : {}),
+        ...(values.brandId && values.brandId !== 'all' ? { brand_id: values.brandId } : {}),
+        ...(values.categoryId && values.categoryId !== 'all' ? { category_id: values.categoryId } : {}),
+    };
+}
+
+export default function Index({
+    spareparts: response,
+    filters,
+    brands,
+    categories,
+}: Props) {
+    const [filterValues, setFilterValues] = useState<FilterValues>({
+        search: filters.search ?? '',
+        brandId: filters.brand_id ?? 'all',
+        categoryId: filters.category_id ?? 'all',
+    });
+
     const rows = response.data;
-    const lowStockCount = rows.filter((item) => item.status !== 'OK').length;
-    const totalActualStock = rows.reduce((sum, item) => sum + item.actual_stock, 0);
+    const hasFilters = Boolean(
+        filterValues.search || filterValues.brandId !== 'all' || filterValues.categoryId !== 'all'
+    );
+
+    const handleFilterChange = (field: keyof FilterValues, value: string) => {
+        setFilterValues((prev) => ({ ...prev, [field]: value }));
+    };
+
+    function applyFilters(event?: FormEvent<HTMLFormElement>) {
+        event?.preventDefault();
+
+        router.get(spareparts.index().url, buildQuery(filterValues), {
+            preserveScroll: true,
+            replace: true,
+        });
+    }
+
+    function resetFilters() {
+        setFilterValues({ search: '', brandId: 'all', categoryId: 'all' });
+
+        router.get(spareparts.index().url, {}, {
+            preserveScroll: true,
+            replace: true,
+        });
+    }
 
     return (
         <>
-            <Head title="Spareparts" />
+            <Head title="Spareparts Master" />
 
-            <div className="space-y-6">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                    <div className="space-y-3">
-                        <Heading
-                            title="Sparepart Master"
-                            description="Daftar barang WMS dengan status stok, lokasi bin, dan akses cepat ke detail data."
-                        />
-                        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                            <Badge variant="outline" className="rounded-full">
-                                {response.total} items
-                            </Badge>
-                            <Badge variant="outline" className="rounded-full">
-                                {lowStockCount} attention items
-                            </Badge>
-                            <Badge variant="outline" className="rounded-full">
-                                {totalActualStock} actual stock
-                            </Badge>
-                        </div>
-                    </div>
+            <div className="space-y-6 p-4 md:p-6">
 
-                    <Button asChild className="w-full gap-2 lg:w-auto">
-                        <Link href={spareparts.create()}>
-                            <Plus className="size-4" />
-                            Add sparepart
-                        </Link>
-                    </Button>
-                </div>
 
-                <SparepartsSummaryCards
-                    total={response.total}
-                    lowStockCount={lowStockCount}
-                    totalActualStock={totalActualStock}
-                />
-
-                <Card className="gap-0 overflow-hidden">
+                <Card className="gap-0 overflow-hidden border-border/60 shadow-sm">
                     <CardHeader className="border-b border-border/60 pb-4">
-                        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                             <div>
-                                <CardTitle className="flex items-center gap-2 text-base">
+                                <CardTitle className="flex items-center gap-2 text-base font-semibold">
                                     <Warehouse className="size-4 text-muted-foreground" />
                                     Sparepart list
                                 </CardTitle>
-                                <CardDescription>
-                                    Klik material number atau tombol detail untuk melihat data lengkap.
-                                </CardDescription>
                             </div>
-
-                            <div className="relative w-full max-w-sm">
-                                <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-                                <Input
-                                    type="search"
-                                    placeholder="Search sparepart..."
-                                    className="pl-9"
-                                    aria-label="Search spareparts"
-                                />
-                            </div>
+                            <Button asChild className="w-full gap-2 shadow-sm lg:w-auto">
+                                <Link href={spareparts.create()}>
+                                    <Plus className="size-4" />
+                                    Add sparepart
+                                </Link>
+                            </Button>
                         </div>
                     </CardHeader>
 
+                    <CardContent className="border-b border-border/60 p-4 md:p-6">
+                        <SparepartFilters
+                            values={filterValues}
+                            onChange={handleFilterChange}
+                            brands={brands}
+                            categories={categories}
+                            onApply={applyFilters}
+                            onReset={resetFilters}
+                            hasFilters={hasFilters}
+                        />
+                    </CardContent>
+
                     <CardContent className="p-0">
-                        <SparepartsTable rows={rows} />
+                        {rows.length > 0 ? (
+                            <SparepartsTable rows={rows} />
+                        ) : (
+                            <div className="flex min-h-72 flex-col items-center justify-center gap-2 px-6 py-12 text-center">
+                                <p className="text-base font-semibold text-foreground">
+                                    No sparepart found
+                                </p>
+                                <p className="max-w-md text-sm text-muted-foreground">
+                                    Coba ubah kata kunci pencarian atau hapus filter untuk melihat data lainnya.
+                                </p>
+                                {hasFilters && (
+                                    <Button variant="outline" onClick={resetFilters}>
+                                        Clear filters
+                                    </Button>
+                                )}
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
+
+                <Pagination meta={response} />
             </div>
         </>
     );

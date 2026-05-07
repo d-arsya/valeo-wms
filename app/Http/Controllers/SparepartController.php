@@ -48,7 +48,7 @@ class SparepartController extends Controller
         return Inertia::render('spareparts/create', [
             'brands' => Brand::all(['id', 'name']),
             'categories' => Category::all(['id', 'name']),
-            'bins' => Bin::with('rack')->get(),
+            'bins' => Bin::with('rack')->orderBy('code')->get(),
         ]);
     }
 
@@ -70,10 +70,10 @@ class SparepartController extends Controller
     {
         return Inertia::render('spareparts/show', [
             'sparepart' => $sparepart->load([
-                'brand', 
-                'category', 
-                'bin.rack', 
-                'activityLogs.user'
+                'brand',
+                'category',
+                'bin.rack',
+                'activityLogs' => fn ($query) => $query->with('user')->latest('performed_at'),
             ]),
         ]);
     }
@@ -84,10 +84,10 @@ class SparepartController extends Controller
     public function edit(Sparepart $sparepart)
     {
         return Inertia::render('spareparts/edit', [
-            'sparepart' => $sparepart,
+            'sparepart' => $sparepart->load(['brand', 'category', 'bin.rack']),
             'brands' => Brand::all(['id', 'name']),
             'categories' => Category::all(['id', 'name']),
-            'bins' => Bin::with('rack')->get(),
+            'bins' => Bin::with('rack')->orderBy('code')->get(),
         ]);
     }
 
