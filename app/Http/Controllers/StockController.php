@@ -6,29 +6,34 @@ use App\Http\Requests\StockInRequest;
 use App\Http\Requests\StockOutRequest;
 use App\Models\ActivityLog;
 use App\Models\Sparepart;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Inertia\Inertia;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class StockController extends Controller
 {
     /**
      * Show the form for stock in.
      */
-    public function inForm(Sparepart $sparepart)
+    public function inForm(Request $request, Sparepart $sparepart)
     {
         return Inertia::render('stock/in', [
-            'sparepart' => $sparepart->load(['brand', 'category', 'bin.rack']),
+            'sparepart' => $sparepart->load(['brand', 'category', 'bin.rack', 'activityLogs.user']),
+            'returnTo' => $request->query('return_to'),
         ]);
     }
 
     /**
      * Show the form for stock out.
      */
-    public function outForm(Sparepart $sparepart)
+    public function outForm(Request $request, Sparepart $sparepart)
     {
         return Inertia::render('stock/out', [
-            'sparepart' => $sparepart->load(['brand', 'category', 'bin.rack']),
+            'sparepart' => $sparepart->load(['brand', 'category', 'bin.rack', 'activityLogs.user']),
+            'picOptions' => User::query()->orderBy('name')->get(['id', 'name']),
+            'returnTo' => $request->query('return_to'),
         ]);
     }
 
@@ -39,11 +44,12 @@ class StockController extends Controller
     {
         DB::transaction(function () use ($request, $sparepart) {
             $data = $request->validated();
-            
+
             // Update sparepart stock & last transaction info
             $sparepart->update([
                 'actual_stock' => $sparepart->actual_stock + $data['quantity'],
                 'last_po_number' => $data['po_number'],
+                'last_supplier' => $data['supplier'],
                 'last_gr_date' => $data['gr_date'],
                 'price_per_unit' => $data['price_per_unit'],
             ]);
@@ -51,7 +57,7 @@ class StockController extends Controller
             // Create activity log
             ActivityLog::create([
                 'sparepart_id' => $sparepart->id,
-                'user_id' => auth()->id(),
+                'user_id' => $request->user()?->id,
                 'control_id' => 'CTL-' . strtoupper(Str::random(8)),
                 'type' => 'IN',
                 'quantity' => $data['quantity'],
@@ -83,7 +89,7 @@ class StockController extends Controller
             // Create activity log
             ActivityLog::create([
                 'sparepart_id' => $sparepart->id,
-                'user_id' => auth()->id(),
+                'user_id' => $data['user_id'],
                 'control_id' => 'CTL-' . strtoupper(Str::random(8)),
                 'type' => 'OUT',
                 'quantity' => $data['quantity'],

@@ -25,6 +25,7 @@ class StockInRequest extends FormRequest
         return [
             'quantity' => ['required', 'integer', 'min:1'],
             'po_number' => ['required', 'string', 'max:255'],
+            'supplier' => ['required', 'string', 'max:255'],
             'gr_date' => ['required', 'date'],
             'price_per_unit' => ['required', 'numeric', 'min:0'],
             'remarks' => ['nullable', 'string'],

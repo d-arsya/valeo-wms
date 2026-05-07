@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import {
     formatCurrency,
     formatDate,
@@ -9,6 +9,8 @@ import { StockStatusBadge } from '@/components/features/spareparts/stock-status-
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import spareparts from '@/routes/spareparts';
+import { form as stockInForm } from '@/routes/stock/in';
+import { form as stockOutForm } from '@/routes/stock/out';
 import type { Sparepart } from '@/types';
 
 interface Props {
@@ -137,7 +139,23 @@ export function SparepartsTable({ rows }: Props) {
                                     </div>
                                 </td>
                                 <td className="px-5 py-4 align-middle">
-                                    <div className="flex justify-end gap-2">
+                                    <div className="flex flex-wrap justify-end gap-2">
+                                        <Button asChild variant="secondary" size="sm" className="h-8 px-3">
+                                            <Link
+                                                href={stockOutForm(sparepart.id, { query: { return_to: spareparts.index().url } })}
+                                            >
+                                                OUT
+                                                <ArrowDownRight className="size-4" />
+                                            </Link>
+                                        </Button>
+                                        <Button asChild variant="secondary" size="sm" className="h-8 px-3">
+                                            <Link
+                                                href={stockInForm(sparepart.id, { query: { return_to: spareparts.index().url } })}
+                                            >
+                                                IN
+                                                <ArrowUpRight className="size-4" />
+                                            </Link>
+                                        </Button>
                                         <Button asChild variant="outline" size="sm" className="h-8 px-3">
                                             <Link
                                                 href={spareparts.show(sparepart.id)}
