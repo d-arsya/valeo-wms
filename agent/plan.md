@@ -115,12 +115,12 @@ performed_at (timestamp), created_at, updated_at
 | # | Task | Agent | Prerequisite |
 |---|---|---|---|
 | F-1 | Layout update: tambah navigasi WMS ke sidebar | 🟩 FE | SYNC-1 |
-| F-2 | `pages/spareparts/Index.tsx` — tabel daftar sparepart + status badge | 🟩 FE | F-1 |
-| F-3 | `pages/spareparts/Create.tsx` — form tambah sparepart | 🟩 FE | F-1 |
-| F-4 | `pages/spareparts/Show.tsx` — detail + tombol Stock IN/OUT | 🟩 FE | F-2 |
-| F-5 | `pages/spareparts/Edit.tsx` — form edit sparepart | 🟩 FE | F-3 |
-| F-6 | `pages/stock/Out.tsx` — form OUT control (qty, PIC, remarks) | 🟩 FE | F-4 |
-| F-7 | `pages/stock/In.tsx` — form IN control (qty, PO, supplier, GR date, price) | 🟩 FE | F-4 |
+| ✅ F-2 | `pages/spareparts/Index.tsx` — tabel daftar sparepart + status badge | 🟩 FE | F-1 |
+| ✅ F-3 | `pages/spareparts/Create.tsx` — form tambah sparepart | 🟩 FE | F-1 |
+| ✅ F-4 | `pages/spareparts/Show.tsx` — detail + tombol Stock IN/OUT | 🟩 FE | F-2 |
+| ✅ F-5 | `pages/spareparts/Edit.tsx` — form edit sparepart | 🟩 FE | F-3 |
+| ✅ F-6 | `pages/stock/Out.tsx` — form OUT control (qty, PIC, remarks) | 🟩 FE | F-4 |
+| ✅ F-7 | `pages/stock/In.tsx` — form IN control (qty, PO, supplier, GR date, price) | 🟩 FE | F-4 |
 | F-8 | `pages/scanner/Index.tsx` — QR scanner camera view | 🟩 FE | F-1 |
 | F-9 | `pages/labels/Show.tsx` — preview & print QR label | 🟩 FE | F-4 |
 | F-10 | `pages/reports/Index.tsx` — filter form + export PDF button | 🟩 FE | F-1 |
