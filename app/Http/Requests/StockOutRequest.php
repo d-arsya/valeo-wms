@@ -23,9 +23,10 @@ class StockOutRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'user_id' => ['required', 'integer', 'exists:users,id'],
             'quantity' => [
-                'required', 
-                'integer', 
+                'required',
+                'integer',
                 'min:1',
                 function ($attribute, $value, $fail) {
                     $sparepart = $this->route('sparepart');
