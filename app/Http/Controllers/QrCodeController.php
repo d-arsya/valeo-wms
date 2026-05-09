@@ -25,7 +25,7 @@ class QrCodeController extends Controller
         // Encode the Material Number in the QR code
         $qrCodeSvg = $writer->writeString($sparepart->material_number);
 
-        return Inertia::render('spareparts/label', [
+        return Inertia::render('labels/Show', [
             'sparepart' => $sparepart->load(['brand', 'category', 'bin.rack']),
             'qrCodeSvg' => $qrCodeSvg,
         ]);
