@@ -1,9 +1,11 @@
-import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, Printer } from 'lucide-react';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { ArrowLeft, Printer, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Sparepart } from '@/types';
 import spareparts from '@/routes/spareparts';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 interface LabelShowProps {
     sparepart: Sparepart;
@@ -11,8 +13,21 @@ interface LabelShowProps {
 }
 
 export default function LabelShow({ sparepart, qrCodeSvg }: LabelShowProps) {
+    const { post, processing } = useForm();
+
     const handlePrint = () => {
+        if (!sparepart.qr_code_path) {
+            toast.error('Generate QR Code terlebih dahulu sebelum mencetak.');
+            return;
+        }
         window.print();
+    };
+
+    const handleGenerateQR = () => {
+        post(route('spareparts.qr.generate', sparepart.id), {
+            preserveScroll: true,
+            onSuccess: () => toast.success('QR Code berhasil di-generate!'),
+        });
     };
 
     const location = sparepart.bin && sparepart.bin.rack 
@@ -25,7 +40,7 @@ export default function LabelShow({ sparepart, qrCodeSvg }: LabelShowProps) {
 
             <div className="flex flex-col gap-6 p-4 md:p-8 max-w-4xl mx-auto">
                 {/* Header Actions (Hidden in Print) */}
-                <div className="flex items-center justify-between print:hidden">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 print:hidden">
                     <div className="flex items-center gap-4">
                         <Button variant="outline" size="icon" asChild>
                             <Link href={spareparts.show(sparepart.id).url}>
@@ -35,14 +50,24 @@ export default function LabelShow({ sparepart, qrCodeSvg }: LabelShowProps) {
                         <div>
                             <h1 className="text-2xl font-bold tracking-tight">Cetak Label QR</h1>
                             <p className="text-sm text-muted-foreground">
-                                Cetak label ini untuk ditempelkan pada fisik bin/rak di gudang.
+                                Cetak label ini untuk ditempelkan pada fisik bin/rak.
                             </p>
                         </div>
                     </div>
-                    <Button onClick={handlePrint}>
-                        <Printer className="mr-2 h-4 w-4" />
-                        Cetak Sekarang
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <Button 
+                            variant="outline" 
+                            onClick={handleGenerateQR} 
+                            disabled={processing}
+                        >
+                            <RefreshCw className={cn("mr-2 h-4 w-4", processing && "animate-spin")} />
+                            {sparepart.qr_code_path ? 'Regenerate QR' : 'Generate QR'}
+                        </Button>
+                        <Button onClick={handlePrint} disabled={!sparepart.qr_code_path}>
+                            <Printer className="mr-2 h-4 w-4" />
+                            Cetak
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Print Preview Container */}
@@ -50,11 +75,27 @@ export default function LabelShow({ sparepart, qrCodeSvg }: LabelShowProps) {
                     {/* The Actual Label Card */}
                     <Card className="w-full max-w-[400px] border-2 border-dashed border-border print:border-solid print:border-black print:shadow-none bg-white">
                         <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
-                            {/* QR Code */}
-                            <div 
-                                className="w-48 h-48 [&>svg]:w-full [&>svg]:h-full"
-                                dangerouslySetInnerHTML={{ __html: qrCodeSvg }} 
-                            />
+                            {/* QR Code Container */}
+                            <div className="w-48 h-48 flex items-center justify-center bg-muted/20 rounded-lg overflow-hidden border">
+                                {sparepart.qr_code_path ? (
+                                    <img 
+                                        src={`/storage/${sparepart.qr_code_path}`} 
+                                        alt="QR Code"
+                                        className="w-full h-full object-contain"
+                                    />
+                                ) : (
+                                    <div 
+                                        className="w-full h-full p-4 [&>svg]:w-full [&>svg]:h-full opacity-50 grayscale"
+                                        dangerouslySetInnerHTML={{ __html: qrCodeSvg }} 
+                                    />
+                                )}
+                            </div>
+                            
+                            {!sparepart.qr_code_path && (
+                                <p className="text-[10px] text-destructive font-medium animate-pulse print:hidden">
+                                    QR Code belum tersimpan. Klik "Generate QR" di atas.
+                                </p>
+                            )}
                             
                             {/* Textual Information */}
                             <div className="space-y-2 w-full pt-4 border-t border-dashed print:border-solid print:border-black">
