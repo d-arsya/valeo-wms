@@ -32,4 +32,27 @@ class ActivityLog extends Model
     {
         return $this->belongsTo(Sparepart::class);
     }
+
+    /**
+     * Scope a query to filter activity logs.
+     */
+    public function scopeFilter($query, array $filters)
+    {
+        $query->when($filters['from'] ?? null, function ($query, $from) {
+            $query->whereDate('performed_at', '>=', $from);
+        })->when($filters['to'] ?? null, function ($query, $to) {
+            $query->whereDate('performed_at', '<=', $to);
+        })->when($filters['type'] ?? null, function ($query, $type) {
+            if ($type !== 'all') {
+                $query->where('type', $type);
+            }
+        })->when($filters['control_id'] ?? null, function ($query, $controlId) {
+            $query->where('control_id', 'like', "%{$controlId}%");
+        })->when($filters['search'] ?? null, function ($query, $search) {
+            $query->whereHas('sparepart', function ($q) use ($search) {
+                $q->where('material_number', 'like', "%{$search}%")
+                  ->orWhere('part_name', 'like', "%{$search}%");
+            });
+        });
+    }
 }

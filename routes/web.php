@@ -34,7 +34,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Reports
     Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
-    Route::get('reports/export', [ReportController::class, 'export'])->name('reports.export');
 });
 
 require __DIR__.'/settings.php';

@@ -12,18 +12,17 @@ class ReportController extends Controller
      */
     public function index(Request $request)
     {
-        return Inertia::render('reports/Index', [
-            'filters' => $request->only(['from', 'to', 'type', 'search']),
-        ]);
-    }
+        $filters = $request->only(['from', 'to', 'type', 'search', 'control_id']);
+        
+        $logs = ActivityLog::with(['sparepart', 'user'])
+            ->filter($filters)
+            ->orderBy('performed_at', 'desc')
+            ->paginate(10)
+            ->withQueryString();
 
-    /**
-     * Export the report as PDF.
-     */
-    public function export(Request $request)
-    {
-        // Placeholder for PDF export logic
-        // Worker-Backend should implement this using DomPDF or Browsershot
-        return response()->json(['message' => 'Export logic not implemented yet'], 501);
+        return Inertia::render('reports/Index', [
+            'logs' => $logs,
+            'filters' => $filters,
+        ]);
     }
 }
