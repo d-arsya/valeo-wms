@@ -24,7 +24,7 @@ export default function LabelShow({ sparepart, qrCodeSvg }: LabelShowProps) {
     };
 
     const handleGenerateQR = () => {
-        post(route('spareparts.qr.generate', sparepart.id), {
+        post(spareparts.qr.generate(sparepart.id).url, {
             preserveScroll: true,
             onSuccess: () => toast.success('QR Code berhasil di-generate!'),
         });
