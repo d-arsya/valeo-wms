@@ -14,6 +14,9 @@ Route::inertia('/', 'welcome', [
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
 
+    // QR Scanner
+    Route::inertia('scanner', 'scanner/Index')->name('scanner.index');
+
     // Spareparts CRUD
     Route::resource('spareparts', SparepartController::class);
 

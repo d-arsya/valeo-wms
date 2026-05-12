@@ -272,6 +272,7 @@
       "resources/js/pages/auth/two-factor-challenge.tsx",
       "resources/js/pages/auth/verify-email.tsx",
       "resources/js/pages/dashboard.tsx",
+      "resources/js/pages/scanner/Index.tsx",
       "resources/js/pages/settings/appearance.tsx",
       "resources/js/pages/settings/profile.tsx",
       "resources/js/pages/settings/security.tsx",
@@ -404,6 +405,20 @@
     "imports": [
       "_wayfinder-CsqLI-eV.js",
       "resources/js/app.tsx"
+    ]
+  },
+  "resources/js/pages/scanner/Index.tsx": {
+    "file": "assets/Index-b7Wb03I_.js",
+    "name": "Index",
+    "src": "resources/js/pages/scanner/Index.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_wayfinder-CsqLI-eV.js",
+      "resources/js/app.tsx",
+      "_createLucideIcon-D_JQbXZt.js",
+      "_alert-C1NyaFOb.js",
+      "_loader-circle-DymcBJKr.js",
+      "_spareparts-DGhAS_vn.js"
     ]
   },
   "resources/js/pages/settings/appearance.tsx": {
