@@ -4,7 +4,7 @@ import AppLayout from '@/layouts/app-layout';
 import { QrScannerCamera } from '@/components/features/QrScannerCamera';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { index as sparepartsIndex } from '@/routes/spareparts';
+import { index as sparepartsIndex, show as sparepartsShow } from '@/routes/spareparts';
 import { index as scannerIndex } from '@/routes/scanner';
 
 export default function ScannerIndex() {
@@ -13,13 +13,13 @@ export default function ScannerIndex() {
 
     const handleScanSuccess = useCallback(async (decodedText: string) => {
         if (isProcessing) return;
-        
+
         setIsProcessing(true);
         setError(null);
-        
+
         // Simply redirect to the spareparts index with the search query
         // This is more robust as it uses the existing search logic
-        router.visit(sparepartsIndex({ query: { search: decodedText } }).url);
+        router.visit(sparepartsShow({ sparepart: decodedText }).url);
     }, [isProcessing]);
 
     return (
@@ -40,9 +40,9 @@ export default function ScannerIndex() {
                             <p className="text-sm font-medium">Mencari data barang...</p>
                         </div>
                     ) : (
-                        <QrScannerCamera 
-                            onScanSuccess={handleScanSuccess} 
-                            onScanFailure={() => {}} 
+                        <QrScannerCamera
+                            onScanSuccess={handleScanSuccess}
+                            onScanFailure={() => { }}
                         />
                     )}
 

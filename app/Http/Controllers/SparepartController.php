@@ -68,13 +68,6 @@ class SparepartController extends Controller
      */
     public function show(Sparepart $sparepart)
     {
-        // $res = $sparepart->load([
-        //     'brand',
-        //     'category',
-        //     'bin.rack',
-        //     'activityLogs' => fn($query) => $query->with('user')->latest('performed_at'),
-        // ]);
-
         return Inertia::render('spareparts/show', [
             'sparepart' => $sparepart->load([
                 'brand',

@@ -20,7 +20,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('scanner', 'scanner/Index')->name('scanner.index');
 
     // Spareparts CRUD
-    Route::resource('spareparts', SparepartController::class);
+    Route::resource('spareparts', SparepartController::class)->except('show');
+    Route::get('spareparts/{sparepart:material_number}', [SparepartController::class, 'show'])->name('spareparts.show');
 
     // Stock Control
     Route::prefix('stock')->name('stock.')->group(function () {
@@ -38,4 +39,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('reports/export', [ReportController::class, 'export'])->name('reports.export');
 });
 
-require __DIR__.'/settings.php';
+require __DIR__ . '/settings.php';

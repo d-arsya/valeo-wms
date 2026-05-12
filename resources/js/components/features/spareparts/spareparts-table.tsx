@@ -99,7 +99,7 @@ export function SparepartsTable({ rows }: Props) {
                                             className={cn(
                                                 'font-semibold tabular-nums',
                                                 isAttention &&
-                                                    'text-amber-600 dark:text-amber-400',
+                                                'text-amber-600 dark:text-amber-400',
                                             )}
                                         >
                                             {sparepart.actual_stock}
@@ -158,7 +158,7 @@ export function SparepartsTable({ rows }: Props) {
                                         </Button>
                                         <Button asChild variant="outline" size="sm" className="h-8 px-3">
                                             <Link
-                                                href={spareparts.show(sparepart.id)}
+                                                href={spareparts.show(sparepart.material_number)}
                                             >
                                                 Detail
                                                 <ArrowRight className="size-4" />
