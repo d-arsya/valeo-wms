@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class ActivityLog extends Model
 {
@@ -31,6 +32,22 @@ class ActivityLog extends Model
     public function sparepart()
     {
         return $this->belongsTo(Sparepart::class);
+    }
+
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted()
+    {
+        static::creating(function ($activityLog) {
+            if (empty($activityLog->control_id)) {
+                $activityLog->control_id = 'CTL-' . strtoupper(Str::random(8));
+            }
+            
+            if (empty($activityLog->performed_at)) {
+                $activityLog->performed_at = now();
+            }
+        });
     }
 
     /**
