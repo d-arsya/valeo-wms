@@ -12,9 +12,9 @@ use Inertia\Inertia;
 class QrCodeController extends Controller
 {
     /**
-     * Handle the incoming request to show a printable label.
+     * Display the printable label.
      */
-    public function __invoke(Sparepart $sparepart)
+    public function show(Sparepart $sparepart)
     {
         $renderer = new ImageRenderer(
             new RendererStyle(200),
@@ -22,10 +22,10 @@ class QrCodeController extends Controller
         );
         $writer = new Writer($renderer);
         
-        // Encode the Material Number in the QR code
+        // Always generate a fresh SVG for preview
         $qrCodeSvg = $writer->writeString($sparepart->material_number);
 
-        return Inertia::render('spareparts/label', [
+        return Inertia::render('labels/Show', [
             'sparepart' => $sparepart->load(['brand', 'category', 'bin.rack']),
             'qrCodeSvg' => $qrCodeSvg,
         ]);

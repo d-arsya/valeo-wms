@@ -25,7 +25,6 @@ return new class extends Migration {
             $table->date('last_gr_date')->nullable();
             $table->decimal('price_per_unit', 15, 2)->nullable();
             $table->enum('status', ['OK', 'ATTENTION', 'NG'])->default('OK');
-            $table->string('qr_code_path')->nullable();
             $table->timestamps();
         });
     }
