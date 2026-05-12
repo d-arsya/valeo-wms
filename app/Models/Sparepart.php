@@ -28,7 +28,6 @@ class Sparepart extends Model
         'last_gr_date',
         'price_per_unit',
         'status',
-        'qr_code_path',
     ];
 
     public function brand()

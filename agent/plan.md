@@ -1,7 +1,7 @@
 
 # 📋 VALEO WMS — Master Blueprint (plan.md)
 > **Single Source of Truth** untuk semua Agent dan Human. Baca dokumen ini **sebelum** menulis satu baris kode pun.
-> Dibuat oleh: Planner Agent | Terakhir diperbarui: 2026-04-24
+> Dibuat oleh: Planner Agent | Terakhir diperbarui: 2026-05-12 (Forensic Audit Update)
 
 ---
 
@@ -19,9 +19,10 @@ Valeo WMS adalah aplikasi **Warehouse Management System** untuk mengelola stok s
 | Styling | Tailwind CSS v4, Shadcn UI |
 | Auth | Laravel Fortify (sudah ter-scaffold) |
 | DB | MySQL/SQLite (via `.env`) |
-| QR Code | Backend: PHP QR Code library | 
-| PDF | Backend: Laravel DomPDF atau Browsershot |
+| QR Code | Backend: BaconQrCode (on-demand SVG) — lihat Issue #35 untuk resolusi |
+| PDF | Backend: barryvdh/laravel-dompdf ^3.1 ✅ installed |
 | State/Form | Inertia `useForm` hook |
+| Routes (FE) | Laravel Wayfinder (auto-generated) |
 
 ### 1.3 Core Constraints (WAJIB DIIKUTI)
 - **Backend:** Maksimal **300 baris** per file PHP. Gunakan `Trait`, `Observer`, `Action Class` untuk dekomposisi.
@@ -32,21 +33,46 @@ Valeo WMS adalah aplikasi **Warehouse Management System** untuk mengelola stok s
 
 ---
 
-## 2. CODEBASE AUDIT (Status Saat Ini)
+## 2. FORENSIC AUDIT — Recovery Status (2026-05-12)
 
-### ✅ Yang Sudah Ada (Jangan Disentuh Tanpa Alasan)
-- `app/Models/User.php` — Model user default Laravel
-- `app/Http/Controllers/Settings/*` — Pengaturan akun user
-- `app/Actions/Fortify/*` — Logic auth (register, login, 2FA)
-- `database/migrations/0001_*` — Migrasi users, cache, jobs
-- `database/migrations/2025_08_14_*` — Kolom 2FA pada users
-- `resources/js/pages/auth/*` — Halaman login, register, 2FA
-- `resources/js/pages/settings/*` — Halaman pengaturan akun
-- `resources/js/components/*` — Komponen layout dasar (sidebar, header, dll.)
-- `routes/web.php`, `routes/settings.php` — Routing dasar + auth
+> **Mandat:** Code is the only source of truth. Status di bawah berdasarkan validasi langsung terhadap file di repository.
 
-### ❌ Yang Belum Ada (Harus Dibangun)
-Seluruh domain bisnis WMS: tidak ada satu pun model, migration, controller, atau halaman terkait inventory/sparepart.
+### 2.1 Recovery Status Table
+
+| Task ID | Judul | Status GitHub | Status Kode | Verdict |
+|---|---|---|---|---|
+| P0-1 | Migrations (spareparts & activity_logs) | CLOSED | ✅ Ada & lengkap | **DONE** |
+| P0-2 | Sparepart Model + HasStockStatus + Observer | CLOSED | ✅ Ada & lengkap | **DONE** |
+| P0-3 | ActivityLog Model | CLOSED | ✅ Ada & lengkap | **DONE** |
+| SYNC-1 | Schema Review Gate | CLOSED | ✅ Passed | **DONE** |
+| B-1 | FormRequests (Store/Update Sparepart) | CLOSED | ✅ Ada (2 file) | **DONE** |
+| B-2 | SparepartController (CRUD) | CLOSED | ✅ Ada, 116 baris | **DONE** |
+| B-3 | FormRequests (StockIn/StockOut) | CLOSED | ✅ Ada (2 file) | **DONE** |
+| B-4 | StockController (in/out logic) | CLOSED | ✅ Ada, 105 baris | **DONE** ⚠️ Issue #33 |
+| B-5 | QrCodeController (on-demand) | CLOSED | ✅ Ada, 34 baris | **DONE** ⚠️ Issue #35 |
+| B-6 | ReportController (filter + PDF) | CLOSED | ✅ Ada, 51 baris | **DONE** |
+| B-7 | Update routes/web.php | CLOSED | ✅ Semua route terdaftar | **DONE** |
+| F-1 | Sidebar Navigation + WMS Types | CLOSED | ✅ Ada + wms.d.ts | **DONE** |
+| F-2 | spareparts/index.tsx | CLOSED | ✅ Ada, 5571 bytes | **DONE** |
+| F-3 | spareparts/create.tsx | CLOSED | ✅ Ada, 82 baris | **DONE** |
+| F-4 | spareparts/show.tsx | CLOSED | ✅ Ada, 239 baris | **DONE** |
+| F-5 | spareparts/edit.tsx | CLOSED | ✅ Ada | **DONE** |
+| F-6 | stock/out.tsx | CLOSED | ✅ Ada | **DONE** |
+| F-7 | stock/in.tsx | CLOSED | ✅ Ada | **DONE** |
+| F-8 | scanner/Index.tsx | OPEN | ✅ Ada, perlu verifikasi | **PARTIAL** |
+| F-9 | labels/Show.tsx | OPEN | ✅ Ada, ada bug logic | **PARTIAL** ⚠️ Issue #32 |
+| F-10 | reports/Index.tsx | OPEN | ✅ Ada, perlu verifikasi | **PARTIAL** |
+| Dashboard | dashboard.tsx summary cards | - | ❌ Masih placeholder | **TODO** Issue #34 |
+
+### 2.2 Bug / Refactor Backlog (Ditemukan saat Audit)
+
+| Issue # | Jenis | Deskripsi | Pemilik | Prioritas |
+|---|---|---|---|---|
+| #32 | refactor | Labels/Show.tsx: QR logic masih pakai `qr_code_path` (static) padahal BE sudah on-demand SVG | Worker-FE | 🔴 High |
+| #33 | refactor | StockController: `control_id` di-generate manual di Controller, seharusnya di Model `boot()` | Worker-BE | 🟡 Medium |
+| #34 | refactor | Dashboard masih placeholder, belum ada WMS summary cards | Worker-FE | 🟡 Medium |
+| #35 | bug | QrCodeController pakai BaconQrCode yang tidak di-declare di `composer.json` | Worker-BE | 🔴 High |
+| #36 | integration | Phase 2: End-to-End Integration Testing (I-1~I-4) | BE + FE | 🔴 High |
 
 ---
 
@@ -71,171 +97,228 @@ brand_id (FK), category_id (FK), bin_id (FK),
 safety_stock (int), actual_stock (int),
 last_po_number, last_supplier, last_gr_date (date), price_per_unit (decimal),
 status (enum: OK, ATTENTION, NG — computed via Observer),
-qr_code_path (string nullable),
 created_at, updated_at
 ```
 
+> ⚠️ **CATATAN AUDIT:** Kolom `qr_code_path` **TIDAK ADA** di migration maupun di spareparts table. Field ini dihapus dari arsitektur (QR sekarang on-demand). Worker FE wajib hapus referensi `qr_code_path` dari TypeScript interface dan semua halaman.
+
 ### Tabel: `activity_logs`
 ```
-id, sparepart_id (FK), user_id (FK), control_id (string unique — auto-generated),
+id, sparepart_id (FK), user_id (FK), control_id (string unique — auto-generated via Model boot()),
 type (enum: IN, OUT), quantity (int), 
 remarks (string nullable), po_number (string nullable — untuk IN),
 gr_date (date nullable — untuk IN), price_per_unit (decimal nullable — untuk IN),
 performed_at (timestamp), created_at, updated_at
 ```
 
-> **ATURAN:** `status` pada `spareparts` **tidak boleh disimpan manual**. Kalkulasi dilakukan di `SparePartObserver` setiap ada mutasi pada `actual_stock`.
+> **ATURAN:** `status` pada `spareparts` **tidak boleh disimpan manual**. Kalkulasi dilakukan di `SparePartObserver` setiap ada mutasi pada `actual_stock`. ✅ Sudah diimplementasikan.
+> **ATURAN:** `control_id` pada `activity_logs` **harus ter-generate di Model `boot()`**, bukan di Controller. ⚠️ Belum diimplementasikan — lihat Issue #33.
 
 ---
 
-## 4. PARALLEL ROADMAP
+## 4. PARALLEL ROADMAP (Updated — Phase 2 Focus)
 
 > 🟦 = Worker-Backend | 🟩 = Worker-Frontend | 🔴 = Blocker | 👤 = Human Action Required
+> ✅ = VERIFIED done di kode | ⚠️ = Ada tapi perlu fix | ❌ = Belum ada
 
-### Phase 0 — Foundation (Sequential, tidak bisa paralel)
-| # | Task | Agent | Prerequisite |
-|---|---|---|---|
-| P0-1 | Create migrations: `spareparts`, `activity_logs` | 🟦 BE | - |
-| P0-2 | Create `Sparepart` model + `HasStockStatus` Trait + `SparePartObserver` | 🟦 BE | P0-1 |
-| P0-3 | Create `ActivityLog` model | 🟦 BE | P0-1 |
-| **SYNC-1** | 👤 **Human Review Schema** — validasi kolom & relasi sebelum lanjut | 👤 Human | P0-1, P0-2, P0-3 |
+### Phase 0 — Foundation ✅ COMPLETE
+| # | Task | Status |
+|---|---|---|
+| P0-1 | Migrations: spareparts, activity_logs | ✅ DONE |
+| P0-2 | Sparepart model + HasStockStatus + Observer | ✅ DONE |
+| P0-3 | ActivityLog model | ✅ DONE |
+| SYNC-1 | Human Schema Review | ✅ DONE |
 
-### Phase 1 — Backend Core (Bisa berjalan setelah SYNC-1)
-| # | Task | Agent | Prerequisite |
+### Phase 1 — Backend Core ✅ COMPLETE (minor bugs)
+| # | Task | Status | Issue |
 |---|---|---|---|
-| B-1 | `FormRequests`: StoreSparepart, UpdateSparepart | 🟦 BE | SYNC-1 |
-| B-2 | `SparepartController` (Resource: Index, Store, Show, Update, Destroy) | 🟦 BE | B-1 |
-| B-3 | `FormRequests`: StockOutRequest, StockInRequest | 🟦 BE | SYNC-1 |
-| B-4 | `StockController` (in/out logic) | 🟦 BE | B-3 |
-| B-5 | `QrCodeController` — on-demand label generation (QR + Info) | 🟦 BE | B-2 |
-| B-6 | `ReportController` — filter + export PDF | 🟦 BE | B-4 |
-| B-7 | Update `routes/web.php` — register all WMS routes | 🟦 BE | B-2..B-6 |
+| B-1 | FormRequests: StoreSparepart, UpdateSparepart | ✅ DONE | - |
+| B-2 | SparepartController (Resource CRUD) | ✅ DONE | - |
+| B-3 | FormRequests: StockOut, StockIn | ✅ DONE | - |
+| B-4 | StockController (in/out logic) | ✅ DONE | ⚠️ #33 control_id |
+| B-5 | QrCodeController (on-demand SVG) | ✅ DONE | ⚠️ #35 dependency |
+| B-6 | ReportController (filter + PDF export) | ✅ DONE | - |
+| B-7 | routes/web.php (semua WMS routes) | ✅ DONE | - |
 
-### Phase 1 — Frontend Core (Paralel dengan Phase 1 BE, gunakan mock data untuk UI)
-| # | Task | Agent | Prerequisite |
+### Phase 1 — Frontend Core ✅ COMPLETE (minor bugs)
+| # | Task | Status | Issue |
 |---|---|---|---|
-| F-1 | Layout update: tambah navigasi WMS ke sidebar | 🟩 FE | SYNC-1 |
-| ✅ F-2 | `pages/spareparts/Index.tsx` — tabel daftar sparepart + status badge | 🟩 FE | F-1 |
-| ✅ F-3 | `pages/spareparts/Create.tsx` — form tambah sparepart | 🟩 FE | F-1 |
-| ✅ F-4 | `pages/spareparts/Show.tsx` — detail + tombol Stock IN/OUT | 🟩 FE | F-2 |
-| ✅ F-5 | `pages/spareparts/Edit.tsx` — form edit sparepart | 🟩 FE | F-3 |
-| ✅ F-6 | `pages/stock/Out.tsx` — form OUT control (qty, PIC, remarks) | 🟩 FE | F-4 |
-| ✅ F-7 | `pages/stock/In.tsx` — form IN control (qty, PO, supplier, GR date, price) | 🟩 FE | F-4 |
-| ✅ F-8 | `pages/scanner/Index.tsx` — QR scanner camera view | 🟩 FE | F-1 |
-| ✅ F-9 | `pages/labels/Show.tsx` — preview & print QR label | 🟩 FE | F-4 |
-| ✅ F-10 | `pages/reports/Index.tsx` — filter form + export PDF button | 🟩 FE | F-1 |
+| F-1 | Sidebar nav + wms.d.ts TypeScript types | ✅ DONE | - |
+| F-2 | spareparts/index.tsx | ✅ DONE | - |
+| F-3 | spareparts/create.tsx | ✅ DONE | - |
+| F-4 | spareparts/show.tsx | ✅ DONE | - |
+| F-5 | spareparts/edit.tsx | ✅ DONE | - |
+| F-6 | stock/out.tsx | ✅ DONE | - |
+| F-7 | stock/in.tsx | ✅ DONE | - |
+| F-8 | scanner/Index.tsx | ⚠️ PARTIAL | Perlu verifikasi mobile |
+| F-9 | labels/Show.tsx | ⚠️ PARTIAL | 🔴 #32 logic bug |
+| F-10 | reports/Index.tsx | ⚠️ PARTIAL | Perlu verifikasi PDF export |
+| - | dashboard.tsx summary cards | ❌ TODO | #34 |
 
-### Phase 2 — Integration & Polish
-| # | Task | Agent | Prerequisite |
-|---|---|---|---|
-| I-1 | Wire FE forms ke BE endpoints yang sudah jadi | 🟩 FE | Phase 1 BE selesai |
-| I-2 | Test alur OUT Control end-to-end | 🟦 BE + 🟩 FE | I-1 |
-| I-3 | Test alur IN Control end-to-end | 🟦 BE + 🟩 FE | I-1 |
-| I-4 | Test QR scan → auto-redirect ke Show page | 🟩 FE | I-1 |
-| **SYNC-2** | 👤 **Human Integration Review** — test manual di device mobile | 👤 Human | I-1..I-4 |
-| I-5 | Final PR: merge `backend` → `main`, merge `frontend` → `main` | 👤 Human | SYNC-2 |
+### Phase 2 — Bug Fix Sprint (SEKARANG — Prioritas Utama)
+| # | Task | Agent | Issue | Prioritas |
+|---|---|---|---|---|
+| FIX-1 | Resolve BaconQrCode → simplesoftwareio/simple-qrcode | 🟦 BE | #35 | 🔴 Blocker |
+| FIX-2 | Refactor `control_id` ke `ActivityLog::boot()` | 🟦 BE | #33 | 🟡 Medium |
+| FIX-3 | Refactor `labels/Show.tsx` — hapus logika `qr_code_path` | 🟩 FE | #32 | 🔴 Blocker |
+| FIX-4 | Implementasi Dashboard summary cards | 🟩 FE | #34 | 🟡 Medium |
+
+### Phase 2 — Integration Testing (Setelah Bug Fix Sprint)
+| # | Task | Agent | Issue | Prerequisite |
+|---|---|---|---|---|
+| I-1 | Wire FE forms ke BE endpoints (verifikasi Wayfinder routes) | 🟩 FE | #36 | FIX-1, FIX-3 |
+| I-2 | Test alur OUT Control end-to-end | 🟦+🟩 | #36 | I-1 |
+| I-3 | Test alur IN Control end-to-end | 🟦+🟩 | #36 | I-1 |
+| I-4 | Test QR scan → auto-redirect ke Show page | 🟩 FE | #36 | FIX-1, FIX-3 |
+| SYNC-2 | 👤 Human Integration Review | 👤 Human | #17 | I-1..I-4 + semua FIX |
+| I-5 | Final PR: merge `backend` → `main`, merge `frontend` → `main` | 👤 Human | - | SYNC-2 |
 
 ---
 
-## 5. BRANCHING & MERGE STRATEGY
+## 5. INTEGRATION POINTS (Critical Contracts)
 
+### 5.1 QR Code Flow (Setelah Issue #35 resolved)
 ```
-main (protected)
-├── backend
-│   ├── feat/be-schema-spareparts        ← P0-1
-│   ├── feat/be-model-sparepart          ← P0-2
-│   ├── feat/be-model-activitylog        ← P0-3
-│   ├── feat/be-crud-sparepart           ← B-1, B-2
-│   ├── feat/be-stock-control            ← B-3, B-4
-│   ├── feat/be-qrcode                   ← B-5
-│   ├── feat/be-report-pdf               ← B-6
-│   └── feat/be-routes                   ← B-7
-└── frontend
-    ├── feat/fe-layout-nav               ← F-1
-    ├── feat/fe-sparepart-index          ← F-2
-    ├── feat/fe-sparepart-crud           ← F-3, F-5
-    ├── feat/fe-sparepart-show           ← F-4
-    ├── feat/fe-stock-control            ← F-6, F-7
-    ├── feat/fe-qr-scanner               ← F-8
-    ├── feat/fe-qr-label                 ← F-9
-    └── feat/fe-report                   ← F-10
+[FE] labels/Show.tsx
+  └── Link href={spareparts.label(sparepart.id)}  ← GET /spareparts/{id}/label
+        └── [BE] QrCodeController@show
+              └── Generate fresh SVG via simplesoftwareio
+              └── Pass 'qrCodeSvg' prop ke Inertia
+        └── [FE] Render <div dangerouslySetInnerHTML={{ __html: qrCodeSvg }} />
+              └── Button "Cetak" → window.print() (langsung aktif, tidak perlu generate dulu)
 ```
 
-### Aturan PR
-1. Setiap feature branch **wajib** membuat PR ke branch induknya (`backend` atau `frontend`), **bukan ke `main`**.
-2. Setiap PR **wajib** di-review oleh **Reviewer Agent** menggunakan checklist `acceptance-criteria.md`.
-3. Merge ke `main` **hanya** boleh dilakukan oleh **Human** setelah SYNC-2.
-4. Squash merge digunakan untuk menjaga history `main` tetap bersih.
+### 5.2 PDF Report Flow
+```
+[FE] reports/Index.tsx
+  └── Button Export → GET /reports/export?from=...&to=...&type=...
+        └── [BE] ReportController@export
+              └── ActivityLog::filter($filters)->get()
+              └── Pdf::loadView('reports.pdf', [...])
+              └── return $pdf->download('WMS_Activity_Report_*.pdf')
+```
+
+### 5.3 Stock Control Flow (Observer chain)
+```
+[FE] stock/out.tsx → POST /stock/out/{sparepart}
+  └── [BE] StockController@out
+        └── DB::transaction()
+              └── $sparepart->update(['actual_stock' => ...])  ← trigger Observer
+              └── ActivityLog::create([...])  ← control_id auto via boot()
+              └── SparepartObserver@saving → calculateStockStatus()
+        └── redirect()->route('spareparts.show', $sparepart)
+  └── [FE] Inertia redirect → show.tsx dengan status badge terupdate
+```
 
 ---
 
 ## 6. AGENT COMMAND CENTER
 
-### 🟦 WORKER-BACKEND — Baca ini pertama
-**File ownership kamu:**
-- `app/Models/` — semua model domain WMS
-- `app/Models/Traits/` — trait dekomposisi model
-- `app/Http/Controllers/SparepartController.php` ← Resource controller
-- `app/Http/Controllers/Stock/` — StockIn, StockOut controllers (Single Action if complex)
-- `app/Http/Controllers/QrCodeController.php`
-- `app/Http/Controllers/ReportController.php`
-- `app/Http/Requests/` — semua FormRequests
-- `app/Actions/` — Action classes (logika antar model)
-- `app/Observers/` — Model observers
-- `app/Events/`, `app/Listeners/` — async side-effects
-- `database/migrations/` — semua migrasi WMS baru
-- `routes/web.php` — tambahkan route group WMS
+### 🟦 WORKER-BACKEND — Priority Order (2026-05-12)
 
-**Langkah pertama kamu:**
-1. Checkout branch `backend` dari `main`.
-2. Buat feature branch: `git checkout -b feat/be-schema-spareparts`
-3. Buat migrasi `spareparts` dan `activity_logs` sesuai schema di Section 3.
-4. Buat PR ke branch `backend`. Tag label: `agent-backend`, `high-priority`.
+**Kerjakan sesuai urutan:**
 
-**Larangan keras:**
+**1. Issue #35 — FIX BaconQrCode dependency (BLOCKER)**
+```bash
+composer require simplesoftwareio/simple-qrcode
+```
+Kemudian refactor `QrCodeController.php`:
+```php
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+
+public function show(Sparepart $sparepart)
+{
+    $qrCodeSvg = QrCode::format('svg')->size(200)->generate($sparepart->material_number);
+    
+    return Inertia::render('labels/Show', [
+        'sparepart' => $sparepart->load(['brand', 'category', 'bin.rack']),
+        'qrCodeSvg' => $qrCodeSvg,
+    ]);
+}
+```
+
+**2. Issue #33 — Pindahkan `control_id` ke `ActivityLog::boot()`**
+Di `app/Models/ActivityLog.php`, tambahkan:
+```php
+protected static function boot(): void
+{
+    parent::boot();
+    static::creating(function (ActivityLog $log) {
+        if (empty($log->control_id)) {
+            $log->control_id = 'CTL-' . strtoupper(Str::random(8));
+        }
+    });
+}
+```
+Kemudian hapus baris `'control_id' => 'CTL-...'` dari `StockController`.
+
+**3. Setelah FIX selesai → Bantu verifikasi Integration Testing (Issue #36)**
+
+**Larangan keras (tetap berlaku):**
 - Jangan sentuh file di `resources/js/`
 - Jangan sentuh file di `app/Http/Controllers/Settings/`
 - Jangan buat folder `Services/` atau `Repositories/`
-- Validasi wajib di FormRequest, bukan inline di Controller
 
 ---
 
-### 🟩 WORKER-FRONTEND — Baca ini pertama
-**File ownership kamu:**
-- `resources/js/pages/spareparts/` — [NEW] semua halaman sparepart
-- `resources/js/pages/stock/` — [NEW] halaman IN/OUT control
-- `resources/js/pages/scanner/` — [NEW] halaman QR scanner
-- `resources/js/pages/labels/` — [NEW] halaman QR label
-- `resources/js/pages/reports/` — [NEW] halaman laporan
-- `resources/js/components/features/` — [NEW] komponen bisnis WMS
-- `resources/js/components/app-sidebar.tsx` — tambahkan nav item WMS
-- `resources/js/types/` — definisi TypeScript interface domain WMS
+### 🟩 WORKER-FRONTEND — Priority Order (2026-05-12)
 
-**Langkah pertama kamu:**
-1. Checkout branch `frontend` dari `main`.
-2. Buat feature branch: `git checkout -b feat/fe-layout-nav`
-3. Tambahkan menu navigasi WMS ke `app-sidebar.tsx`.
-4. Definisikan TypeScript interfaces di `resources/js/types/wms.d.ts` sesuai schema Section 3.
-5. Buat PR ke branch `frontend`. Tag: `agent-frontend`.
+**Kerjakan sesuai urutan:**
 
-**Larangan keras:**
+**1. Issue #32 — Refactor `labels/Show.tsx` (BLOCKER)**
+
+Ganti logika yang bergantung pada `qr_code_path` menjadi langsung render `qrCodeSvg` prop:
+```tsx
+// HAPUS: handleGenerateQR(), handlePrint() check, button "Generate QR"
+// GANTI: render qrCodeSvg langsung, tombol Cetak selalu aktif
+
+export default function LabelShow({ sparepart, qrCodeSvg }: LabelShowProps) {
+    const handlePrint = () => window.print();
+
+    return (
+        <>
+            {/* ... header buttons ... */}
+            <div 
+                className="w-full h-full p-4 [&>svg]:w-full [&>svg]:h-full"
+                dangerouslySetInnerHTML={{ __html: qrCodeSvg }} 
+            />
+        </>
+    );
+}
+```
+
+Juga hapus `qr_code_path` dari:
+- `resources/js/types/wms.d.ts` interface `Sparepart`
+- `resources/js/pages/spareparts/show.tsx` baris 123 (`DetailItem label="QR Code"`)
+
+**2. Issue #34 — Dashboard summary cards**
+
+Update `routes/web.php` untuk pass summary ke dashboard:
+```php
+Route::inertia('dashboard', 'dashboard', [
+    'summary' => fn() => [
+        'total' => Sparepart::count(),
+        'ok' => Sparepart::where('status', 'OK')->count(),
+        'attention' => Sparepart::where('status', 'ATTENTION')->count(),
+        'ng' => Sparepart::where('status', 'NG')->count(),
+    ],
+    'recentLogs' => fn() => ActivityLog::with(['sparepart', 'user'])
+        ->latest('performed_at')->limit(5)->get(),
+])->name('dashboard');
+```
+
+Update `dashboard.tsx` untuk pakai `SparePartsSummaryCards` dan `ActivityLogTable`.
+
+**3. Verifikasi Issues #14, #15, #16** — Test manual di browser setelah FIX-1 dan FIX-3 selesai.
+
+**Larangan keras (tetap berlaku):**
 - Jangan sentuh file PHP di `app/`
-- Jangan sentuh file `routes/`
-- Gunakan `useForm` dari Inertia untuk semua form — jangan buat state manual untuk form
-- Semua props komponen **wajib** memiliki interface TypeScript yang eksplisit
-
-**Catatan untuk QR Scanner (F-8):**
-Gunakan library `html5-qrcode` atau `@zxing/browser`. Install via: `npm install html5-qrcode`. Bungkus dalam `useEffect` untuk manajemen lifecycle kamera.
-
-**Catatan untuk PDF Export (F-10):**
-Frontend cukup mengirim request `GET /spareparts/report?from=...&to=...` dengan header `Accept: application/pdf`. Backend yang generate dan stream file-nya.
+- Jangan sentuh file `routes/` (kecuali yang disebutkan di FIX-4)
+- Gunakan `useForm` dari Inertia untuk semua form
 
 ---
 
-### 🔍 REVIEWER AGENT — Baca ini pertama
-**Tugasmu:** Melakukan audit setiap PR sebelum merge ke branch induk.
-
-**Checklist wajib per PR (berdasarkan acceptance-criteria.md):**
+### 🔍 REVIEWER AGENT — Checklist (Updated)
 
 #### Checklist Backend PR
 - [ ] Migrasi memiliki kolom yang sesuai dengan schema Section 3
@@ -243,8 +326,9 @@ Frontend cukup mengirim request `GET /spareparts/report?from=...&to=...` dengan 
 - [ ] Validasi ada di FormRequest (bukan di Controller body)
 - [ ] Controller tidak melebihi 300 baris
 - [ ] Tidak ada folder `Services/` atau `Repositories/` yang dibuat
-- [ ] `control_id` di `activity_logs` ter-generate otomatis (di Observer/boot)
+- [ ] `control_id` di `activity_logs` ter-generate otomatis di **`ActivityLog::boot()`** (Issue #33)
 - [ ] Route terdaftar di `routes/web.php` dalam group `auth` middleware
+- [ ] `composer.json` mencantumkan semua direct dependencies (Issue #35)
 
 #### Checklist Frontend PR
 - [ ] Semua props memiliki TypeScript interface
@@ -253,9 +337,10 @@ Frontend cukup mengirim request `GET /spareparts/report?from=...&to=...` dengan 
 - [ ] Status badge menampilkan emoji yang benar (😮 = ATTENTION, 😡 = NG, ✅ = OK)
 - [ ] Komponen UI menggunakan Shadcn (bukan elemen HTML mentah)
 - [ ] `cn()` digunakan untuk penggabungan class Tailwind
+- [ ] **Tidak ada referensi `qr_code_path`** di komponen manapun (Issue #32)
 
-#### Checklist Acceptance Criteria (dari dokumen)
-- [ ] **AC-1 (Master Data):** Form sparepart menyimpan semua 9 field yang dipersyaratkan
+#### Checklist Acceptance Criteria
+- [ ] **AC-1 (Master Data):** Form sparepart menyimpan semua 9 field
 - [ ] **AC-2 (QR):** QR Code berisi Material Number, Location, Brand, Specification
 - [ ] **AC-3 (Scanner):** Auto-redirect ke halaman detail setelah scan berhasil
 - [ ] **AC-4 (OUT):** Stok berkurang real-time setelah konfirmasi, log tercatat otomatis
@@ -266,109 +351,146 @@ Frontend cukup mengirim request `GET /spareparts/report?from=...&to=...` dengan 
 
 ## 7. HUMAN SYNC POINTS
 
-### SYNC-1 — Schema Review (Setelah P0-1, P0-2, P0-3 selesai)
-**Siapa:** Kedua Human
-**Apa yang harus diperiksa:**
-1. Jalankan `php artisan migrate --pretend` dan verifikasi kolom tabel.
-2. Konfirmasi bahwa `status` enum (OK/ATTENTION/NG) sudah benar.
-3. Setujui PR `feat/be-schema-spareparts` dan `feat/be-model-sparepart` sebelum Phase 1 dimulai.
+### SYNC-1 — Schema Review ✅ COMPLETED
+Dilaksanakan pada Phase 0. Schema disetujui.
 
-**Gate:** Jika schema belum disetujui, Worker-BE dan Worker-FE **TIDAK BOLEH** membuat fitur baru.
+### SYNC-2 — Integration Review (Issue #17) ⏳ HOLD
+**Status:** ON HOLD — menunggu penyelesaian Issues #32, #33, #34, #35, #36.
 
-### SYNC-2 — Integration Review (Setelah Phase 1 selesai)
-**Siapa:** Kedua Human
-**Apa yang harus diperiksa:**
+**Gate:** Semua issue di bawah harus CLOSED sebelum SYNC-2 bisa dilaksanakan:
+- [ ] Issue #32 — Refactor Labels/Show.tsx
+- [ ] Issue #33 — Refactor control_id ke Model boot
+- [ ] Issue #34 — Dashboard summary cards
+- [ ] Issue #35 — BaconQrCode dependency fix
+- [ ] Issue #36 — Integration Testing selesai
+
+**Setelah semua CLOSED, Human perlu:**
 1. Test alur OUT Control di device mobile sesungguhnya.
 2. Test QR Scan menggunakan kamera smartphone.
 3. Download laporan PDF dan bandingkan dengan template Word.
 4. Verifikasi bahwa status badge berubah otomatis setelah stok di bawah safety stock.
 
-**Gate:** Kedua human harus memberikan **Approval** secara eksplisit sebelum merge `backend` + `frontend` → `main`.
-
 ---
 
-## 8. FILE STRUCTURE TARGET (End State)
+## 8. FILE STRUCTURE — Current State
 
 ```
 app/
 ├── Actions/
-│   └── Fortify/                    ← existing, jangan diubah
-├── Events/
-│   └── StockUpdated.php            ← [NEW-BE]
+│   └── Fortify/                    ← existing ✅
 ├── Http/
 │   ├── Controllers/
-│   │   ├── Settings/               ← existing, jangan diubah
-│   │   ├── SparepartController.php ← [NEW-BE] Resource
-│   │   ├── Stock/
-│   │   │   ├── StockOutController.php← [NEW-BE]
-│   │   │   └── StockInController.php← [NEW-BE]
-│   │   ├── QrCodeController.php    ← [NEW-BE]
-│   │   └── ReportController.php    ← [NEW-BE]
+│   │   ├── Settings/               ← existing ✅
+│   │   ├── SparepartController.php ← DONE ✅ (116 baris)
+│   │   ├── StockController.php     ← DONE ✅ (105 baris) ⚠️ Issue #33
+│   │   ├── QrCodeController.php    ← DONE ✅ (34 baris) ⚠️ Issue #35
+│   │   └── ReportController.php    ← DONE ✅ (51 baris)
 │   └── Requests/
-│       ├── StoreSparepartRequest.php← [NEW-BE]
-│       ├── UpdateSparepartRequest.php← [NEW-BE]
-│       ├── StockOutRequest.php     ← [NEW-BE]
-│       └── StockInRequest.php      ← [NEW-BE]
+│       ├── StoreSparepartRequest.php  ← DONE ✅
+│       ├── UpdateSparepartRequest.php ← DONE ✅
+│       ├── StockOutRequest.php        ← DONE ✅
+│       └── StockInRequest.php         ← DONE ✅
 ├── Models/
-│   ├── User.php                    ← existing
-│   ├── Sparepart.php               ← [NEW-BE]
-│   ├── ActivityLog.php             ← [NEW-BE]
-│   ├── Brand.php                   ← [NEW-BE]
-│   ├── Category.php                ← [NEW-BE]
-│   ├── Rack.php                    ← [NEW-BE]
-│   ├── Bin.php                     ← [NEW-BE]
+│   ├── User.php                    ← existing ✅
+│   ├── Sparepart.php               ← DONE ✅
+│   ├── ActivityLog.php             ← DONE ✅ ⚠️ perlu boot() untuk Issue #33
+│   ├── Brand.php                   ← DONE ✅
+│   ├── Category.php                ← DONE ✅
+│   ├── Rack.php                    ← DONE ✅
+│   ├── Bin.php                     ← DONE ✅
 │   └── Traits/
-│       └── HasStockStatus.php      ← [NEW-BE]
+│       └── HasStockStatus.php      ← DONE ✅
 └── Observers/
-    └── SparepartObserver.php       ← [NEW-BE]
+    └── SparepartObserver.php       ← DONE ✅
 
 resources/js/
 ├── components/
-│   ├── ui/                         ← existing Shadcn components
 │   ├── features/
-│   │   ├── StockStatusBadge.tsx    ← [NEW-FE]
-│   │   ├── ActivityLogTable.tsx    ← [NEW-FE]
-│   │   └── QrScannerCamera.tsx     ← [NEW-FE]
-│   └── ... (existing layout components)
+│   │   ├── spareparts/
+│   │   │   ├── sparepart-form.tsx         ← DONE ✅
+│   │   │   ├── spareparts-filters.tsx     ← DONE ✅
+│   │   │   ├── spareparts-summary-cards.tsx ← DONE ✅
+│   │   │   ├── spareparts-table.tsx       ← DONE ✅
+│   │   │   ├── spareparts-utils.ts        ← DONE ✅
+│   │   │   └── stock-status-badge.tsx     ← DONE ✅
+│   │   ├── stock/
+│   │   │   ├── activity-log-table.tsx     ← DONE ✅
+│   │   │   └── stock-transaction-form.tsx ← DONE ✅
+│   │   └── reports/
+│   │       ├── ReportFilters.tsx          ← DONE ✅
+│   │       ├── ReportHeader.tsx           ← DONE ✅
+│   │       └── ReportPreviewTable.tsx     ← DONE ✅
+│   └── QrScannerCamera.tsx              ← DONE ✅
 ├── pages/
-│   ├── auth/                       ← existing
-│   ├── settings/                   ← existing
-│   ├── dashboard.tsx               ← [MODIFY-FE] tambahkan summary cards
+│   ├── dashboard.tsx               ← ❌ Perlu update (Issue #34)
 │   ├── spareparts/
-│   │   ├── Index.tsx               ← [NEW-FE]
-│   │   ├── Create.tsx              ← [NEW-FE]
-│   │   ├── Show.tsx                ← [NEW-FE]
-│   │   └── Edit.tsx                ← [NEW-FE]
+│   │   ├── index.tsx               ← DONE ✅
+│   │   ├── create.tsx              ← DONE ✅
+│   │   ├── show.tsx                ← DONE ✅ (hapus qr_code_path ref)
+│   │   └── edit.tsx                ← DONE ✅
 │   ├── stock/
-│   │   ├── Out.tsx                 ← [NEW-FE]
-│   │   └── In.tsx                  ← [NEW-FE]
+│   │   ├── out.tsx                 ← DONE ✅
+│   │   └── in.tsx                  ← DONE ✅
 │   ├── scanner/
-│   │   └── Index.tsx               ← [NEW-FE]
+│   │   └── Index.tsx               ← DONE ✅ (perlu verifikasi mobile)
 │   ├── labels/
-│   │   └── Show.tsx                ← [NEW-FE]
+│   │   └── Show.tsx                ← ⚠️ Perlu refactor (Issue #32)
 │   └── reports/
-│       └── Index.tsx               ← [NEW-FE]
+│       └── Index.tsx               ← DONE ✅ (perlu verifikasi PDF export)
 └── types/
-    └── wms.d.ts                    ← [NEW-FE] TypeScript interfaces
+    └── wms.d.ts                    ← DONE ✅ (hapus qr_code_path field)
 ```
 
 ---
 
-## 9. DEPENDENCY NOTES (npm yang perlu ditambah)
+## 9. DEPENDENCY NOTES
 
-| Package | Kegunaan | Siapa yang Install |
+### Composer (PHP)
+| Package | Versi | Status |
 |---|---|---|
-| `html5-qrcode` | QR Scanner camera | Worker-FE |
-| `simplesoftwareio/simple-qrcode` | Generate QR Code di PHP | Worker-BE (via composer) |
-| `barryvdh/laravel-dompdf` | Generate PDF | Worker-BE (via composer) |
+| `barryvdh/laravel-dompdf` | ^3.1 | ✅ Installed |
+| `simplesoftwareio/simple-qrcode` | - | ❌ Belum install — Issue #35 |
+| `bacon/bacon-qr-code` | - | ⚠️ Dipakai via transitive dep, tidak di-declare |
 
-Cara install (Worker-BE):
-```bash
-composer require simplesoftwareio/simple-qrcode
-composer require barryvdh/laravel-dompdf
+### NPM (JavaScript)
+| Package | Versi | Status |
+|---|---|---|
+| `html5-qrcode` | ^2.3.8 | ✅ Installed |
+| `react-day-picker` | ^8.10.1 | ✅ Installed |
+| `date-fns` | ^4.1.0 | ✅ Installed |
+| `sonner` | ^2.0.0 | ✅ Installed |
+
+---
+
+## 10. NEXT ACTION COMMAND
+
+### 🟦 Worker-Backend — Jalankan sekarang:
+```
+1. Checkout branch: git checkout backend
+2. git checkout -b fix/be-qrcode-dependency
+3. composer require simplesoftwareio/simple-qrcode
+4. Refactor QrCodeController.php (lihat Section 6)
+5. PR ke branch backend → tag Issue #35
+6. Kemudian buat branch fix/be-activitylog-boot
+7. Tambah boot() ke ActivityLog.php (lihat Section 6)
+8. Hapus control_id manual dari StockController
+9. PR ke branch backend → tag Issue #33
 ```
 
-Cara install (Worker-FE):
-```bash
-npm install html5-qrcode
+### 🟩 Worker-Frontend — Jalankan sekarang:
+```
+1. Checkout branch: git checkout frontend
+2. git checkout -b fix/fe-label-qr-logic
+3. Refactor resources/js/pages/labels/Show.tsx (lihat Section 6)
+4. Hapus qr_code_path dari wms.d.ts dan spareparts/show.tsx baris 123
+5. PR ke branch frontend → tag Issue #32
+6. Kemudian buat branch feat/fe-dashboard-summary
+7. Update dashboard.tsx + modifikasi routes/web.php untuk pass summary data
+8. PR ke branch frontend → tag Issue #34
+```
+
+### Setelah semua FIX selesai:
+```
+Worker-BE + Worker-FE: Kerjakan Issue #36 (Integration Testing)
+Laporkan hasil ke Human untuk SYNC-2 (Issue #17)
 ```
