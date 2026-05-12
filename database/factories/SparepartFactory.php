@@ -30,8 +30,7 @@ class SparepartFactory extends Factory
             'last_supplier' => $this->faker->company(),
             'last_gr_date' => $this->faker->date(),
             'price_per_unit' => $this->faker->randomFloat(2, 10, 1000),
-            'status' => 'OK',
-            'qr_code_path' => null,
+            'status' => 'OK'
         ];
     }
 }
