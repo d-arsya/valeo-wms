@@ -121,9 +121,9 @@ performed_at (timestamp), created_at, updated_at
 | ✅ F-5 | `pages/spareparts/Edit.tsx` — form edit sparepart | 🟩 FE | F-3 |
 | ✅ F-6 | `pages/stock/Out.tsx` — form OUT control (qty, PIC, remarks) | 🟩 FE | F-4 |
 | ✅ F-7 | `pages/stock/In.tsx` — form IN control (qty, PO, supplier, GR date, price) | 🟩 FE | F-4 |
-| F-8 | `pages/scanner/Index.tsx` — QR scanner camera view | 🟩 FE | F-1 |
-| F-9 | `pages/labels/Show.tsx` — preview & print QR label | 🟩 FE | F-4 |
-| F-10 | `pages/reports/Index.tsx` — filter form + export PDF button | 🟩 FE | F-1 |
+| ✅ F-8 | `pages/scanner/Index.tsx` — QR scanner camera view | 🟩 FE | F-1 |
+| ✅ F-9 | `pages/labels/Show.tsx` — preview & print QR label | 🟩 FE | F-4 |
+| ✅ F-10 | `pages/reports/Index.tsx` — filter form + export PDF button | 🟩 FE | F-1 |
 
 ### Phase 2 — Integration & Polish
 | # | Task | Agent | Prerequisite |

@@ -3,6 +3,7 @@
 use App\Http\Controllers\SparepartController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\QrCodeController;
+use App\Http\Controllers\ReportController;
 
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
@@ -29,7 +30,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // QR Label
-    Route::get('spareparts/{sparepart}/label', QrCodeController::class)->name('spareparts.label');
+    Route::get('spareparts/{sparepart}/label', [QrCodeController::class, 'show'])->name('spareparts.label');
+    Route::post('spareparts/{sparepart}/qr', [QrCodeController::class, 'generate'])->name('spareparts.qr.generate');
+
+    // Reports
+    Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
 });
 
 require __DIR__.'/settings.php';
