@@ -1,6 +1,8 @@
 import { Head, Link } from '@inertiajs/react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { dashboard, spareparts, reports } from '@/routes';
+import { dashboard } from '@/routes';
+import spareparts from '@/routes/spareparts';
+import reports from '@/routes/reports';
 import { Package, AlertTriangle, CheckCircle2, XCircle, ArrowRight, Activity } from 'lucide-react';
 import { ActivityLog } from '@/types';
 import { cn } from '@/lib/utils';
@@ -111,7 +113,7 @@ export default function Dashboard({ stats }: DashboardProps) {
                                             <div className="flex flex-1 flex-col gap-1">
                                                 <div className="flex items-center justify-between">
                                                     <p className="text-sm font-medium leading-none">
-                                                        <Link 
+                                                        <Link
                                                             href={spareparts.show(log.sparepart_id).url}
                                                             className="hover:underline"
                                                         >
