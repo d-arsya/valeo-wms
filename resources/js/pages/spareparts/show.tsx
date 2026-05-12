@@ -12,7 +12,7 @@ import type { ActivityLog, Sparepart } from '@/types';
 import type { User } from '@/types/auth';
 
 type SparepartDetail = Sparepart & {
-    activityLogs: Array<ActivityLog & { user?: User | null }>;
+    activity_logs: Array<ActivityLog & { user?: User | null }>;
 };
 
 interface Props {
@@ -28,7 +28,8 @@ function renderActivityBadge(type: ActivityLog['type']) {
 }
 
 export default function Show({ sparepart }: Props) {
-    const activityLogs = sparepart.activityLogs ?? [];
+    const activityLogs = sparepart.activity_logs ?? [];
+
 
     function handleDelete() {
         if (!window.confirm(`Hapus sparepart ${sparepart.material_number}?`)) {
@@ -154,11 +155,11 @@ export default function Show({ sparepart }: Props) {
 
                             <div className="rounded-xl border border-dashed border-border/60 p-4 text-sm text-muted-foreground">
                                 Lokasi fisik: {getBinLabel(sparepart)}
+                                <p></p>
                             </div>
                         </CardContent>
                     </Card>
                 </div>
-
                 <Card className="gap-0 overflow-hidden border-border/60 shadow-sm">
                     <CardHeader className="border-b border-border/60">
                         <CardTitle className="text-base">Riwayat aktivitas</CardTitle>

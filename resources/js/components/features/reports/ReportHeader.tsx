@@ -1,13 +1,12 @@
 import { FileText, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import reports from '@/routes/reports';
 
 export function ReportHeader() {
-    const handlePlaceholderExport = () => {
-        toast.info('Fitur ekspor PDF sedang dalam pengembangan', {
-            description: 'Fungsi ini akan segera tersedia di pembaruan berikutnya.',
-            duration: 3000,
-        });
+    const handleExport = () => {
+        const params = new URLSearchParams(window.location.search);
+        window.location.href = reports.export().url + '?' + params.toString();
     };
 
     return (
@@ -25,9 +24,9 @@ export function ReportHeader() {
             </div>
 
             <div className="flex gap-3 pl-11 md:pl-0">
-                <Button 
-                    size="lg" 
-                    onClick={handlePlaceholderExport}
+                <Button
+                    size="lg"
+                    onClick={handleExport}
                     className="rounded-xl h-12 px-8 font-bold shadow-md shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95"
                 >
                     <Download className="mr-2 h-5 w-5" />

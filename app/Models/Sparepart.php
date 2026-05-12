@@ -47,6 +47,6 @@ class Sparepart extends Model
 
     public function activityLogs()
     {
-        return $this->hasMany(ActivityLog::class);
+        return $this->hasMany(ActivityLog::class, 'sparepart_id', 'id');
     }
 }

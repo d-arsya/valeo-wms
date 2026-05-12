@@ -16,7 +16,7 @@ class SparepartSeeder extends Seeder
         $brands = \App\Models\Brand::factory()->count(5)->create();
         $categories = \App\Models\Category::factory()->count(4)->create();
         $racks = \App\Models\Rack::factory()->count(3)->create();
-        
+
         $bins = collect();
         foreach ($racks as $rack) {
             $bins = $bins->concat(\App\Models\Bin::factory()->count(5)->create(['rack_id' => $rack->id]));
@@ -24,14 +24,14 @@ class SparepartSeeder extends Seeder
 
         $user = \App\Models\User::first();
 
-        Sparepart::factory()
-            ->count(30)
-            ->recycle($brands)
-            ->recycle($categories)
-            ->recycle($bins)
-            ->has(\App\Models\ActivityLog::factory()->count(5)->state(fn (array $attributes, Sparepart $sparepart) => [
-                'user_id' => $user->id,
-            ]), 'activityLogs')
-            ->create();
+        // Sparepart::factory()
+        //     ->count(30)
+        //     ->recycle($brands)
+        //     ->recycle($categories)
+        //     ->recycle($bins)
+        //     ->has(\App\Models\ActivityLog::factory()->count(5)->state(fn (array $attributes, Sparepart $sparepart) => [
+        //         'user_id' => $user->id,
+        //     ]), 'activityLogs')
+        //     ->create();
     }
 }

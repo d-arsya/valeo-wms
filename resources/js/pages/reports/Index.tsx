@@ -1,5 +1,5 @@
 import { Head, useForm, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import reports from '@/routes/reports';
 import { ReportHeader } from '@/components/features/reports/ReportHeader';
 import { ReportFilters } from '@/components/features/reports/ReportFilters';
@@ -24,29 +24,36 @@ export default function ReportsIndex({ logs, filters }: ReportsProps) {
         to: filters.to || '',
         type: filters.type || 'all',
         search: filters.search || '',
-        control_id: filters.control_id || '',
     });
 
     const hasFilters = Boolean(
-        data.from || data.to || data.type !== 'all' || data.search || data.control_id
+        data.from || data.to || data.type !== 'all' || data.search
     );
 
-    const handleFilter = () => {
-        const params = {
-            from: data.from,
-            to: data.to,
-            type: data.type,
-            search: data.search,
-            control_id: data.control_id,
-        };
+    // Real-time filtering effect
+    const [isFirstRender, setIsFirstRender] = useState(true);
 
-        router.get(reports.index().url, params, {
-            preserveState: true,
-            preserveScroll: true,
-            replace: true,
-            only: ['logs', 'filters'],
-        });
-    };
+    useEffect(() => {
+        if (isFirstRender) {
+            setIsFirstRender(false);
+            return;
+        }
+
+        const timeout = setTimeout(() => {
+            router.get(reports.index().url, {
+                from: data.from,
+                to: data.to,
+                type: data.type,
+                search: data.search,
+            }, {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            });
+        }, 300);
+
+        return () => clearTimeout(timeout);
+    }, [data.from, data.to, data.type, data.search]);
 
     const handleClearFilters = () => {
         reset();
@@ -61,27 +68,24 @@ export default function ReportsIndex({ logs, filters }: ReportsProps) {
         <>
             <Head title="Laporan Transaksi" />
 
-            <div className="flex flex-col gap-8 p-6 md:p-10 max-w-7xl mx-auto">
+            <div className="flex flex-col gap-6 p-6 md:p-10 max-w-7xl mx-auto w-full">
                 <ReportHeader />
 
-                <div className="grid gap-8 lg:grid-cols-4 items-start">
-                    <ReportFilters 
-                        data={data} 
-                        setData={setData} 
-                        onApply={handleFilter} 
+                <ReportFilters
+                    data={data}
+                    setData={setData}
+                    onReset={handleClearFilters}
+                    hasFilters={hasFilters}
+                    processing={processing}
+                />
+
+                <div className="space-y-6">
+                    <ReportPreviewTable
+                        logs={logs}
                         onReset={handleClearFilters}
-                        hasFilters={hasFilters}
-                        processing={processing} 
                     />
 
-                    <div className="lg:col-span-3 space-y-6">
-                        <ReportPreviewTable 
-                            logs={logs} 
-                            onReset={handleClearFilters} 
-                        />
-                        
-                        <Pagination meta={logs} />
-                    </div>
+                    <Pagination meta={logs} />
                 </div>
             </div>
         </>

@@ -31,7 +31,6 @@ class StockController extends Controller
     {
         return Inertia::render('stock/out', [
             'sparepart' => $sparepart->load(['brand', 'category', 'bin.rack', 'activityLogs.user']),
-            'picOptions' => User::query()->orderBy('name')->get(['id', 'name']),
             'returnTo' => $request->query('return_to'),
         ]);
     }
@@ -86,7 +85,7 @@ class StockController extends Controller
             // Create activity log
             ActivityLog::create([
                 'sparepart_id' => $sparepart->id,
-                'user_id' => $data['user_id'],
+                'user_id' => $request->user()->id,
                 'type' => 'OUT',
                 'quantity' => $data['quantity'],
                 'remarks' => $data['remarks'] ?? null,

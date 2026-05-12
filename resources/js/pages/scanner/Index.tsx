@@ -1,47 +1,26 @@
 import { Head, router } from '@inertiajs/react';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import AppLayout from '@/layouts/app-layout';
 import { QrScannerCamera } from '@/components/features/QrScannerCamera';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { index as sparepartsIndex, show as sparepartsShow } from '@/routes/spareparts';
+import { index as sparepartsIndex } from '@/routes/spareparts';
 import { index as scannerIndex } from '@/routes/scanner';
 
 export default function ScannerIndex() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const handleScanSuccess = async (decodedText: string) => {
+    const handleScanSuccess = useCallback(async (decodedText: string) => {
+        if (isProcessing) return;
+        
         setIsProcessing(true);
         setError(null);
         
-        try {
-            const response = await fetch(sparepartsIndex({ query: { search: decodedText } }).url, {
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Inertia': 'true',
-                    'X-Inertia-Version': 'default'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch data');
-            }
-
-            const data = await response.json();
-            const sparepartsData = data.props.spareparts.data;
-
-            if (sparepartsData && sparepartsData.length > 0) {
-                router.visit(sparepartsShow(sparepartsData[0].id).url);
-            } else {
-                setError(`Barang dengan Material Number "${decodedText}" tidak ditemukan.`);
-                setIsProcessing(false);
-            }
-        } catch (err) {
-            setError('Terjadi kesalahan saat memproses hasil scan.');
-            setIsProcessing(false);
-        }
-    };
+        // Simply redirect to the spareparts index with the search query
+        // This is more robust as it uses the existing search logic
+        router.visit(sparepartsIndex({ query: { search: decodedText } }).url);
+    }, [isProcessing]);
 
     return (
         <>

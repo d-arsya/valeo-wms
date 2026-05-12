@@ -14,7 +14,7 @@ class ReportController extends Controller
     public function index(Request $request)
     {
         $filters = $request->only(['from', 'to', 'type', 'search', 'control_id']);
-        
+
         $logs = ActivityLog::with(['sparepart', 'user'])
             ->filter($filters)
             ->orderBy('performed_at', 'desc')
@@ -33,7 +33,7 @@ class ReportController extends Controller
     public function export(Request $request)
     {
         $filters = $request->only(['from', 'to', 'type', 'search', 'control_id']);
-        
+
         $logs = ActivityLog::with(['sparepart', 'user'])
             ->filter($filters)
             ->orderBy('performed_at', 'desc')

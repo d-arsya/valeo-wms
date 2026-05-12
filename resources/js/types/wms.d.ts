@@ -75,7 +75,7 @@ export interface Sparepart {
     brand?: Brand | null;
     category?: Category | null;
     bin?: Bin | null;
-    activityLogs?: ActivityLog[];
+    activity_logs?: ActivityLog[];
 }
 
 export interface ActivityLog {

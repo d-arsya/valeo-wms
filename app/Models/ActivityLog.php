@@ -11,6 +11,8 @@ class ActivityLog extends Model
     /** @use HasFactory<\Database\Factories\ActivityLogFactory> */
     use HasFactory;
 
+    protected $table = 'activity_logs';
+
     protected $fillable = [
         'sparepart_id',
         'user_id',
@@ -43,7 +45,7 @@ class ActivityLog extends Model
             if (empty($activityLog->control_id)) {
                 $activityLog->control_id = 'CTL-' . strtoupper(Str::random(8));
             }
-            
+
             if (empty($activityLog->performed_at)) {
                 $activityLog->performed_at = now();
             }
@@ -68,7 +70,7 @@ class ActivityLog extends Model
         })->when($filters['search'] ?? null, function ($query, $search) {
             $query->whereHas('sparepart', function ($q) use ($search) {
                 $q->where('material_number', 'like', "%{$search}%")
-                  ->orWhere('part_name', 'like', "%{$search}%");
+                    ->orWhere('part_name', 'like', "%{$search}%");
             });
         });
     }

@@ -18,13 +18,11 @@ interface Props {
 }
 
 interface StockOutFormValues {
-    user_id: string;
     quantity: string;
     remarks: string;
 }
 
 const initialValues: StockOutFormValues = {
-    user_id: '',
     quantity: '',
     remarks: '',
 };
@@ -37,7 +35,6 @@ export default function Out({ sparepart, picOptions, returnTo }: Props) {
 
         form.transform((data) => ({
             ...data,
-            user_id: Number(data.user_id),
             quantity: Number(data.quantity),
         }));
 
@@ -68,23 +65,6 @@ export default function Out({ sparepart, picOptions, returnTo }: Props) {
                     </div>
 
                     <div className="grid gap-4 md:grid-cols-2">
-                        <div className="space-y-2">
-                            <Label htmlFor="user_id">PIC Name</Label>
-                            <Select value={form.data.user_id} onValueChange={(value) => form.setData('user_id', value)}>
-                                <SelectTrigger id="user_id">
-                                    <SelectValue placeholder="Pilih PIC" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {picOptions.map((pic) => (
-                                        <SelectItem key={pic.id} value={String(pic.id)}>
-                                            {pic.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <InputError message={form.errors.user_id} />
-                        </div>
-
                         <div className="space-y-2">
                             <Label htmlFor="quantity">Quantity</Label>
                             <Input
