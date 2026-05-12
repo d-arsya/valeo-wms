@@ -31,10 +31,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // QR Label
     Route::get('spareparts/{sparepart}/label', [QrCodeController::class, 'show'])->name('spareparts.label');
-    Route::post('spareparts/{sparepart}/qr', [QrCodeController::class, 'generate'])->name('spareparts.qr.generate');
 
     // Reports
     Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('reports/export', [ReportController::class, 'export'])->name('reports.export');
 });
 
 require __DIR__.'/settings.php';

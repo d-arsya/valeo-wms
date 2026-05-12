@@ -71,7 +71,6 @@ brand_id (FK), category_id (FK), bin_id (FK),
 safety_stock (int), actual_stock (int),
 last_po_number, last_supplier, last_gr_date (date), price_per_unit (decimal),
 status (enum: OK, ATTENTION, NG — computed via Observer),
-qr_code_path (string nullable),
 created_at, updated_at
 ```
 
@@ -108,7 +107,7 @@ performed_at (timestamp), created_at, updated_at
 | B-3 | `FormRequests`: StockOutRequest, StockInRequest | 🟦 BE | SYNC-1 |
 | B-4 | `StockController` (in/out logic) | 🟦 BE | B-3 |
 | B-5 | `QrCodeController` — on-demand label generation (QR + Info) | 🟦 BE | B-2 |
-| B-6 | `ReportController` — filter + export PDF | 🟦 BE | B-4 |
+| B-6 | `ReportController` — filter + export PDF (dompdf) | 🟦 BE | B-4 |
 | B-7 | Update `routes/web.php` — register all WMS routes | 🟦 BE | B-2..B-6 |
 
 ### Phase 1 — Frontend Core (Paralel dengan Phase 1 BE, gunakan mock data untuk UI)
