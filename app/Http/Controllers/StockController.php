@@ -9,7 +9,6 @@ use App\Models\Sparepart;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class StockController extends Controller
@@ -58,14 +57,12 @@ class StockController extends Controller
             ActivityLog::create([
                 'sparepart_id' => $sparepart->id,
                 'user_id' => $request->user()?->id,
-                'control_id' => 'CTL-' . strtoupper(Str::random(8)),
                 'type' => 'IN',
                 'quantity' => $data['quantity'],
                 'remarks' => $data['remarks'] ?? null,
                 'po_number' => $data['po_number'],
                 'gr_date' => $data['gr_date'],
                 'price_per_unit' => $data['price_per_unit'],
-                'performed_at' => now(),
             ]);
         });
 
@@ -90,11 +87,9 @@ class StockController extends Controller
             ActivityLog::create([
                 'sparepart_id' => $sparepart->id,
                 'user_id' => $data['user_id'],
-                'control_id' => 'CTL-' . strtoupper(Str::random(8)),
                 'type' => 'OUT',
                 'quantity' => $data['quantity'],
                 'remarks' => $data['remarks'] ?? null,
-                'performed_at' => now(),
             ]);
         });
 
