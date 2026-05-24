@@ -2,6 +2,7 @@
 /bootstrap/ssr
 /node_modules
 /public/hot
+/public/build
 /public/storage
 /storage/*.key
 /storage/pail
@@ -25,6 +26,6 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
-*.md 
+*.md
 !agent/*
 !README.md

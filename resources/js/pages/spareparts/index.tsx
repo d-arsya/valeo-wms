@@ -79,10 +79,8 @@ export default function Index({
             <Head title="Spareparts Master" />
 
             <div className="space-y-6 p-4 md:p-6">
-
-
-                <Card className="gap-0 overflow-hidden border-border/60 shadow-sm">
-                    <CardHeader className="border-b border-border/60 pb-4">
+                <Card className="gap-0 overflow-hidden border-border/70 shadow-sm">
+                    <CardHeader className="border-b border-border/60 bg-linear-to-b from-muted/35 via-background to-background pb-4">
                         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                             <div>
                                 <CardTitle className="flex items-center gap-2 text-base font-semibold">
@@ -99,7 +97,7 @@ export default function Index({
                         </div>
                     </CardHeader>
 
-                    <CardContent className="border-b border-border/60 p-4 md:p-6">
+                    <CardContent className="border-b border-border/60 bg-background p-4 md:p-6">
                         <SparepartFilters
                             values={filterValues}
                             onChange={handleFilterChange}

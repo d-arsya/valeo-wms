@@ -1,10 +1,11 @@
 import { Head, useForm, router } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
+import type { FormEvent } from 'react';
 import reports from '@/routes/reports';
 import { ReportHeader } from '@/components/features/reports/ReportHeader';
 import { ReportFilters } from '@/components/features/reports/ReportFilters';
 import { ReportPreviewTable } from '@/components/features/reports/ReportPreviewTable';
 import { Pagination } from '@/components/pagination';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import type { ActivityLog, PaginatedResponse } from '@/types';
 
 interface ReportsProps {
@@ -30,30 +31,24 @@ export default function ReportsIndex({ logs, filters }: ReportsProps) {
         data.from || data.to || data.type !== 'all' || data.search
     );
 
-    // Real-time filtering effect
-    const [isFirstRender, setIsFirstRender] = useState(true);
+    const handleApplyFilters = (event?: FormEvent<HTMLFormElement>) => {
+        event?.preventDefault();
 
-    useEffect(() => {
-        if (isFirstRender) {
-            setIsFirstRender(false);
-            return;
-        }
-
-        const timeout = setTimeout(() => {
-            router.get(reports.index().url, {
+        router.get(
+            reports.index().url,
+            {
                 from: data.from,
                 to: data.to,
                 type: data.type,
                 search: data.search,
-            }, {
+            },
+            {
                 preserveState: true,
                 preserveScroll: true,
                 replace: true,
-            });
-        }, 300);
-
-        return () => clearTimeout(timeout);
-    }, [data.from, data.to, data.type, data.search]);
+            },
+        );
+    };
 
     const handleClearFilters = () => {
         reset();
@@ -68,25 +63,32 @@ export default function ReportsIndex({ logs, filters }: ReportsProps) {
         <>
             <Head title="Laporan Transaksi" />
 
-            <div className="flex flex-col gap-6 p-6 md:p-10 max-w-7xl mx-auto w-full">
-                <ReportHeader />
+            <div className="space-y-6 p-4 md:p-6">
+                <Card className="gap-0 overflow-hidden border-border/70 shadow-sm">
+                    <CardHeader className="border-b border-border/60 bg-linear-to-b from-muted/35 via-background to-background pb-4">
+                        <ReportHeader />
+                    </CardHeader>
 
-                <ReportFilters
-                    data={data}
-                    setData={setData}
-                    onReset={handleClearFilters}
-                    hasFilters={hasFilters}
-                    processing={processing}
-                />
+                    <CardContent className="border-b border-border/60 bg-background p-4 md:p-6">
+                        <ReportFilters
+                            data={data}
+                            setData={setData}
+                            onApply={handleApplyFilters}
+                            onReset={handleClearFilters}
+                            hasFilters={hasFilters}
+                            processing={processing}
+                        />
+                    </CardContent>
 
-                <div className="space-y-6">
-                    <ReportPreviewTable
-                        logs={logs}
-                        onReset={handleClearFilters}
-                    />
+                    <CardContent className="p-0">
+                        <ReportPreviewTable
+                            logs={logs}
+                            onReset={handleClearFilters}
+                        />
+                    </CardContent>
+                </Card>
 
-                    <Pagination meta={logs} />
-                </div>
+                <Pagination meta={logs} />
             </div>
         </>
     );

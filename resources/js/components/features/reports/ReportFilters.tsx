@@ -1,13 +1,12 @@
-import { Filter, Search, FileText, Calendar as CalendarIcon, X } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { id } from 'date-fns/locale';
+import { Search, Calendar as CalendarIcon } from 'lucide-react';
+import type { FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
+import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 
 interface ReportFiltersProps {
@@ -16,28 +15,29 @@ interface ReportFiltersProps {
         to: string;
         type: string;
         search: string;
-        control_id: string;
+        control_id?: string;
     };
     setData: (key: any, value?: any) => void;
+    onApply: (event?: FormEvent<HTMLFormElement>) => void;
     onReset: () => void;
     hasFilters: boolean;
     processing: boolean;
 }
 
-export function ReportFilters({ data, setData, onReset, hasFilters, processing }: ReportFiltersProps) {
+export function ReportFilters({ data, setData, onApply, onReset, hasFilters, processing }: ReportFiltersProps) {
     return (
-        <Card className="border-none shadow-sm bg-card/50 backdrop-blur-md mb-6">
-            <CardContent className="p-4">
-                <div className="flex flex-wrap items-end gap-4">
-                    {/* Date From */}
-                    <div className="flex-1 min-w-[200px] space-y-1.5">
-                        <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-1">Dari Tanggal</Label>
+        <form
+            onSubmit={onApply}
+            className="grid gap-3 md:gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(220px,0.8fr)_minmax(0,1.4fr)_auto]"
+        >
+                    <div className="space-y-1.5">
+                        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Dari Tanggal</p>
                         <Popover>
                             <PopoverTrigger asChild>
                                 <Button
                                     variant="outline"
                                     className={cn(
-                                        "w-full justify-start text-left font-normal rounded-xl h-10 border-border/60 bg-background",
+                                        "w-full justify-start text-left font-normal h-10",
                                         !data.from && "text-muted-foreground"
                                     )}
                                 >
@@ -45,7 +45,7 @@ export function ReportFilters({ data, setData, onReset, hasFilters, processing }
                                     {data.from ? format(parseISO(data.from), "dd MMM yyyy", { locale: id }) : <span>Pilih tanggal</span>}
                                 </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0 rounded-2xl overflow-hidden shadow-2xl border-none" align="start">
+                            <PopoverContent className="w-auto p-0" align="start">
                                 <Calendar
                                     mode="single"
                                     locale={id}
@@ -60,16 +60,15 @@ export function ReportFilters({ data, setData, onReset, hasFilters, processing }
                         </Popover>
                     </div>
 
-                    {/* Date To */}
-                    <div className="flex-1 min-w-[200px] space-y-1.5">
-                        <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-1">Sampai Tanggal</Label>
+                    <div className="space-y-1.5">
+                        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Sampai Tanggal</p>
                         <Popover>
                             <PopoverTrigger asChild>
                                 <Button
                                     variant="outline"
                                     disabled={!data.from}
                                     className={cn(
-                                        "w-full justify-start text-left font-normal rounded-xl h-10 border-border/60 bg-background",
+                                        "w-full justify-start text-left font-normal h-10",
                                         !data.to && "text-muted-foreground",
                                         !data.from && "opacity-50"
                                     )}
@@ -78,7 +77,7 @@ export function ReportFilters({ data, setData, onReset, hasFilters, processing }
                                     {data.to ? format(parseISO(data.to), "dd MMM yyyy", { locale: id }) : <span>Pilih tanggal</span>}
                                 </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0 rounded-2xl overflow-hidden shadow-2xl border-none" align="start">
+                            <PopoverContent className="w-auto p-0" align="start">
                                 <Calendar
                                     mode="single"
                                     locale={id}
@@ -91,17 +90,16 @@ export function ReportFilters({ data, setData, onReset, hasFilters, processing }
                         </Popover>
                     </div>
 
-                    {/* Type */}
-                    <div className="w-[180px] space-y-1.5">
-                        <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-1">Tipe</Label>
-                        <Select 
-                            value={data.type} 
+                    <div className="space-y-1.5">
+                        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Tipe</p>
+                        <Select
+                            value={data.type}
                             onValueChange={value => setData('type', value)}
                         >
-                            <SelectTrigger className="rounded-xl h-10 border-border/60 bg-background">
+                            <SelectTrigger className="h-10 w-full">
                                 <SelectValue placeholder="Pilih tipe" />
                             </SelectTrigger>
-                            <SelectContent className="rounded-xl">
+                            <SelectContent>
                                 <SelectItem value="all">Semua Tipe</SelectItem>
                                 <SelectItem value="IN">Stock IN</SelectItem>
                                 <SelectItem value="OUT">Stock OUT</SelectItem>
@@ -109,35 +107,39 @@ export function ReportFilters({ data, setData, onReset, hasFilters, processing }
                         </Select>
                     </div>
 
-                    {/* Search */}
-                    <div className="flex-[1.5] min-w-[250px] space-y-1.5">
-                        <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-1">Pencarian</Label>
+                    <div className="space-y-1.5">
+                        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Pencarian</p>
                         <div className="relative">
-                            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                            <Input 
+                            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input
                                 placeholder="Cari Material # atau Control ID..."
-                                className="pl-10 rounded-xl h-10 border-border/60 bg-background focus-visible:ring-primary"
+                                className="h-10 pl-9"
                                 value={data.search}
                                 onChange={e => setData('search', e.target.value)}
+                                onKeyDown={(event) => {
+                                    if (event.key === 'Enter') {
+                                        event.preventDefault();
+                                        onApply();
+                                    }
+                                }}
                             />
                         </div>
                     </div>
 
-                    {/* Reset Button */}
-                    {hasFilters && (
-                        <Button 
+                    <div className="flex items-end gap-2">
+                        <Button type="submit" className="h-10 px-4" disabled={processing}>
+                            Apply
+                        </Button>
+                        <Button
                             type="button"
-                            variant="ghost"
-                            onClick={onReset} 
-                            className="rounded-xl h-10 px-3 text-muted-foreground hover:text-destructive transition-colors" 
-                            disabled={processing}
+                            variant="outline"
+                            onClick={onReset}
+                            className="h-10 px-4"
+                            disabled={!hasFilters || processing}
                         >
-                            <X className="h-4 w-4 mr-2" />
                             Reset
                         </Button>
-                    )}
-                </div>
-            </CardContent>
-        </Card>
+                    </div>
+        </form>
     );
 }
