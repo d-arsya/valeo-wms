@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import type {FormEvent} from 'react';
+import type { FormEvent } from 'react';
 import { getBinLocationLabel } from '@/components/features/spareparts/spareparts-utils';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ export type SparepartFormValues = {
     material_number: string;
     part_name: string;
     specification: string;
+    rank: string;
     brand_id: string;
     category_id: string;
     bin_id: string;
@@ -92,6 +93,17 @@ export function SparepartForm({
                                     autoComplete="off"
                                 />
                                 <InputError message={errors.part_name} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="rank">Rank</Label>
+                                <Input
+                                    id="rank"
+                                    value={values.rank}
+                                    onChange={(event) => onChange('rank', event.target.value)}
+                                    placeholder="Pilih rank"
+                                    autoComplete="off"
+                                />
+                                <InputError message={errors.rank} />
                             </div>
                         </div>
 

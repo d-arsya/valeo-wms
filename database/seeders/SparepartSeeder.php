@@ -24,14 +24,14 @@ class SparepartSeeder extends Seeder
 
         $user = \App\Models\User::first();
 
-        // Sparepart::factory()
-        //     ->count(30)
-        //     ->recycle($brands)
-        //     ->recycle($categories)
-        //     ->recycle($bins)
-        //     ->has(\App\Models\ActivityLog::factory()->count(5)->state(fn (array $attributes, Sparepart $sparepart) => [
-        //         'user_id' => $user->id,
-        //     ]), 'activityLogs')
-        //     ->create();
+        Sparepart::factory()
+            ->count(30)
+            ->recycle($brands)
+            ->recycle($categories)
+            ->recycle($bins)
+            ->has(\App\Models\ActivityLog::factory()->count(5)->state(fn (array $attributes, Sparepart $sparepart) => [
+                'user_id' => $user->id,
+            ]), 'activityLogs')
+            ->create();
     }
 }

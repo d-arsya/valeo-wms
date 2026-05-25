@@ -1,6 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
-import { SparepartForm  } from '@/components/features/spareparts/sparepart-form';
-import type {SparepartFormValues} from '@/components/features/spareparts/sparepart-form';
+import { SparepartForm } from '@/components/features/spareparts/sparepart-form';
+import type { SparepartFormValues } from '@/components/features/spareparts/sparepart-form';
 import spareparts from '@/routes/spareparts';
 import type { Bin, Brand, Category, Sparepart } from '@/types';
 
@@ -16,6 +16,7 @@ function mapSparepartToValues(sparepart: Sparepart): SparepartFormValues {
         material_number: sparepart.material_number ?? '',
         part_name: sparepart.part_name ?? '',
         specification: sparepart.specification ?? '',
+        rank: sparepart.rank ?? '',
         brand_id: sparepart.brand_id ? String(sparepart.brand_id) : '',
         category_id: sparepart.category_id ? String(sparepart.category_id) : '',
         bin_id: sparepart.bin_id ? String(sparepart.bin_id) : '',

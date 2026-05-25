@@ -60,6 +60,7 @@ export interface Sparepart {
     part_name: string;
     specification: string;
     brand_id: number;
+    rank: string;
     category_id: number;
     bin_id: number;
     safety_stock: number;

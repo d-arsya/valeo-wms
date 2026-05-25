@@ -1,6 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
-import { SparepartForm  } from '@/components/features/spareparts/sparepart-form';
-import type {SparepartFormValues} from '@/components/features/spareparts/sparepart-form';
+import { SparepartForm } from '@/components/features/spareparts/sparepart-form';
+import type { SparepartFormValues } from '@/components/features/spareparts/sparepart-form';
 import spareparts from '@/routes/spareparts';
 import type { Bin, Brand, Category } from '@/types';
 
@@ -13,6 +13,7 @@ interface Props {
 const initialValues: SparepartFormValues = {
     material_number: '',
     part_name: '',
+    rank: '',
     specification: '',
     brand_id: '',
     category_id: '',

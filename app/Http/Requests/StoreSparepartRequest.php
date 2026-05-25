@@ -26,6 +26,7 @@ class StoreSparepartRequest extends FormRequest
             'material_number' => ['required', 'string', 'unique:spareparts,material_number'],
             'part_name' => ['required', 'string', 'max:255'],
             'specification' => ['required', 'string'],
+            'rank' => ['required', 'string', 'max:255'],
             'brand_id' => ['required', 'exists:brands,id'],
             'category_id' => ['required', 'exists:categories,id'],
             'bin_id' => ['required', 'exists:bins,id'],

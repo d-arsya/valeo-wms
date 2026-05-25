@@ -28,6 +28,7 @@ class Sparepart extends Model
         'last_gr_date',
         'price_per_unit',
         'status',
+        'rank'
     ];
 
     public function brand()

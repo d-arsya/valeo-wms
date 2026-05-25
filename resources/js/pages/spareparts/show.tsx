@@ -113,6 +113,7 @@ export default function Show({ sparepart }: Props) {
                         <CardContent className="grid gap-4 py-6 md:grid-cols-2">
                             <DetailItem label="Brand" value={sparepart.brand?.name ?? '-'} />
                             <DetailItem label="Category" value={sparepart.category?.name ?? '-'} />
+                            <DetailItem label="Rank" value={sparepart.rank ?? '-'} />
                             <DetailItem label="Location" value={getBinLabel(sparepart)} />
                             <DetailItem label="Rack / Bin" value={`${sparepart.bin?.rack?.code ?? '-'} / ${sparepart.bin?.code ?? '-'}`} />
                             <DetailItem label="Safety stock" value={String(sparepart.safety_stock)} />
