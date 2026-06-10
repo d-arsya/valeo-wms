@@ -4,6 +4,7 @@ use App\Http\Controllers\SparepartController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\QrCodeController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\UserController;
 
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
@@ -15,6 +16,11 @@ Route::inertia('/', 'welcome', [
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
+
+    // User Management (Admin Only)
+    Route::middleware('admin')->group(function () {
+        Route::resource('users', UserController::class);
+    });
 
     // QR Scanner
     Route::inertia('scanner', 'scanner/Index')->name('scanner.index');
