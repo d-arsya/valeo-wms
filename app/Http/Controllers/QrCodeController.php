@@ -18,10 +18,10 @@ class QrCodeController extends Controller
     {
         $renderer = new ImageRenderer(
             new RendererStyle(200),
-            new SvgImageBackEnd()
+            new SvgImageBackEnd
         );
         $writer = new Writer($renderer);
-        
+
         // Always generate a fresh SVG for preview
         $qrCodeSvg = $writer->writeString($sparepart->material_number);
 

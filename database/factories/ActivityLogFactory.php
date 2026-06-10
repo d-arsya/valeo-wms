@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\ActivityLog;
 use App\Models\Sparepart;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -19,9 +20,10 @@ class ActivityLogFactory extends Factory
     public function definition(): array
     {
         $type = $this->faker->randomElement(['IN', 'OUT']);
+
         return [
             'sparepart_id' => Sparepart::factory(),
-            'user_id' => \App\Models\User::factory(),
+            'user_id' => User::factory(),
             'control_id' => $this->faker->unique()->bothify('CTL-####-####'),
             'type' => $type,
             'quantity' => $this->faker->numberBetween(1, 10),

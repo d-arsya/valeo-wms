@@ -32,7 +32,7 @@ class StockOutRequest extends FormRequest
                     if ($sparepart && $value > $sparepart->actual_stock) {
                         $fail("The quantity exceeds the current actual stock ({$sparepart->actual_stock}).");
                     }
-                }
+                },
             ],
             'remarks' => ['nullable', 'string'],
         ];

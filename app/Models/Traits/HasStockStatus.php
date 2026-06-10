@@ -6,8 +6,6 @@ trait HasStockStatus
 {
     /**
      * Calculate the stock status based on actual_stock and safety_stock.
-     *
-     * @return string
      */
     public function calculateStockStatus(): string
     {

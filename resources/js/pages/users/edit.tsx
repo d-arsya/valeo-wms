@@ -82,7 +82,7 @@ export default function Edit({ user, roles }: Props) {
 
                             <div className="space-y-2">
                                 <Label htmlFor="role">System Role</Label>
-                                <Select value={form.data.role} onValueChange={(value) => form.setData('role', value)}>
+                                <Select value={form.data.role} onValueChange={(value) => form.setData('role', value as 'admin' | 'technician')}>
                                     <SelectTrigger id="role">
                                         <SelectValue placeholder="Select a role" />
                                     </SelectTrigger>

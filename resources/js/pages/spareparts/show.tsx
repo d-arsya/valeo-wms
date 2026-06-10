@@ -68,12 +68,12 @@ export default function Show({ sparepart }: Props) {
 
                     <div className="flex flex-wrap gap-2">
                         <Button asChild variant="secondary">
-                            <Link href={stockOutForm(sparepart.id, { query: { return_to: spareparts.show(sparepart.id).url } })}>
+                            <Link href={stockOutForm(sparepart.id, { query: { return_to: spareparts.show(sparepart.material_number).url } })}>
                                 Stock OUT
                             </Link>
                         </Button>
                         <Button asChild variant="secondary">
-                            <Link href={stockInForm(sparepart.id, { query: { return_to: spareparts.show(sparepart.id).url } })}>
+                            <Link href={stockInForm(sparepart.id, { query: { return_to: spareparts.show(sparepart.material_number).url } })}>
                                 Stock IN
                             </Link>
                         </Button>

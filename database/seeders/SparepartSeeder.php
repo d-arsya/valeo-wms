@@ -2,8 +2,13 @@
 
 namespace Database\Seeders;
 
+use App\Models\ActivityLog;
+use App\Models\Bin;
+use App\Models\Brand;
+use App\Models\Category;
+use App\Models\Rack;
 use App\Models\Sparepart;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class SparepartSeeder extends Seeder
@@ -13,23 +18,23 @@ class SparepartSeeder extends Seeder
      */
     public function run(): void
     {
-        $brands = \App\Models\Brand::factory()->count(5)->create();
-        $categories = \App\Models\Category::factory()->count(4)->create();
-        $racks = \App\Models\Rack::factory()->count(3)->create();
+        $brands = Brand::factory()->count(5)->create();
+        $categories = Category::factory()->count(4)->create();
+        $racks = Rack::factory()->count(3)->create();
 
         $bins = collect();
         foreach ($racks as $rack) {
-            $bins = $bins->concat(\App\Models\Bin::factory()->count(5)->create(['rack_id' => $rack->id]));
+            $bins = $bins->concat(Bin::factory()->count(5)->create(['rack_id' => $rack->id]));
         }
 
-        $user = \App\Models\User::first();
+        $user = User::first();
 
         Sparepart::factory()
             ->count(30)
             ->recycle($brands)
             ->recycle($categories)
             ->recycle($bins)
-            ->has(\App\Models\ActivityLog::factory()->count(5)->state(fn (array $attributes, Sparepart $sparepart) => [
+            ->has(ActivityLog::factory()->count(5)->state(fn (array $attributes, Sparepart $sparepart) => [
                 'user_id' => $user->id,
             ]), 'activityLogs')
             ->create();

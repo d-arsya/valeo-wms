@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Traits\HasStockStatus;
 use App\Observers\SparepartObserver;
+use Database\Factories\SparepartFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 #[ObservedBy(SparepartObserver::class)]
 class Sparepart extends Model
 {
-    /** @use HasFactory<\Database\Factories\SparepartFactory> */
+    /** @use HasFactory<SparepartFactory> */
     use HasFactory, HasStockStatus;
 
     protected $fillable = [
@@ -28,7 +29,7 @@ class Sparepart extends Model
         'last_gr_date',
         'price_per_unit',
         'status',
-        'rank'
+        'rank',
     ];
 
     public function brand()

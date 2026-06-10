@@ -7,6 +7,9 @@ import {
     ScanLine,
     Warehouse,
     Users,
+    Tag,
+    FolderOpen,
+    Layers,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -34,6 +37,21 @@ const mainNavItems: NavItem[] = [
         title: 'Spareparts',
         href: '/spareparts',
         icon: Warehouse,
+    },
+    {
+        title: 'Brands',
+        href: '/brands',
+        icon: Tag,
+    },
+    {
+        title: 'Categories',
+        href: '/categories',
+        icon: FolderOpen,
+    },
+    {
+        title: 'Racks',
+        href: '/racks',
+        icon: Layers,
     },
     {
         title: 'Scanner',

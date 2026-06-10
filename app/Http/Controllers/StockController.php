@@ -6,7 +6,6 @@ use App\Http\Requests\StockInRequest;
 use App\Http\Requests\StockOutRequest;
 use App\Models\ActivityLog;
 use App\Models\Sparepart;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -27,7 +26,7 @@ class StockController extends Controller
     /**
      * Show the form for stock out.
      */
-    public function outForm(Request $request, Sparepart $sparepart)
+    public function outFormView(Request $request, Sparepart $sparepart)
     {
         return Inertia::render('stock/out', [
             'sparepart' => $sparepart->load(['brand', 'category', 'bin.rack', 'activityLogs.user']),

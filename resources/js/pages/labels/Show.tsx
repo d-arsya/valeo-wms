@@ -30,7 +30,7 @@ export default function LabelShow({ sparepart, qrCodeSvg }: LabelShowProps) {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 print:hidden">
                     <div className="flex items-center gap-4">
                         <Button variant="outline" size="icon" asChild>
-                            <Link href={spareparts.show(sparepart.id).url}>
+                            <Link href={spareparts.show(sparepart.material_number).url}>
                                 <ArrowLeft className="h-4 w-4" />
                             </Link>
                         </Button>

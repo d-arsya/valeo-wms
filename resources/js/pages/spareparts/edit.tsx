@@ -64,7 +64,7 @@ export default function Edit({ sparepart, brands, categories, bins }: Props) {
                     onSubmit={handleSubmit}
                     onChange={form.setData}
                     submitLabel="Update sparepart"
-                    cancelHref={spareparts.show(sparepart.id).url}
+                    cancelHref={spareparts.show(sparepart.material_number).url}
                 />
             </div>
         </>

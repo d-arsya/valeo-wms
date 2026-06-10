@@ -57,11 +57,11 @@ export default function In({ sparepart, returnTo }: Props) {
                 title={`Stock IN - ${sparepart.material_number}`}
                 description="Tambahkan stok masuk beserta informasi PO, GR date, dan harga satuan untuk audit."
                 sparepart={sparepart}
-                cancelHref={returnTo ?? spareparts.show(sparepart.id).url}
+                cancelHref={returnTo ?? spareparts.show(sparepart.material_number).url}
                 submitLabel="Konfirmasi IN"
                 processing={form.processing}
                 onSubmit={handleSubmit}
-                activityLogs={sparepart.activityLogs ?? []}
+                activityLogs={sparepart.activity_logs ?? []}
                 footerNote="Pastikan data PO dan GR date sesuai dokumen penerimaan barang."
             >
                 <section className="space-y-4">

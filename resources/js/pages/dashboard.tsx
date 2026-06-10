@@ -114,7 +114,7 @@ export default function Dashboard({ stats }: DashboardProps) {
                                                 <div className="flex items-center justify-between">
                                                     <p className="text-sm font-medium leading-none">
                                                         <Link
-                                                            href={spareparts.show(log.sparepart_id).url}
+                                                            href={spareparts.show(log.sparepart?.material_number ?? '').url}
                                                             className="hover:underline"
                                                         >
                                                             {log.sparepart?.material_number}

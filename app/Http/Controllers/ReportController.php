@@ -1,10 +1,11 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
@@ -45,6 +46,6 @@ class ReportController extends Controller
             'generated_at' => now()->format('d/m/Y H:i'),
         ]);
 
-        return $pdf->download('WMS_Activity_Report_' . now()->format('Ymd_His') . '.pdf');
+        return $pdf->download('WMS_Activity_Report_'.now()->format('Ymd_His').'.pdf');
     }
 }

@@ -1,12 +1,14 @@
 <?php
 
+use App\Http\Controllers\BrandController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\QrCodeController;
+use App\Http\Controllers\RackController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SparepartController;
 use App\Http\Controllers\StockController;
-use App\Http\Controllers\QrCodeController;
-use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
-
-use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
@@ -22,6 +24,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('users', UserController::class);
     });
 
+    // Master Data (All authenticated users)
+    Route::resource('brands', BrandController::class);
+    Route::resource('categories', CategoryController::class);
+    Route::resource('racks', RackController::class);
+
     // QR Scanner
     Route::inertia('scanner', 'scanner/Index')->name('scanner.index');
 
@@ -33,7 +40,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('stock')->name('stock.')->group(function () {
         Route::get('/in/{sparepart}', [StockController::class, 'inForm'])->name('in.form');
         Route::post('/in/{sparepart}', [StockController::class, 'in'])->name('in');
-        Route::get('/out/{sparepart}', [StockController::class, 'outForm'])->name('out.form');
+        Route::get('/out/{sparepart}', [StockController::class, 'outFormView'])->name('out.form');
         Route::post('/out/{sparepart}', [StockController::class, 'out'])->name('out');
     });
 
@@ -45,4 +52,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('reports/export', [ReportController::class, 'export'])->name('reports.export');
 });
 
-require __DIR__ . '/settings.php';
+require __DIR__.'/settings.php';

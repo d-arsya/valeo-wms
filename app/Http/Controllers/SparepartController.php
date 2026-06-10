@@ -26,8 +26,8 @@ class SparepartController extends Controller
                         ->orWhere('part_name', 'like', "%{$search}%");
                 });
             })
-            ->when($request->brand_id, fn($query, $brandId) => $query->where('brand_id', $brandId))
-            ->when($request->category_id, fn($query, $categoryId) => $query->where('category_id', $categoryId))
+            ->when($request->brand_id, fn ($query, $brandId) => $query->where('brand_id', $brandId))
+            ->when($request->category_id, fn ($query, $categoryId) => $query->where('category_id', $categoryId))
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -73,7 +73,7 @@ class SparepartController extends Controller
                 'brand',
                 'category',
                 'bin.rack',
-                'activityLogs' => fn($query) => $query->with('user')->latest('performed_at'),
+                'activityLogs' => fn ($query) => $query->with('user')->latest('performed_at'),
             ]),
         ]);
     }

@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use App\Enums\UserRole;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,24 +14,22 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
         User::factory()->create([
             'name' => 'Admin User',
             'email' => 'admin@example.com',
-            'role' => \App\Enums\UserRole::ADMIN,
+            'role' => UserRole::ADMIN,
             'password' => bcrypt('password'),
         ]);
 
         User::factory()->create([
             'name' => 'Technician User',
             'email' => 'tech@example.com',
-            'role' => \App\Enums\UserRole::TECHNICIAN,
+            'role' => UserRole::TECHNICIAN,
             'password' => bcrypt('password'),
         ]);
 
-        $this->call([
-            SparepartSeeder::class,
-        ]);
+        // $this->call([
+        //     SparepartSeeder::class,
+        // ]);
     }
 }

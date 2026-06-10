@@ -51,11 +51,11 @@ export default function Out({ sparepart, picOptions, returnTo }: Props) {
                 title={`Stock OUT - ${sparepart.material_number}`}
                 description="Catat pengambilan barang secara akurat dan biarkan sistem menghitung stok aktual secara otomatis."
                 sparepart={sparepart}
-                cancelHref={returnTo ?? spareparts.show(sparepart.id).url}
+                cancelHref={returnTo ?? spareparts.show(sparepart.material_number).url}
                 submitLabel="Konfirmasi OUT"
                 processing={form.processing}
                 onSubmit={handleSubmit}
-                activityLogs={sparepart.activityLogs ?? []}
+                activityLogs={sparepart.activity_logs ?? []}
                 footerNote="Pastikan jumlah pengambilan sesuai dengan barang yang benar-benar keluar dari bin."
             >
                 <section className="space-y-4">

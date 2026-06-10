@@ -29,7 +29,7 @@ class DashboardController extends Controller
         ];
 
         return Inertia::render('dashboard', [
-            'stats' => $stats
+            'stats' => $stats,
         ]);
     }
 }

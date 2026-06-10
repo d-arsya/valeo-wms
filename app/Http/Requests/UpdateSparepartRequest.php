@@ -24,9 +24,9 @@ class UpdateSparepartRequest extends FormRequest
     {
         return [
             'material_number' => [
-                'required', 
-                'string', 
-                'unique:spareparts,material_number,' . $this->route('sparepart')->id
+                'required',
+                'string',
+                'unique:spareparts,material_number,'.$this->route('sparepart')->id,
             ],
             'part_name' => ['required', 'string', 'max:255'],
             'rank' => ['required', 'string', 'max:255'],

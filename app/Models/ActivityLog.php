@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\ActivityLogFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class ActivityLog extends Model
 {
-    /** @use HasFactory<\Database\Factories\ActivityLogFactory> */
+    /** @use HasFactory<ActivityLogFactory> */
     use HasFactory;
 
     protected $table = 'activity_logs';
@@ -43,7 +44,7 @@ class ActivityLog extends Model
     {
         static::creating(function ($activityLog) {
             if (empty($activityLog->control_id)) {
-                $activityLog->control_id = 'CTL-' . strtoupper(Str::random(8));
+                $activityLog->control_id = 'CTL-'.strtoupper(Str::random(8));
             }
 
             if (empty($activityLog->performed_at)) {

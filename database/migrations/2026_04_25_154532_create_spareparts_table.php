@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -25,7 +26,7 @@ return new class extends Migration {
             $table->date('last_gr_date')->nullable();
             $table->decimal('price_per_unit', 15, 2)->nullable();
             $table->enum('status', ['OK', 'ATTENTION', 'NG'])->default('OK');
-            $table->char('rank',1);
+            $table->char('rank', 1);
             $table->timestamps();
         });
     }

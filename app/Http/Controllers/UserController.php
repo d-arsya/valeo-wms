@@ -23,7 +23,7 @@ class UserController extends Controller
                         ->orWhere('email', 'like', "%{$search}%");
                 });
             })
-            ->when($request->role, fn($query, $role) => $query->where('role', $role))
+            ->when($request->role, fn ($query, $role) => $query->where('role', $role))
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -97,7 +97,7 @@ class UserController extends Controller
             'role' => ['required', new Enum(UserRole::class)],
         ]);
 
-        if (!empty($validated['password'])) {
+        if (! empty($validated['password'])) {
             $validated['password'] = bcrypt($validated['password']);
         } else {
             unset($validated['password']);
