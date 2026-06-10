@@ -9,7 +9,7 @@
 
 @theme {
     --font-sans:
-        'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
+        'Inter', ui-sans-serif, system-ui, sans-serif,
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
 
@@ -61,75 +61,122 @@
     --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* ─── Valeo Brand Color Tokens ─────────────────────────────────────────────
+   Primary:      Valeo Lime Green  #CCFF00
+   Dark:         Valeo Charcoal    #3D3D3D
+   Accent:       Teal              #00A8A8
+   Warning:      Orange            #FF9900
+   Background:   White             #FFFFFF
+   Surface:      Light Gray        #F5F5F5
+──────────────────────────────────────────────────────────────────────────── */
+
 :root {
+    /* Base surfaces */
     --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
+    /* #FFFFFF */
+    --foreground: oklch(0.278 0 0);
+    /* #3D3D3D */
+
+    /* Cards & popovers */
     --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
+    --card-foreground: oklch(0.278 0 0);
     --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
+    --popover-foreground: oklch(0.278 0 0);
+
+    /* Primary — Valeo Lime Green #CCFF00 with dark text */
+    --primary: oklch(0.944 0.243 128.7);
+    /* #CCFF00 */
+    --primary-foreground: oklch(0.278 0 0);
+    /* #3D3D3D – dark text on lime */
+
+    /* Secondary surface — Light Gray #F5F5F5 */
+    --secondary: oklch(0.961 0 0);
+    --secondary-foreground: oklch(0.278 0 0);
+
+    /* Muted — subtle gray */
+    --muted: oklch(0.961 0 0);
+    --muted-foreground: oklch(0.6 0 0);
+    /* #999999 */
+
+    /* Accent — Valeo Teal #00A8A8 */
+    --accent: oklch(0.635 0.133 191.7);
+    /* #00A8A8 */
+    --accent-foreground: oklch(1 0 0);
+
+    /* Destructive — keeps red for errors */
     --destructive: oklch(0.577 0.245 27.325);
-    --destructive-foreground: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.87 0 0);
-    --chart-1: oklch(0.646 0.222 41.116);
-    --chart-2: oklch(0.6 0.118 184.704);
-    --chart-3: oklch(0.398 0.07 227.392);
-    --chart-4: oklch(0.828 0.189 84.429);
-    --chart-5: oklch(0.769 0.188 70.08);
-    --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.87 0 0);
+    --destructive-foreground: oklch(1 0 0);
+
+    /* Borders & inputs */
+    --border: oklch(0.91 0 0);
+    --input: oklch(0.91 0 0);
+    --ring: oklch(0.944 0.243 128.7);
+    /* Lime Green focus ring */
+
+    /* Charts */
+    --chart-1: oklch(0.944 0.243 128.7);
+    /* Lime Green */
+    --chart-2: oklch(0.635 0.133 191.7);
+    /* Teal */
+    --chart-3: oklch(0.278 0 0);
+    /* Dark Gray */
+    --chart-4: oklch(0.72 0.178 57.7);
+    /* Orange #FF9900 */
+    --chart-5: oklch(0.577 0.245 27.325);
+    /* Red */
+
+    --radius: 0.5rem;
+
+    /* Sidebar — Valeo Charcoal #3D3D3D */
+    --sidebar: oklch(0.278 0 0);
+    /* #3D3D3D */
+    --sidebar-foreground: oklch(0.92 0 0);
+    --sidebar-primary: oklch(0.944 0.243 128.7);
+    /* Lime Green active */
+    --sidebar-primary-foreground: oklch(0.278 0 0);
+    --sidebar-accent: oklch(0.35 0 0);
+    /* Slightly lighter charcoal for hover */
+    --sidebar-accent-foreground: oklch(0.944 0.243 128.7);
+    /* Lime text on hover */
+    --sidebar-border: oklch(0.35 0 0);
+    --sidebar-ring: oklch(0.944 0.243 128.7);
 }
 
 .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
+    /* Dark mode: black base, lime accents */
+    --background: oklch(0.1 0 0);
+    --foreground: oklch(0.95 0 0);
     --card: oklch(0.145 0 0);
-    --card-foreground: oklch(0.985 0 0);
+    --card-foreground: oklch(0.95 0 0);
     --popover: oklch(0.145 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.985 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
+    --popover-foreground: oklch(0.95 0 0);
+    --primary: oklch(0.944 0.243 128.7);
+    /* Lime Green */
+    --primary-foreground: oklch(0.1 0 0);
+    --secondary: oklch(0.22 0 0);
+    --secondary-foreground: oklch(0.95 0 0);
+    --muted: oklch(0.22 0 0);
+    --muted-foreground: oklch(0.65 0 0);
+    --accent: oklch(0.635 0.133 191.7);
+    --accent-foreground: oklch(0.1 0 0);
     --destructive: oklch(0.396 0.141 25.723);
     --destructive-foreground: oklch(0.637 0.237 25.331);
-    --border: oklch(0.269 0 0);
-    --input: oklch(0.269 0 0);
-    --ring: oklch(0.439 0 0);
-    --chart-1: oklch(0.488 0.243 264.376);
-    --chart-2: oklch(0.696 0.17 162.48);
-    --chart-3: oklch(0.769 0.188 70.08);
-    --chart-4: oklch(0.627 0.265 303.9);
-    --chart-5: oklch(0.645 0.246 16.439);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.985 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(0.269 0 0);
-    --sidebar-ring: oklch(0.439 0 0);
+    --border: oklch(0.25 0 0);
+    --input: oklch(0.25 0 0);
+    --ring: oklch(0.944 0.243 128.7);
+    --chart-1: oklch(0.944 0.243 128.7);
+    --chart-2: oklch(0.635 0.133 191.7);
+    --chart-3: oklch(0.72 0.178 57.7);
+    --chart-4: oklch(0.577 0.245 27.325);
+    --chart-5: oklch(0.278 0 0);
+    --sidebar: oklch(0.145 0 0);
+    --sidebar-foreground: oklch(0.95 0 0);
+    --sidebar-primary: oklch(0.944 0.243 128.7);
+    --sidebar-primary-foreground: oklch(0.1 0 0);
+    --sidebar-accent: oklch(0.22 0 0);
+    --sidebar-accent-foreground: oklch(0.944 0.243 128.7);
+    --sidebar-border: oklch(0.22 0 0);
+    --sidebar-ring: oklch(0.944 0.243 128.7);
 }
 
 @layer base {
@@ -139,5 +186,21 @@
 
     body {
         @apply bg-background text-foreground;
+        font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    }
+}
+
+/* ─── Valeo Global Helpers ──────────────────────────────────────────────── */
+@layer utilities {
+
+    /* Teal link style per brand guide */
+    .valeo-link {
+        color: #00A8A8;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+
+    .valeo-link:hover {
+        color: #007878;
     }
 }
