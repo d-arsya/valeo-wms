@@ -3,6 +3,7 @@ import { SparepartForm } from '@/components/features/spareparts/sparepart-form';
 import type { SparepartFormValues } from '@/components/features/spareparts/sparepart-form';
 import spareparts from '@/routes/spareparts';
 import type { Bin, Brand, Category } from '@/types';
+import { useState } from 'react';
 
 interface Props {
     brands: Pick<Brand, 'id' | 'name'>[];
@@ -27,6 +28,8 @@ const initialValues: SparepartFormValues = {
 };
 
 export default function Create({ brands, categories, bins }: Props) {
+    const [localBrands, setLocalBrands] = useState(brands);
+    const [localCategories, setLocalCategories] = useState(categories);
     const form = useForm(initialValues);
 
     function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -59,14 +62,16 @@ export default function Create({ brands, categories, bins }: Props) {
                     description="Isi data master supaya QR code, lokasi, dan stok dasar langsung tersimpan rapi."
                     values={form.data}
                     errors={form.errors as Partial<Record<keyof SparepartFormValues, string>>}
-                    brands={brands}
-                    categories={categories}
+                    brands={localBrands}
+                    categories={localCategories}
                     bins={bins}
                     processing={form.processing}
                     onSubmit={handleSubmit}
                     onChange={form.setData}
                     submitLabel="Simpan sparepart"
                     cancelHref={spareparts.index().url}
+                    onBrandCreated={(newBrand) => setLocalBrands([...localBrands, newBrand])}
+                    onCategoryCreated={(newCategory) => setLocalCategories([...localCategories, newCategory])}
                 />
             </div>
         </>

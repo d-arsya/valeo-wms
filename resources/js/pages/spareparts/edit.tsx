@@ -3,6 +3,7 @@ import { SparepartForm } from '@/components/features/spareparts/sparepart-form';
 import type { SparepartFormValues } from '@/components/features/spareparts/sparepart-form';
 import spareparts from '@/routes/spareparts';
 import type { Bin, Brand, Category, Sparepart } from '@/types';
+import { useState } from 'react';
 
 interface Props {
     sparepart: Sparepart;
@@ -26,6 +27,8 @@ function mapSparepartToValues(sparepart: Sparepart): SparepartFormValues {
 }
 
 export default function Edit({ sparepart, brands, categories, bins }: Props) {
+    const [localBrands, setLocalBrands] = useState(brands);
+    const [localCategories, setLocalCategories] = useState(categories);
     const form = useForm(mapSparepartToValues(sparepart));
 
     function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -57,14 +60,16 @@ export default function Edit({ sparepart, brands, categories, bins }: Props) {
                     description="Perbarui data master tanpa mengubah pola validasi dan relasi yang sudah ada."
                     values={form.data}
                     errors={form.errors as Partial<Record<keyof SparepartFormValues, string>>}
-                    brands={brands}
-                    categories={categories}
+                    brands={localBrands}
+                    categories={localCategories}
                     bins={bins}
                     processing={form.processing}
                     onSubmit={handleSubmit}
                     onChange={form.setData}
                     submitLabel="Update sparepart"
                     cancelHref={spareparts.show(sparepart.material_number).url}
+                    onBrandCreated={(newBrand) => setLocalBrands([...localBrands, newBrand])}
+                    onCategoryCreated={(newCategory) => setLocalCategories([...localCategories, newCategory])}
                 />
             </div>
         </>

@@ -45,7 +45,11 @@ class BrandController extends Controller
             'name' => ['required', 'string', 'max:255', 'unique:brands,name'],
         ]);
 
-        Brand::create($validated);
+        $brand = Brand::create($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json($brand, 201);
+        }
 
         return redirect()->route('brands.index')
             ->with('success', 'Brand created successfully.');
