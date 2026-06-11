@@ -32,6 +32,11 @@ class StoreSparepartRequest extends FormRequest
             'bin_id' => ['required', 'exists:bins,id'],
             'safety_stock' => ['required', 'integer', 'min:0'],
             'actual_stock' => ['required', 'integer', 'min:0'],
+            'last_po_number' => ['nullable', 'string', 'max:255'],
+            'last_supplier' => ['nullable', 'string', 'max:255'],
+            'last_gr_date' => ['nullable', 'date_format:Y-m-d'],
+            'price_per_unit' => ['required', 'numeric'],
+            'last_gr_date' => ['nullable', 'date_format:Y-m-d'],
         ];
     }
 }

@@ -20,6 +20,10 @@ const initialValues: SparepartFormValues = {
     bin_id: '',
     safety_stock: '',
     actual_stock: '',
+    last_po_number: '',
+    last_supplier: '',
+    last_gr_date: '',
+    price_per_unit: '',
 };
 
 export default function Create({ brands, categories, bins }: Props) {
@@ -36,6 +40,7 @@ export default function Create({ brands, categories, bins }: Props) {
             bin_id: Number(data.bin_id),
             safety_stock: Number(data.safety_stock),
             actual_stock: Number(data.actual_stock),
+            price_per_unit: Number(data.price_per_unit),
         }));
 
         form.post(spareparts.store().url, {

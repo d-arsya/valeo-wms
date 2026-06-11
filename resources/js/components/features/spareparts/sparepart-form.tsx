@@ -20,6 +20,10 @@ export type SparepartFormValues = {
     bin_id: string;
     safety_stock: string;
     actual_stock: string;
+    last_po_number: string;
+    last_supplier: string;
+    last_gr_date: string;
+    price_per_unit: string;
 };
 
 interface Props {
@@ -105,6 +109,51 @@ export function SparepartForm({
                                 />
                                 <InputError message={errors.rank} />
                             </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="last_po_number">Last PO Number</Label>
+                                <Input
+                                    id="last_po_number"
+                                    value={values.last_po_number}
+                                    onChange={(event) => onChange('last_po_number', event.target.value)}
+                                    placeholder="Nomor PO terakhir"
+                                    autoComplete="off"
+                                />
+                                <InputError message={errors.last_po_number} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="last_supplier">Last Supplier</Label>
+                                <Input
+                                    id="last_supplier"
+                                    value={values.last_supplier}
+                                    onChange={(event) => onChange('last_supplier', event.target.value)}
+                                    placeholder="Nama supplier terakhir"
+                                    autoComplete="off"
+                                />
+                                <InputError message={errors.last_supplier} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="price_per_unit">Price Per Unit</Label>
+                                <Input
+                                    id="price_per_unit"
+                                    value={values.price_per_unit}
+                                    onChange={(event) => onChange('price_per_unit', event.target.value)}
+                                    placeholder="Harga per unituan"
+                                    autoComplete="off"
+                                    type="number"
+                                />
+                                <InputError message={errors.price_per_unit} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="gr_date">GR Date</Label>
+                                <Input
+                                    id="gr_date"
+                                    type="date"
+                                    value={values.last_gr_date}
+                                    onChange={(event) => onChange('last_gr_date', event.target.value)}
+                                    placeholder="Pilih tanggal GR"
+                                />
+                                <InputError message={errors.last_gr_date} />
+                            </div>
                         </div>
 
                         <div className="space-y-2">
@@ -176,6 +225,7 @@ export function SparepartForm({
                                 </Select>
                                 <InputError message={errors.bin_id} />
                             </div>
+
                         </div>
                     </section>
 
