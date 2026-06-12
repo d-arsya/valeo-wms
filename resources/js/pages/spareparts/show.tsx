@@ -1,7 +1,8 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { AlertTriangle, ArrowLeft, Edit3, MapPin, Package, Printer, QrCode, Trash2 } from 'lucide-react';
+import { Head, router } from '@inertiajs/react';
+import { AlertTriangle, Edit3, MapPin, Package, Printer, QrCode, Trash2 } from 'lucide-react';
 import { formatCurrency, formatDate, formatDateTime, getBinLabel } from '@/components/features/spareparts/spareparts-utils';
 import { StockStatusBadge } from '@/components/features/spareparts/stock-status-badge';
+import { BackButton } from '@/components/back-button';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -46,12 +47,7 @@ export default function Show({ sparepart }: Props) {
             <Head title={sparepart.material_number} />
 
             <div className="space-y-6 p-4 md:p-6">
-                <Button variant="ghost" asChild className="w-fit px-0 text-muted-foreground hover:bg-transparent hover:text-foreground">
-                    <Link href={spareparts.index()}>
-                        <ArrowLeft className="size-4" />
-                        Kembali ke daftar
-                    </Link>
-                </Button>
+                <BackButton fallback={spareparts.index().url} label="Kembali ke daftar" variant="ghost" className="w-fit px-0 text-muted-foreground hover:bg-transparent hover:text-foreground" />
 
                 <div className="flex flex-col gap-4 rounded-2xl border border-border/60 bg-card p-6 shadow-sm lg:flex-row lg:items-center lg:justify-between">
                     <div className="space-y-3">

@@ -102,12 +102,9 @@ export function SparepartForm({
                 </CardHeader>
 
                 <CardContent className="space-y-6 pt-6">
+                    {/* Section 1: Identitas Utama */}
                     <section className="space-y-4">
-                        <div>
-                            <p className="text-sm font-semibold text-foreground">Identitas Sparepart</p>
-                            <p className="text-sm text-muted-foreground">Isi data inti barang supaya mudah dicari dan dilacak.</p>
-                        </div>
-
+                        <p className="text-sm font-semibold text-foreground">Identitas Sparepart</p>
                         <div className="grid gap-4 md:grid-cols-2">
                             <div className="space-y-2">
                                 <Label htmlFor="material_number">Material Number</Label>
@@ -120,7 +117,6 @@ export function SparepartForm({
                                 />
                                 <InputError message={errors.material_number} />
                             </div>
-
                             <div className="space-y-2">
                                 <Label htmlFor="part_name">Part Name</Label>
                                 <Input
@@ -143,6 +139,61 @@ export function SparepartForm({
                                 />
                                 <InputError message={errors.rank} />
                             </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="specification">Specification</Label>
+                            <Textarea
+                                id="specification"
+                                value={values.specification}
+                                onChange={(event) => onChange('specification', event.target.value)}
+                                placeholder="Tulis spesifikasi barang secara ringkas dan jelas"
+                            />
+                            <InputError message={errors.specification} />
+                        </div>
+                    </section>
+
+                    {/* Section 2: Klasifikasi & Lokasi */}
+                    <section className="space-y-4">
+                        <p className="text-sm font-semibold text-foreground">Klasifikasi & Lokasi</p>
+                        <div className="grid gap-4 md:grid-cols-3">
+                            <ComboboxCreatable
+                                label="Brand"
+                                options={brands}
+                                value={currentBrand}
+                                onChange={(brand) => onChange('brand_id', brand ? String(brand.id) : '')}
+                                createEndpoint={brandsRoute.store().url}
+                                onItemCreated={onBrandCreated}
+                            />
+                            <ComboboxCreatable
+                                label="Category"
+                                options={categories}
+                                value={currentCategory}
+                                onChange={(category) => onChange('category_id', category ? String(category.id) : '')}
+                                createEndpoint={categoriesRoute.store().url}
+                                onItemCreated={onCategoryCreated}
+                            />
+                            <div className="space-y-2">
+                                <Label htmlFor="bin_id">Location / Bin</Label>
+                                <Select value={values.bin_id} onValueChange={(value) => onChange('bin_id', value)}>
+                                    <SelectTrigger id="bin_id">
+                                        <SelectValue placeholder="Pilih lokasi bin" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {bins.map((bin) => (
+                                            <SelectItem key={bin.id} value={String(bin.id)}>
+                                                {getBinLocationLabel(bin)}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Section 3: Data Lainnya */}
+                    <section className="space-y-4">
+                        <p className="text-sm font-semibold text-foreground">Data Lainnya</p>
+                        <div className="grid gap-4 md:grid-cols-2">
                             <div className="space-y-2">
                                 <Label htmlFor="last_po_number">Last PO Number</Label>
                                 <Input
@@ -207,77 +258,6 @@ export function SparepartForm({
                                 </Popover>
                                 <InputError message={errors.last_gr_date} />
                             </div>
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="specification">Specification</Label>
-                            <Textarea
-                                id="specification"
-                                value={values.specification}
-                                onChange={(event) => onChange('specification', event.target.value)}
-                                placeholder="Tulis spesifikasi barang secara ringkas dan jelas"
-                            />
-                            <InputError message={errors.specification} />
-                        </div>
-                    </section>
-
-                    <section className="space-y-4">
-                        <div>
-                            <p className="text-sm font-semibold text-foreground">Klasifikasi & Lokasi</p>
-                            <p className="text-sm text-muted-foreground">Pilih brand, kategori, dan bin supaya label QR konsisten.</p>
-                        </div>
-
-                        <div className="grid gap-4 md:grid-cols-3">
-                            {/* Brand Combobox Creatable */}
-                            <ComboboxCreatable
-                                label="Brand"
-                                options={brands}
-                                value={currentBrand}
-                                onChange={(brand) => onChange('brand_id', brand ? String(brand.id) : '')}
-                                createEndpoint={brandsRoute.store().url}
-                                onItemCreated={onBrandCreated}
-                                // Error brand_id disembunyikan sesuai permintaan user
-                            />
-
-                            {/* Category Combobox Creatable */}
-                            <ComboboxCreatable
-                                label="Category"
-                                options={categories}
-                                value={currentCategory}
-                                onChange={(category) => onChange('category_id', category ? String(category.id) : '')}
-                                createEndpoint={categoriesRoute.store().url}
-                                onItemCreated={onCategoryCreated}
-                                // Error category_id disembunyikan sesuai permintaan user
-                            />
-
-                            {/* Bin tetap pakai Select biasa */}
-                            <div className="space-y-2">
-                                <Label htmlFor="bin_id">Location / Bin</Label>
-                                <Select value={values.bin_id} onValueChange={(value) => onChange('bin_id', value)}>
-                                    <SelectTrigger id="bin_id">
-                                        <SelectValue placeholder="Pilih lokasi bin" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {bins.map((bin) => (
-                                            <SelectItem key={bin.id} value={String(bin.id)}>
-                                                {getBinLocationLabel(bin)}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                {/* Error bin_id disembunyikan sesuai permintaan user */}
-                            </div>
-
-                        </div>
-                    </section>
-
-                    <section className="space-y-4">
-                        <div>
-                            <p className="text-sm font-semibold text-foreground">Stok Awal</p>
-                            <p className="text-sm text-muted-foreground">Nilai ini dipakai sebagai stok awal sebelum transaksi IN/OUT berjalan.</p>
-                        </div>
-
-                        <div className="grid gap-4 md:grid-cols-2">
                             <div className="space-y-2">
                                 <Label htmlFor="safety_stock">Safety Stock</Label>
                                 <Input
@@ -291,7 +271,6 @@ export function SparepartForm({
                                 />
                                 <InputError message={errors.safety_stock} />
                             </div>
-
                             <div className="space-y-2">
                                 <Label htmlFor="actual_stock">Actual Stock</Label>
                                 <Input

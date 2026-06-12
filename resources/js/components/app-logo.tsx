@@ -11,10 +11,7 @@ export default function AppLogo() {
             </div>
 
             <div className="ml-2 flex flex-col justify-center leading-tight">
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/80">
-                    Valeo
-                </span>
-                <span className="text-sm font-black tracking-tighter text-foreground -mt-1">
+                <span className="text-sm font-black tracking-tighter text-foreground">
                     WMS
                 </span>
             </div>

@@ -22,9 +22,13 @@ interface Props {
         search?: string | null;
         brand_id?: string | null;
         category_id?: string | null;
+        rank?: string | null;
+        status?: string | null;
     };
     brands: Pick<Brand, 'id' | 'name'>[];
     categories: Pick<Category, 'id' | 'name'>[];
+    ranks: string[];
+    statuses: string[];
 }
 
 function buildQuery(values: FilterValues) {
@@ -32,6 +36,8 @@ function buildQuery(values: FilterValues) {
         ...(values.search ? { search: values.search.trim() } : {}),
         ...(values.brandId && values.brandId !== 'all' ? { brand_id: values.brandId } : {}),
         ...(values.categoryId && values.categoryId !== 'all' ? { category_id: values.categoryId } : {}),
+        ...(values.rank && values.rank !== 'all' ? { rank: values.rank } : {}),
+        ...(values.status && values.status !== 'all' ? { status: values.status } : {}),
     };
 }
 
@@ -40,16 +46,24 @@ export default function Index({
     filters,
     brands,
     categories,
+    ranks,
+    statuses,
 }: Props) {
     const [filterValues, setFilterValues] = useState<FilterValues>({
         search: filters.search ?? '',
         brandId: filters.brand_id ?? 'all',
         categoryId: filters.category_id ?? 'all',
+        rank: filters.rank ?? 'all',
+        status: filters.status ?? 'all',
     });
 
     const rows = response.data;
     const hasFilters = Boolean(
-        filterValues.search || filterValues.brandId !== 'all' || filterValues.categoryId !== 'all'
+        filterValues.search ||
+        filterValues.brandId !== 'all' ||
+        filterValues.categoryId !== 'all' ||
+        filterValues.rank !== 'all' ||
+        filterValues.status !== 'all'
     );
 
     const handleFilterChange = (field: keyof FilterValues, value: string) => {
@@ -66,7 +80,13 @@ export default function Index({
     }
 
     function resetFilters() {
-        setFilterValues({ search: '', brandId: 'all', categoryId: 'all' });
+        setFilterValues({
+            search: '',
+            brandId: 'all',
+            categoryId: 'all',
+            rank: 'all',
+            status: 'all'
+        });
 
         router.get(spareparts.index().url, {}, {
             preserveScroll: true,
@@ -103,6 +123,8 @@ export default function Index({
                             onChange={handleFilterChange}
                             brands={brands}
                             categories={categories}
+                            ranks={ranks}
+                            statuses={statuses}
                             onApply={applyFilters}
                             onReset={resetFilters}
                             hasFilters={hasFilters}

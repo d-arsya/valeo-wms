@@ -18,6 +18,8 @@ class SparepartController extends Controller
      */
     public function index(Request $request)
     {
+        $sort = $request->input('sort', 'latest');
+
         $spareparts = Sparepart::query()
             ->with(['brand', 'category', 'bin.rack'])
             ->when($request->search, function ($query, $search) {
@@ -28,15 +30,21 @@ class SparepartController extends Controller
             })
             ->when($request->brand_id, fn ($query, $brandId) => $query->where('brand_id', $brandId))
             ->when($request->category_id, fn ($query, $categoryId) => $query->where('category_id', $categoryId))
-            ->latest()
+            ->when($request->rank, fn ($query, $rank) => $query->where('rank', $rank))
+            ->when($request->status, fn ($query, $status) => $query->where('status', $status))
+            ->when($sort === 'latest', fn($query) => $query->latest())
+            ->when($sort === 'oldest', fn($query) => $query->oldest())
+            ->when($sort === 'alphabetical', fn($query) => $query->orderBy('part_name', 'asc'))
             ->paginate(10)
             ->withQueryString();
 
         return Inertia::render('spareparts/index', [
             'spareparts' => $spareparts,
-            'filters' => $request->only(['search', 'brand_id', 'category_id']),
+            'filters' => $request->only(['search', 'brand_id', 'category_id', 'rank', 'status', 'sort']),
             'brands' => Brand::all(['id', 'name']),
             'categories' => Category::all(['id', 'name']),
+            'ranks' => ['A', 'B', 'C', 'D', 'E'], // Contoh ranks, bisa diambil dari tabel nanti
+            'statuses' => ['active', 'inactive', 'low_stock'], // Contoh statuses
         ]);
     }
 
