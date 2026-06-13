@@ -1,9 +1,11 @@
 import { Head, useForm } from '@inertiajs/react';
+import type * as React from 'react';
+import { useState } from 'react';
+
 import { SparepartForm } from '@/components/features/spareparts/sparepart-form';
 import type { SparepartFormValues } from '@/components/features/spareparts/sparepart-form';
 import spareparts from '@/routes/spareparts';
 import type { Bin, Brand, Category } from '@/types';
-import { useState } from 'react';
 
 interface Props {
     brands: Pick<Brand, 'id' | 'name'>[];
@@ -30,7 +32,7 @@ const initialValues: SparepartFormValues = {
 export default function Create({ brands, categories, bins }: Props) {
     const [localBrands, setLocalBrands] = useState(brands);
     const [localCategories, setLocalCategories] = useState(categories);
-    const form = useForm(initialValues);
+    const form = useForm<SparepartFormValues>(initialValues);
 
     function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();

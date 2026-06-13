@@ -1,8 +1,8 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { AlertTriangle, Edit3, MapPin, Package, Printer, QrCode, Trash2 } from 'lucide-react';
+import { BackButton } from '@/components/back-button';
 import { formatCurrency, formatDate, formatDateTime, getBinLabel } from '@/components/features/spareparts/spareparts-utils';
 import { StockStatusBadge } from '@/components/features/spareparts/stock-status-badge';
-import { BackButton } from '@/components/back-button';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

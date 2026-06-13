@@ -1,39 +1,29 @@
 import { router } from '@inertiajs/react';
 import { ChevronLeft } from 'lucide-react';
+import type * as React from 'react';
+
 import { Button } from '@/components/ui/button';
 
-interface BackButtonProps {
+interface BackButtonProps extends Omit<React.ComponentProps<typeof Button>, 'onClick' | 'asChild'> {
     fallback: string;
-    className?: string;
-    variant?: 'outline' | 'ghost' | 'link' | 'default' | 'destructive' | 'secondary';
     label?: string;
+    showIcon?: boolean;
 }
 
-/**
- * Komponen tombol kembali yang aman untuk Inertia.js.
- * Menggunakan router.visit ke fallback URL daripada window.history.back()
- * untuk menghindari masalah 404 saat history state tidak valid.
- */
-export function BackButton({ 
-    fallback, 
-    className = '', 
-    variant = 'outline',
-    label = 'Kembali'
+export function BackButton({
+  fallback,
+  label = 'Kembali',
+  showIcon = true,
+  ...buttonProps
 }: BackButtonProps) {
-    const handleBack = () => {
-        // Menggunakan router.visit ke fallback URL untuk keamanan
-        router.visit(fallback);
-    };
+  function handleClick() {
+    router.visit(fallback, { preserveScroll: true, replace: false });
+  }
 
-    return (
-        <Button 
-            type="button" 
-            variant={variant} 
-            onClick={handleBack} 
-            className={`gap-2 ${className}`}
-        >
-            <ChevronLeft className="h-4 w-4" />
-            {label}
-        </Button>
-    );
+  return (
+    <Button onClick={handleClick} variant="ghost" {...buttonProps}>
+      {showIcon && <ChevronLeft className="size-4" />}
+      {label}
+    </Button>
+  );
 }

@@ -1,9 +1,11 @@
 import { Head, useForm } from '@inertiajs/react';
+import type * as React from 'react';
+import { useState } from 'react';
+
 import { SparepartForm } from '@/components/features/spareparts/sparepart-form';
 import type { SparepartFormValues } from '@/components/features/spareparts/sparepart-form';
 import spareparts from '@/routes/spareparts';
 import type { Bin, Brand, Category, Sparepart } from '@/types';
-import { useState } from 'react';
 
 interface Props {
     sparepart: Sparepart;
@@ -23,13 +25,17 @@ function mapSparepartToValues(sparepart: Sparepart): SparepartFormValues {
         bin_id: sparepart.bin_id ? String(sparepart.bin_id) : '',
         safety_stock: String(sparepart.safety_stock ?? 0),
         actual_stock: String(sparepart.actual_stock ?? 0),
+        last_po_number: sparepart.last_po_number ?? '',
+        last_supplier: sparepart.last_supplier ?? '',
+        last_gr_date: sparepart.last_gr_date ?? '',
+        price_per_unit: sparepart.price_per_unit ? String(sparepart.price_per_unit) : '',
     };
 }
 
 export default function Edit({ sparepart, brands, categories, bins }: Props) {
     const [localBrands, setLocalBrands] = useState(brands);
     const [localCategories, setLocalCategories] = useState(categories);
-    const form = useForm(mapSparepartToValues(sparepart));
+    const form = useForm<SparepartFormValues>(mapSparepartToValues(sparepart));
 
     function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -42,6 +48,7 @@ export default function Edit({ sparepart, brands, categories, bins }: Props) {
             bin_id: Number(data.bin_id),
             safety_stock: Number(data.safety_stock),
             actual_stock: Number(data.actual_stock),
+            price_per_unit: Number(data.price_per_unit),
         }));
 
         form.put(spareparts.update(sparepart.id).url, {

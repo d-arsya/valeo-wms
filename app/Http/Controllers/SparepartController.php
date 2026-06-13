@@ -18,33 +18,41 @@ class SparepartController extends Controller
      */
     public function index(Request $request)
     {
-        $sort = $request->input('sort', 'latest');
+        $query = Sparepart::query()->with(['brand', 'category', 'bin.rack']);
 
-        $spareparts = Sparepart::query()
-            ->with(['brand', 'category', 'bin.rack'])
-            ->when($request->search, function ($query, $search) {
-                $query->where(function ($query) use ($search) {
-                    $query->where('material_number', 'like', "%{$search}%")
-                        ->orWhere('part_name', 'like', "%{$search}%");
-                });
-            })
-            ->when($request->brand_id, fn ($query, $brandId) => $query->where('brand_id', $brandId))
-            ->when($request->category_id, fn ($query, $categoryId) => $query->where('category_id', $categoryId))
-            ->when($request->rank, fn ($query, $rank) => $query->where('rank', $rank))
-            ->when($request->status, fn ($query, $status) => $query->where('status', $status))
-            ->when($sort === 'latest', fn($query) => $query->latest())
-            ->when($sort === 'oldest', fn($query) => $query->oldest())
-            ->when($sort === 'alphabetical', fn($query) => $query->orderBy('part_name', 'asc'))
-            ->paginate(10)
-            ->withQueryString();
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('material_number', 'like', "%{$search}%")
+                    ->orWhere('part_name', 'like', "%{$search}%");
+            });
+        }
 
-        return Inertia::render('spareparts/index', [
+        if ($request->filled('brand_id')) {
+            $query->where('brand_id', $request->input('brand_id'));
+        }
+
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->input('category_id'));
+        }
+
+        if ($request->filled('rank')) {
+            $query->where('rank', $request->input('rank'));
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+
+        $spareparts = $query->latest()->paginate(10)->withQueryString();
+
+        return inertia('spareparts/index', [
             'spareparts' => $spareparts,
-            'filters' => $request->only(['search', 'brand_id', 'category_id', 'rank', 'status', 'sort']),
-            'brands' => Brand::all(['id', 'name']),
-            'categories' => Category::all(['id', 'name']),
-            'ranks' => ['A', 'B', 'C', 'D', 'E'], // Contoh ranks, bisa diambil dari tabel nanti
-            'statuses' => ['active', 'inactive', 'low_stock'], // Contoh statuses
+            'filters' => $request->only(['search', 'brand_id', 'category_id', 'rank', 'status']),
+            'brands' => Brand::select(['id', 'name'])->get(),
+            'categories' => Category::select(['id', 'name'])->get(),
+            'ranks' => ['A', 'B', 'C'],
+            'statuses' => ['in_stock', 'low_stock', 'out_of_stock'],
         ]);
     }
 
@@ -104,6 +112,7 @@ class SparepartController extends Controller
      */
     public function update(UpdateSparepartRequest $request, Sparepart $sparepart)
     {
+        /** @var \Illuminate\Database\Eloquent\Model $sparepart */
         $sparepart->update($request->validated());
 
         return redirect()->route('spareparts.show', $sparepart)
@@ -115,6 +124,7 @@ class SparepartController extends Controller
      */
     public function destroy(Sparepart $sparepart)
     {
+        /** @var \Illuminate\Database\Eloquent\Model $sparepart */
         $sparepart->delete();
 
         return redirect()->route('spareparts.index')

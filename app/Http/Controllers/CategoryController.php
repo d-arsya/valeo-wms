@@ -74,7 +74,12 @@ class CategoryController extends Controller
             'name' => ['required', 'string', 'max:255', Rule::unique('categories')->ignore($category->id)],
         ]);
 
+        /** @var \Illuminate\Database\Eloquent\Model $category */
         $category->update($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json($category);
+        }
 
         return redirect()->route('categories.index')
             ->with('success', 'Category updated successfully.');
@@ -90,6 +95,7 @@ class CategoryController extends Controller
                 ->with('error', 'Cannot delete Category. It is currently associated with one or more spareparts.');
         }
 
+        /** @var \Illuminate\Database\Eloquent\Model $category */
         $category->delete();
 
         return redirect()->route('categories.index')

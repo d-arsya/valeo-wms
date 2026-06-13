@@ -2,10 +2,10 @@ export default function AppLogo() {
     return (
         <>
             {/* Valeo Logo Container */}
-            <div className="flex items-center justify-center flex-shrink-0">
-                <img 
-                    src="/logo.png" 
-                    alt="Valeo Logo" 
+            <div className="flex items-center justify-center shrink-0">
+                <img
+                    src="/logo.png"
+                    alt="Valeo Logo"
                     className="h-8 w-auto object-contain"
                 />
             </div>

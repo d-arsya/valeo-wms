@@ -1,6 +1,7 @@
-import { Search, Filter } from 'lucide-react';
+import { Filter, Search } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -10,8 +11,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import type { Brand, Category } from '@/types';
 import { cn } from '@/lib/utils';
+import type { Brand, Category } from '@/types';
 
 export type FilterValues = {
     search: string;
@@ -46,8 +47,12 @@ export function SparepartFilters({
 }: Props) {
     // Ambil state dari localStorage jika ada (aman untuk SSR)
     const [isFilterOpen, setIsFilterOpen] = useState(() => {
-        if (typeof window === 'undefined') return false;
+        if (typeof window === 'undefined') {
+            return false;
+        }
+
         const saved = localStorage.getItem('spareparts_filter_open');
+
         return saved === 'true' ? true : false;
     });
 
@@ -59,41 +64,48 @@ export function SparepartFilters({
     };
 
     return (
-        <form onSubmit={onApply} className="space-y-4">
+        <form onSubmit={onApply} className="">
             {/* Baris Utama (Selalu Terlihat) */}
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-4">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:gap-4">
                 {/* Search - Lebar Maksimal */}
-                <div className="relative flex-1 w-full">
-                    <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                        type="search"
-                        placeholder="Cari material number atau part name..."
-                        className="h-10 pl-9 w-full"
-                        aria-label="Search spareparts"
-                        value={values.search}
-                        onChange={(event) => onChange('search', event.target.value)}
-                        onKeyDown={(event) => {
-                            if (event.key === 'Enter') {
-                                event.preventDefault();
-                                onApply();
-                            }
-                        }}
-                    />
+                <div className="flex-1 w-full space-y-1.5">
+                    <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                        Pencarian
+                    </p>
+                    <div className="relative">
+                        <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                            type="search"
+                            placeholder="Cari material number atau part name..."
+                            className="h-10 pl-9 w-full"
+                            aria-label="Search spareparts"
+                            value={values.search}
+                            onChange={(event) => onChange('search', event.target.value)}
+                            onKeyDown={(event) => {
+                                if (event.key === 'Enter') {
+                                    event.preventDefault();
+                                    onApply();
+                                }
+                            }}
+                        />
+                    </div>
                 </div>
 
                 {/* Tombol Filter By */}
-                <Button
-                    type="button"
-                    variant={isFilterOpen ? 'default' : 'secondary'}
-                    className="h-10 gap-2"
-                    onClick={handleToggleFilter}
-                >
-                    <Filter className="size-4" />
-                    Filter By
-                </Button>
+                <div className="pb-0">
+                    <Button
+                        type="button"
+                        variant={isFilterOpen ? 'default' : 'secondary'}
+                        className="h-10 gap-2"
+                        onClick={handleToggleFilter}
+                    >
+                        <Filter className="size-4" />
+                        Filter By
+                    </Button>
+                </div>
 
                 {/* Tombol Apply & Reset (Posisi dibalik, Apply dulu baru Reset) */}
-                <div className="flex items-center gap-2 lg:ml-auto">
+                <div className="lg:ml-auto flex items-center gap-2 pb-0">
                     <Button type="submit" className="h-10 px-4">
                         Apply
                     </Button>
@@ -110,10 +122,13 @@ export function SparepartFilters({
             </div>
 
             {/* Area Filter (Collapsible, tetap terbuka setelah apply) */}
-            <div className={cn(
-                "grid gap-4 md:grid-cols-2 lg:grid-cols-4 overflow-hidden transition-all duration-300",
-                isFilterOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
-            )}>
+            <div
+                className={cn(
+                    'mt-4 grid gap-4 overflow-hidden transition-all duration-300 md:grid-cols-2 lg:grid-cols-4',
+                    isFilterOpen ? 'max-h-[500px] opacity-100' : 'invisible max-h-0 opacity-0 pointer-events-none',
+                )}
+                style={{ display: isFilterOpen ? 'grid' : 'none' }}
+            >
                 <div className="space-y-1.5">
                     <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
                         Brand

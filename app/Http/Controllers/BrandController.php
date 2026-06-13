@@ -74,7 +74,12 @@ class BrandController extends Controller
             'name' => ['required', 'string', 'max:255', Rule::unique('brands')->ignore($brand->id)],
         ]);
 
+        /** @var \Illuminate\Database\Eloquent\Model $brand */
         $brand->update($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json($brand);
+        }
 
         return redirect()->route('brands.index')
             ->with('success', 'Brand updated successfully.');
@@ -90,6 +95,7 @@ class BrandController extends Controller
                 ->with('error', 'Cannot delete Brand. It is currently associated with one or more spareparts.');
         }
 
+        /** @var \Illuminate\Database\Eloquent\Model $brand */
         $brand->delete();
 
         return redirect()->route('brands.index')

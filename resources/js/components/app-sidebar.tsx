@@ -10,6 +10,8 @@ import {
     Tag,
     FolderOpen,
     Layers,
+    Database,
+    ChevronRight,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -39,19 +41,25 @@ const mainNavItems: NavItem[] = [
         icon: Warehouse,
     },
     {
-        title: 'Brands',
-        href: '/brands',
-        icon: Tag,
-    },
-    {
-        title: 'Categories',
-        href: '/categories',
-        icon: FolderOpen,
-    },
-    {
-        title: 'Racks',
-        href: '/racks',
-        icon: Layers,
+        title: 'Masterdata',
+        icon: Database,
+        children: [
+            {
+                title: 'Brands',
+                href: '/brands',
+                icon: Tag,
+            },
+            {
+                title: 'Categories',
+                href: '/categories',
+                icon: FolderOpen,
+            },
+            {
+                title: 'Racks',
+                href: '/racks',
+                icon: Layers,
+            },
+        ],
     },
     {
         title: 'Scanner',
