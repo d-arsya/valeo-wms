@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { AlertTriangle, Edit3, MapPin, Package, Printer, QrCode, Trash2 } from 'lucide-react';
 import { BackButton } from '@/components/back-button';
 import { formatCurrency, formatDate, formatDateTime, getBinLabel } from '@/components/features/spareparts/spareparts-utils';
@@ -29,7 +29,9 @@ function renderActivityBadge(type: ActivityLog['type']) {
 }
 
 export default function Show({ sparepart }: Props) {
-    const activityLogs = sparepart.activity_logs ?? [];
+    const { auth } = usePage().props;
+    const isAdmin = auth.user?.role === 'admin';
+    const activityLogs = sparepart.activityLogs ?? [];
 
 
     function handleDelete() {
@@ -68,33 +70,39 @@ export default function Show({ sparepart }: Props) {
                                 Stock OUT
                             </Link>
                         </Button>
-                        <Button asChild variant="secondary">
-                            <Link href={stockInForm(sparepart.id, { query: { return_to: spareparts.show(sparepart.material_number).url } })}>
-                                Stock IN
-                            </Link>
-                        </Button>
-                        <Button asChild variant="outline">
-                            <Link href={spareparts.label(sparepart.id)}>
-                                <QrCode className="size-4" />
-                                Generate QR
-                            </Link>
-                        </Button>
-                        <Button asChild variant="outline">
-                            <Link href={spareparts.label(sparepart.id, { query: { print: '1' } })} target="_blank" rel="noreferrer">
-                                <Printer className="size-4" />
-                                Print Label
-                            </Link>
-                        </Button>
-                        <Button asChild >
-                            <Link href={spareparts.edit(sparepart.id)}>
-                                <Edit3 className="size-4" />
-                                Edit sparepart
-                            </Link>
-                        </Button>
-                        <Button variant="destructive" onClick={handleDelete}>
-                            <Trash2 className="size-4" />
-                            Hapus
-                        </Button>
+                        {isAdmin && (
+                            <Button asChild variant="secondary">
+                                <Link href={stockInForm(sparepart.id, { query: { return_to: spareparts.show(sparepart.material_number).url } })}>
+                                    Stock IN
+                                </Link>
+                            </Button>
+                        )}
+                        {isAdmin && (
+                            <>
+                                <Button asChild variant="outline">
+                                    <Link href={spareparts.label(sparepart.id)}>
+                                        <QrCode className="size-4" />
+                                        Generate QR
+                                    </Link>
+                                </Button>
+                                <Button asChild variant="outline">
+                                    <Link href={spareparts.label(sparepart.id, { query: { print: '1' } })} target="_blank" rel="noreferrer">
+                                        <Printer className="size-4" />
+                                        Print Label
+                                    </Link>
+                                </Button>
+                                <Button asChild >
+                                    <Link href={spareparts.edit(sparepart.id)}>
+                                        <Edit3 className="size-4" />
+                                        Edit sparepart
+                                    </Link>
+                                </Button>
+                                <Button variant="destructive" onClick={handleDelete}>
+                                    <Trash2 className="size-4" />
+                                    Hapus
+                                </Button>
+                            </>
+                        )}
                     </div>
                 </div>
 

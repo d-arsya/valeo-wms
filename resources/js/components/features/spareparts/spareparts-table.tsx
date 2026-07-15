@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { ArrowUpRight, ArrowDownRight, Eye } from 'lucide-react';
 import { useLayoutEffect, useRef } from 'react';
 import {
@@ -20,6 +20,8 @@ interface Props {
 }
 
 export function SparepartsTable({ rows }: Props) {
+    const { auth } = usePage().props;
+    const isAdmin = auth.user?.role === 'admin';
     const topScrollRef = useRef<HTMLDivElement | null>(null);
     const topScrollSpacerRef = useRef<HTMLDivElement | null>(null);
     const tableScrollRef = useRef<HTMLDivElement | null>(null);
@@ -299,25 +301,27 @@ export function SparepartsTable({ rows }: Props) {
                                                 </TooltipTrigger>
                                                 <TooltipContent side="top">Stock out</TooltipContent>
                                             </Tooltip>
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <Button
-                                                        asChild
-                                                        variant="outline"
-                                                        size="icon"
-                                                        className="size-8 border-border/80 bg-background"
-                                                        aria-label="Stock in"
-                                                    >
-                                                        <Link
-                                                            href={stockInForm(sparepart.id, { query: { return_to: spareparts.index().url } })}
+                                            {isAdmin && (
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button
+                                                            asChild
+                                                            variant="outline"
+                                                            size="icon"
+                                                            className="size-8 border-border/80 bg-background"
+                                                            aria-label="Stock in"
                                                         >
-                                                            <ArrowUpRight className="size-3.5" />
-                                                            <span className="sr-only">Stock in</span>
-                                                        </Link>
-                                                    </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent side="top">Stock in</TooltipContent>
-                                            </Tooltip>
+                                                            <Link
+                                                                href={stockInForm(sparepart.id, { query: { return_to: spareparts.index().url } })}
+                                                            >
+                                                                <ArrowUpRight className="size-3.5" />
+                                                                <span className="sr-only">Stock in</span>
+                                                            </Link>
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent side="top">Stock in</TooltipContent>
+                                                </Tooltip>
+                                            )}
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
                                                     <Button

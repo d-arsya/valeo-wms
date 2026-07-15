@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Plus, Warehouse } from 'lucide-react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
@@ -49,6 +49,9 @@ export default function Index({
     ranks,
     statuses,
 }: Props) {
+    const { auth } = usePage().props;
+    const isAdmin = auth.user?.role === 'admin';
+
     const [filterValues, setFilterValues] = useState<FilterValues>({
         search: filters.search ?? '',
         brandId: filters.brand_id ?? 'all',
@@ -108,12 +111,14 @@ export default function Index({
                                     Sparepart list
                                 </CardTitle>
                             </div>
-                            <Button asChild className="w-full gap-2 shadow-sm lg:w-auto">
-                                <Link href={spareparts.create()}>
-                                    <Plus className="size-4" />
-                                    Add sparepart
-                                </Link>
-                            </Button>
+                            {isAdmin && (
+                                <Button asChild className="w-full gap-2 shadow-sm lg:w-auto">
+                                    <Link href={spareparts.create()}>
+                                        <Plus className="size-4" />
+                                        Add sparepart
+                                    </Link>
+                                </Button>
+                            )}
                         </div>
                     </CardHeader>
 

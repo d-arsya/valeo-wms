@@ -80,10 +80,14 @@ const mainNavItems: NavItem[] = [
 
 export function AppSidebar() {
     const { auth } = usePage().props;
+    const isAdmin = auth.user?.role === 'admin';
 
     const filteredNavItems = mainNavItems.filter((item) => {
         if (item.href === '/users') {
-            return auth.user?.role === 'admin';
+            return isAdmin;
+        }
+        if (item.title === 'Masterdata') {
+            return isAdmin;
         }
         return true;
     });
