@@ -2,17 +2,20 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\SanitizesInput;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StockInRequest extends FormRequest
 {
+    use SanitizesInput;
+
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->canManageStock() ?? false;
     }
 
     /**
@@ -30,5 +33,14 @@ class StockInRequest extends FormRequest
             'price_per_unit' => ['required', 'numeric', 'min:0'],
             'remarks' => ['nullable', 'string'],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'po_number' => $this->sanitizeString($this->input('po_number')),
+            'supplier' => $this->sanitizeString($this->input('supplier')),
+            'remarks' => $this->sanitizeString($this->input('remarks')),
+        ]);
     }
 }

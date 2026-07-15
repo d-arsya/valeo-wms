@@ -2,17 +2,20 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\SanitizesInput;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StockOutRequest extends FormRequest
 {
+    use SanitizesInput;
+
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->canManageStock() ?? false;
     }
 
     /**
@@ -27,7 +30,7 @@ class StockOutRequest extends FormRequest
                 'required',
                 'integer',
                 'min:1',
-                function ($attribute, $value, $fail) {
+                function ($_attribute, $value, $fail) {
                     $sparepart = $this->route('sparepart');
                     if ($sparepart && $value > $sparepart->actual_stock) {
                         $fail("The quantity exceeds the current actual stock ({$sparepart->actual_stock}).");
@@ -36,5 +39,12 @@ class StockOutRequest extends FormRequest
             ],
             'remarks' => ['nullable', 'string'],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'remarks' => $this->sanitizeString($this->input('remarks')),
+        ]);
     }
 }

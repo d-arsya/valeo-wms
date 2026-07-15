@@ -45,22 +45,10 @@ export function SparepartFilters({
     onReset,
     hasFilters,
 }: Props) {
-    // Ambil state dari localStorage jika ada (aman untuk SSR)
-    const [isFilterOpen, setIsFilterOpen] = useState(() => {
-        if (typeof window === 'undefined') {
-            return false;
-        }
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-        const saved = localStorage.getItem('spareparts_filter_open');
-
-        return saved === 'true' ? true : false;
-    });
-
-    // Simpan state ke localStorage ketika berubah
     const handleToggleFilter = () => {
-        const newState = !isFilterOpen;
-        setIsFilterOpen(newState);
-        localStorage.setItem('spareparts_filter_open', newState.toString());
+        setIsFilterOpen((current) => !current);
     };
 
     return (

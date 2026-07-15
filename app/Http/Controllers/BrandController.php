@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Brand;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -15,9 +16,7 @@ class BrandController extends Controller
     public function index(Request $request)
     {
         $brands = Brand::query()
-            ->when($request->search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%");
-            })
+            ->searchByName($request->search)
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -41,11 +40,16 @@ class BrandController extends Controller
      */
     public function store(Request $request)
     {
+        $request->merge([
+            'name' => trim(strip_tags((string) $request->input('name'))),
+        ]);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 'unique:brands,name'],
         ]);
 
         $brand = Brand::create($validated);
+        Cache::forget('select.brands');
 
         if ($request->wantsJson()) {
             return response()->json($brand, 201);
@@ -70,12 +74,17 @@ class BrandController extends Controller
      */
     public function update(Request $request, Brand $brand)
     {
+        $request->merge([
+            'name' => trim(strip_tags((string) $request->input('name'))),
+        ]);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', Rule::unique('brands')->ignore($brand->id)],
         ]);
 
         /** @var \Illuminate\Database\Eloquent\Model $brand */
         $brand->update($validated);
+        Cache::forget('select.brands');
 
         if ($request->wantsJson()) {
             return response()->json($brand);
@@ -97,6 +106,7 @@ class BrandController extends Controller
 
         /** @var \Illuminate\Database\Eloquent\Model $brand */
         $brand->delete();
+        Cache::forget('select.brands');
 
         return redirect()->route('brands.index')
             ->with('success', 'Brand deleted successfully.');

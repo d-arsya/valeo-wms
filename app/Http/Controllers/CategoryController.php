@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -15,9 +16,7 @@ class CategoryController extends Controller
     public function index(Request $request)
     {
         $categories = Category::query()
-            ->when($request->search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%");
-            })
+            ->searchByName($request->search)
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -41,11 +40,16 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
+        $request->merge([
+            'name' => trim(strip_tags((string) $request->input('name'))),
+        ]);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 'unique:categories,name'],
         ]);
 
         $category = Category::create($validated);
+        Cache::forget('select.categories');
 
         if ($request->wantsJson()) {
             return response()->json($category, 201);
@@ -70,12 +74,17 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category)
     {
+        $request->merge([
+            'name' => trim(strip_tags((string) $request->input('name'))),
+        ]);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', Rule::unique('categories')->ignore($category->id)],
         ]);
 
         /** @var \Illuminate\Database\Eloquent\Model $category */
         $category->update($validated);
+        Cache::forget('select.categories');
 
         if ($request->wantsJson()) {
             return response()->json($category);
@@ -97,6 +106,7 @@ class CategoryController extends Controller
 
         /** @var \Illuminate\Database\Eloquent\Model $category */
         $category->delete();
+        Cache::forget('select.categories');
 
         return redirect()->route('categories.index')
             ->with('success', 'Category deleted successfully.');

@@ -39,9 +39,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Stock Control
     Route::prefix('stock')->name('stock.')->group(function () {
         Route::get('/in/{sparepart}', [StockController::class, 'inForm'])->name('in.form');
-        Route::post('/in/{sparepart}', [StockController::class, 'in'])->name('in');
+        Route::post('/in/{sparepart}', [StockController::class, 'in'])
+            ->middleware('throttle:stock-transactions')
+            ->name('in');
         Route::get('/out/{sparepart}', [StockController::class, 'outFormView'])->name('out.form');
-        Route::post('/out/{sparepart}', [StockController::class, 'out'])->name('out');
+        Route::post('/out/{sparepart}', [StockController::class, 'out'])
+            ->middleware('throttle:stock-transactions')
+            ->name('out');
     });
 
     // QR Label
@@ -49,7 +53,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Reports
     Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
-    Route::get('reports/export', [ReportController::class, 'export'])->name('reports.export');
+    Route::get('reports/export', [ReportController::class, 'export'])
+        ->middleware('throttle:report-export')
+        ->name('reports.export');
 });
 
 require __DIR__.'/settings.php';

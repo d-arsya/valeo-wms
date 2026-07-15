@@ -118,7 +118,6 @@ export default function Show({ sparepart }: Props) {
                             <DetailItem label="Last supplier" value={sparepart.last_supplier ?? '-'} />
                             <DetailItem label="Last GR date" value={formatDate(sparepart.last_gr_date)} />
                             <DetailItem label="Price per unit" value={formatCurrency(sparepart.price_per_unit)} />
-                            <DetailItem label="QR Code" value={sparepart.qr_code_path ?? '-'} />
                             <DetailItem label="Dibuat" value={formatDate(sparepart.created_at)} />
                         </CardContent>
                     </Card>

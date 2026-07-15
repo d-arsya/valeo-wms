@@ -2,17 +2,20 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\SanitizesInput;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateSparepartRequest extends FormRequest
 {
+    use SanitizesInput;
+
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->canManageMasterData() ?? false;
     }
 
     /**
@@ -37,5 +40,17 @@ class UpdateSparepartRequest extends FormRequest
             'safety_stock' => ['required', 'integer', 'min:0'],
             'actual_stock' => ['required', 'integer', 'min:0'],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'material_number' => $this->sanitizeString($this->input('material_number')),
+            'part_name' => $this->sanitizeString($this->input('part_name')),
+            'specification' => $this->sanitizeString($this->input('specification')),
+            'rank' => $this->sanitizeString($this->input('rank')),
+            'last_po_number' => $this->sanitizeString($this->input('last_po_number')),
+            'last_supplier' => $this->sanitizeString($this->input('last_supplier')),
+        ]);
     }
 }

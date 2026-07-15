@@ -16,25 +16,11 @@ export function PrintableLabel({ sparepart, qrCodeSvg }: PrintableLabelProps) {
             <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
                 {/* QR Code Container */}
                 <div className="w-48 h-48 flex items-center justify-center bg-muted/20 rounded-lg overflow-hidden border">
-                    {sparepart.qr_code_path ? (
-                        <img
-                            src={`/storage/${sparepart.qr_code_path}`}
-                            alt="QR Code"
-                            className="w-full h-full object-contain"
-                        />
-                    ) : (
-                        <div
-                            className="w-full h-full p-4 [&>svg]:w-full [&>svg]:h-full opacity-50 grayscale"
-                            dangerouslySetInnerHTML={{ __html: qrCodeSvg }}
-                        />
-                    )}
+                    <div
+                        className="w-full h-full p-4 [&>svg]:w-full [&>svg]:h-full"
+                        dangerouslySetInnerHTML={{ __html: qrCodeSvg }}
+                    />
                 </div>
-
-                {!sparepart.qr_code_path && (
-                    <p className="text-[10px] text-destructive font-medium animate-pulse print:hidden">
-                        QR Code belum tersimpan. Klik "Generate QR" di atas.
-                    </p>
-                )}
 
                 {/* Textual Information */}
                 <div className="space-y-2 w-full pt-4 border-t border-dashed print:border-solid print:border-black">

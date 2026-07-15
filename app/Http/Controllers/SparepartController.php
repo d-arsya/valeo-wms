@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreSparepartRequest;
 use App\Http\Requests\UpdateSparepartRequest;
 use App\Models\Bin;
-use App\Models\Brand;
-use App\Models\Category;
 use App\Models\Sparepart;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class SparepartController extends Controller
@@ -49,10 +49,10 @@ class SparepartController extends Controller
         return inertia('spareparts/index', [
             'spareparts' => $spareparts,
             'filters' => $request->only(['search', 'brand_id', 'category_id', 'rank', 'status']),
-            'brands' => Brand::select(['id', 'name'])->get(),
-            'categories' => Category::select(['id', 'name'])->get(),
+            'brands' => $this->brandOptions(),
+            'categories' => $this->categoryOptions(),
             'ranks' => ['A', 'B', 'C'],
-            'statuses' => ['in_stock', 'low_stock', 'out_of_stock'],
+            'statuses' => ['OK', 'ATTENTION', 'NG'],
         ]);
     }
 
@@ -62,8 +62,8 @@ class SparepartController extends Controller
     public function create()
     {
         return Inertia::render('spareparts/create', [
-            'brands' => Brand::all(['id', 'name']),
-            'categories' => Category::all(['id', 'name']),
+            'brands' => $this->brandOptions(),
+            'categories' => $this->categoryOptions(),
             'bins' => Bin::with('rack')->orderBy('code')->get(),
         ]);
     }
@@ -74,6 +74,7 @@ class SparepartController extends Controller
     public function store(StoreSparepartRequest $request)
     {
         Sparepart::create($request->validated());
+        Cache::forget('dashboard.stats');
 
         return redirect()->route('spareparts.index')
             ->with('success', 'Sparepart created successfully.');
@@ -101,8 +102,8 @@ class SparepartController extends Controller
     {
         return Inertia::render('spareparts/edit', [
             'sparepart' => $sparepart->load(['brand', 'category', 'bin.rack']),
-            'brands' => Brand::all(['id', 'name']),
-            'categories' => Category::all(['id', 'name']),
+            'brands' => $this->brandOptions(),
+            'categories' => $this->categoryOptions(),
             'bins' => Bin::with('rack')->orderBy('code')->get(),
         ]);
     }
@@ -114,6 +115,7 @@ class SparepartController extends Controller
     {
         /** @var \Illuminate\Database\Eloquent\Model $sparepart */
         $sparepart->update($request->validated());
+        Cache::forget('dashboard.stats');
 
         return redirect()->route('spareparts.show', $sparepart)
             ->with('success', 'Sparepart updated successfully.');
@@ -126,8 +128,37 @@ class SparepartController extends Controller
     {
         /** @var \Illuminate\Database\Eloquent\Model $sparepart */
         $sparepart->delete();
+        Cache::forget('dashboard.stats');
 
         return redirect()->route('spareparts.index')
             ->with('success', 'Sparepart deleted successfully.');
+    }
+
+    private function brandOptions()
+    {
+        return Cache::remember('select.brands', now()->addMinutes(10), function () {
+            return DB::table('brands')
+                ->orderBy('name')
+                ->get(['id', 'name'])
+                ->map(fn ($brand) => [
+                    'id' => (int) $brand->id,
+                    'name' => $brand->name,
+                ])
+                ->all();
+        });
+    }
+
+    private function categoryOptions()
+    {
+        return Cache::remember('select.categories', now()->addMinutes(10), function () {
+            return DB::table('categories')
+                ->orderBy('name')
+                ->get(['id', 'name'])
+                ->map(fn ($category) => [
+                    'id' => (int) $category->id,
+                    'name' => $category->name,
+                ])
+                ->all();
+        });
     }
 }
