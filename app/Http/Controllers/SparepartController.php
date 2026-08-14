@@ -6,6 +6,10 @@ use App\Http\Requests\StoreSparepartRequest;
 use App\Http\Requests\UpdateSparepartRequest;
 use App\Models\Bin;
 use App\Models\Sparepart;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -85,6 +89,14 @@ class SparepartController extends Controller
      */
     public function show(Sparepart $sparepart)
     {
+        // Generate QR Code SVG
+        $renderer = new ImageRenderer(
+            new RendererStyle(300),
+            new SvgImageBackEnd()
+        );
+        $writer = new Writer($renderer);
+        $qrCodeSvg = $writer->writeString($sparepart->material_number);
+
         return Inertia::render('spareparts/show', [
             'sparepart' => $sparepart->load([
                 'brand',
@@ -92,6 +104,7 @@ class SparepartController extends Controller
                 'bin.rack',
                 'activityLogs' => fn ($query) => $query->with('user')->latest('performed_at'),
             ]),
+            'qrCodeSvg' => $qrCodeSvg,
         ]);
     }
 
@@ -117,7 +130,7 @@ class SparepartController extends Controller
         $sparepart->update($request->validated());
         Cache::forget('dashboard.stats');
 
-        return redirect()->route('spareparts.show', $sparepart)
+        return redirect()->route('spareparts.show', ['sparepart' => $sparepart->material_number])
             ->with('success', 'Sparepart updated successfully.');
     }
 

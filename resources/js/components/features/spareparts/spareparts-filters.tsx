@@ -113,7 +113,7 @@ export function SparepartFilters({
             <div
                 className={cn(
                     'mt-4 grid gap-4 overflow-hidden transition-all duration-300 md:grid-cols-2 lg:grid-cols-4',
-                    isFilterOpen ? 'max-h-[500px] opacity-100' : 'invisible max-h-0 opacity-0 pointer-events-none',
+                    isFilterOpen ? 'max-h-125 opacity-100' : 'invisible max-h-0 opacity-0 pointer-events-none',
                 )}
                 style={{ display: isFilterOpen ? 'grid' : 'none' }}
             >

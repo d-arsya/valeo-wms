@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Http\Requests\Concerns\SanitizesInput;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreSparepartRequest extends FormRequest
 {
@@ -29,7 +30,7 @@ class StoreSparepartRequest extends FormRequest
             'material_number' => ['required', 'string', 'unique:spareparts,material_number'],
             'part_name' => ['required', 'string', 'max:255'],
             'specification' => ['required', 'string'],
-            'rank' => ['required', 'string', 'max:255'],
+            'rank' => ['required', 'string', Rule::in(['A', 'B', 'C'])],
             'brand_id' => ['required', 'exists:brands,id'],
             'category_id' => ['required', 'exists:categories,id'],
             'bin_id' => ['required', 'exists:bins,id'],
@@ -38,7 +39,7 @@ class StoreSparepartRequest extends FormRequest
             'last_po_number' => ['nullable', 'string', 'max:255'],
             'last_supplier' => ['nullable', 'string', 'max:255'],
             'last_gr_date' => ['nullable', 'date_format:Y-m-d'],
-            'price_per_unit' => ['required', 'numeric'],
+            'price_per_unit' => ['required', 'numeric', 'min:0'],
         ];
     }
 

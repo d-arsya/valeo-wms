@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Plus, Search, Trash2, FolderOpen, Edit } from 'lucide-react';
+import { Plus, Search, Trash2, FolderOpen, Edit, Eye } from 'lucide-react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Pagination } from '@/components/pagination';
@@ -145,6 +145,16 @@ export default function Index({
                                                 </td>
                                                 <td className="px-5 py-4 text-right whitespace-nowrap">
                                                     <div className="flex justify-end gap-2">
+                                                        <Button
+                                                            asChild
+                                                            variant="outline"
+                                                            size="icon"
+                                                            className="size-8"
+                                                        >
+                                                            <Link href={categories.show(category.id).url}>
+                                                                <Eye className="size-3.5" />
+                                                            </Link>
+                                                        </Button>
                                                         <Button
                                                             asChild
                                                             variant="outline"

@@ -50,7 +50,7 @@ class StockController extends Controller
             $request->user()?->id,
         );
 
-        return redirect()->route('spareparts.show', $sparepart)
+        return redirect()->route('spareparts.show', ['sparepart' => $sparepart->material_number])
             ->with('success', "Successfully added {$request->quantity} units to stock.");
     }
 
@@ -65,7 +65,7 @@ class StockController extends Controller
             $request->user()->id,
         );
 
-        return redirect()->route('spareparts.show', $sparepart)
+        return redirect()->route('spareparts.show', ['sparepart' => $sparepart->material_number])
             ->with('success', "Successfully removed {$request->quantity} units from stock.");
     }
 }

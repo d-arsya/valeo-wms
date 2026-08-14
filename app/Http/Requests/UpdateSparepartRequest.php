@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Http\Requests\Concerns\SanitizesInput;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateSparepartRequest extends FormRequest
 {
@@ -29,16 +30,20 @@ class UpdateSparepartRequest extends FormRequest
             'material_number' => [
                 'required',
                 'string',
-                'unique:spareparts,material_number,'.$this->route('sparepart')->id,
+                Rule::unique('spareparts', 'material_number')->ignore($this->route('sparepart')->id),
             ],
             'part_name' => ['required', 'string', 'max:255'],
-            'rank' => ['required', 'string', 'max:255'],
+            'rank' => ['required', 'string', Rule::in(['A', 'B', 'C'])],
             'specification' => ['required', 'string'],
             'brand_id' => ['required', 'exists:brands,id'],
             'category_id' => ['required', 'exists:categories,id'],
             'bin_id' => ['required', 'exists:bins,id'],
             'safety_stock' => ['required', 'integer', 'min:0'],
             'actual_stock' => ['required', 'integer', 'min:0'],
+            'last_po_number' => ['nullable', 'string', 'max:255'],
+            'last_supplier' => ['nullable', 'string', 'max:255'],
+            'last_gr_date' => ['nullable', 'date_format:Y-m-d'],
+            'price_per_unit' => ['nullable', 'numeric', 'min:0'],
         ];
     }
 

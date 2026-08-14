@@ -58,4 +58,9 @@ class User extends Authenticatable
     {
         return $this->canManageStock();
     }
+
+    public function activityLogs()
+    {
+        return $this->hasMany(ActivityLog::class);
+    }
 }

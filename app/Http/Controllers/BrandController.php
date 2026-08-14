@@ -60,6 +60,18 @@ class BrandController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     */
+    public function show(Brand $brand)
+    {
+        return Inertia::render('brands/show', [
+            'brand' => $brand->load(['spareparts' => function ($query) {
+                $query->with(['category', 'bin.rack']);
+            }]),
+        ]);
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(Brand $brand)

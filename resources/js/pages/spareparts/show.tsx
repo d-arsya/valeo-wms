@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { AlertTriangle, Edit3, MapPin, Package, Printer, QrCode, Trash2 } from 'lucide-react';
+import { AlertTriangle, Edit3, MapPin, Package, Trash2 } from 'lucide-react';
 import { BackButton } from '@/components/back-button';
 import { formatCurrency, formatDate, formatDateTime, getBinLabel } from '@/components/features/spareparts/spareparts-utils';
 import { StockStatusBadge } from '@/components/features/spareparts/stock-status-badge';
@@ -13,11 +13,12 @@ import type { ActivityLog, Sparepart } from '@/types';
 import type { User } from '@/types/auth';
 
 type SparepartDetail = Sparepart & {
-    activity_logs: Array<ActivityLog & { user?: User | null }>;
+    activityLogs: Array<ActivityLog & { user?: User | null }>;
 };
 
 interface Props {
     sparepart: SparepartDetail;
+    qrCodeSvg: string;
 }
 
 function renderActivityBadge(type: ActivityLog['type']) {
@@ -28,11 +29,10 @@ function renderActivityBadge(type: ActivityLog['type']) {
     );
 }
 
-export default function Show({ sparepart }: Props) {
+export default function Show({ sparepart, qrCodeSvg }: Props) {
     const { auth } = usePage().props;
     const isAdmin = auth.user?.role === 'admin';
     const activityLogs = sparepart.activityLogs ?? [];
-
 
     function handleDelete() {
         if (!window.confirm(`Hapus sparepart ${sparepart.material_number}?`)) {
@@ -52,15 +52,20 @@ export default function Show({ sparepart }: Props) {
                 <BackButton fallback={spareparts.index().url} label="Kembali ke daftar" variant="ghost" className="w-fit px-0 text-muted-foreground hover:bg-transparent hover:text-foreground" />
 
                 <div className="flex flex-col gap-4 rounded-2xl border border-border/60 bg-card p-6 shadow-sm lg:flex-row lg:items-center lg:justify-between">
-                    <div className="space-y-3">
-
-                        <div className="space-y-2">
-                            <div className="flex flex-wrap items-center gap-3">
-                                <h1 className="text-2xl font-semibold tracking-tight">{sparepart.material_number}</h1>
-                                <StockStatusBadge status={sparepart.status} />
+                    <div className="space-y-3 flex-1">
+                        <div className="flex flex-col md:flex-row md:items-center gap-4">
+                            <div className="bg-white p-4 rounded-xl border border-border/60 shrink-0">
+                                {/* Render SVG */}
+                                <div dangerouslySetInnerHTML={{ __html: qrCodeSvg }} />
                             </div>
-                            <p className="text-sm text-muted-foreground">{sparepart.part_name}</p>
-                            <p className="max-w-3xl text-sm text-muted-foreground">{sparepart.specification}</p>
+                            <div className="space-y-2">
+                                <div className="flex flex-wrap items-center gap-3">
+                                    <h1 className="text-2xl font-semibold tracking-tight">{sparepart.material_number}</h1>
+                                    <StockStatusBadge status={sparepart.status} />
+                                </div>
+                                <p className="text-sm text-muted-foreground">{sparepart.part_name}</p>
+                                <p className="max-w-3xl text-sm text-muted-foreground">{sparepart.specification}</p>
+                            </div>
                         </div>
                     </div>
 
@@ -79,18 +84,6 @@ export default function Show({ sparepart }: Props) {
                         )}
                         {isAdmin && (
                             <>
-                                <Button asChild variant="outline">
-                                    <Link href={spareparts.label(sparepart.id)}>
-                                        <QrCode className="size-4" />
-                                        Generate QR
-                                    </Link>
-                                </Button>
-                                <Button asChild variant="outline">
-                                    <Link href={spareparts.label(sparepart.id, { query: { print: '1' } })} target="_blank" rel="noreferrer">
-                                        <Printer className="size-4" />
-                                        Print Label
-                                    </Link>
-                                </Button>
                                 <Button asChild >
                                     <Link href={spareparts.edit(sparepart.id)}>
                                         <Edit3 className="size-4" />
@@ -114,7 +107,7 @@ export default function Show({ sparepart }: Props) {
                                 Detail master data
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="grid gap-4 py-6 md:grid-cols-2">
+                        <CardContent className="grid gap-4 py-6 grid-cols-1">
                             <DetailItem label="Brand" value={sparepart.brand?.name ?? '-'} />
                             <DetailItem label="Category" value={sparepart.category?.name ?? '-'} />
                             <DetailItem label="Rank" value={sparepart.rank ?? '-'} />
@@ -159,7 +152,6 @@ export default function Show({ sparepart }: Props) {
 
                             <div className="rounded-xl border border-dashed border-border/60 p-4 text-sm text-muted-foreground">
                                 Lokasi fisik: {getBinLabel(sparepart)}
-                                <p></p>
                             </div>
                         </CardContent>
                     </Card>
@@ -225,7 +217,7 @@ function DetailItem({
 
 interface DetailItemProps {
     label: string;
-    value: string;
+    value: string | number;
     emphasize?: boolean;
 }
 
