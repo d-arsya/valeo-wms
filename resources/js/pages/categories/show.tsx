@@ -1,10 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
-import { BackButton } from '@/components/back-button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Layers, Package2 } from 'lucide-react';
+import { BackButton } from '@/components/back-button';
 import { getBinLabel } from '@/components/features/spareparts/spareparts-utils';
 import { StockStatusBadge } from '@/components/features/spareparts/stock-status-badge';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import categories from '@/routes/categories';
 import spareparts from '@/routes/spareparts';
 import type { Category, Sparepart } from '@/types';

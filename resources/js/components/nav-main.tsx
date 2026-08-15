@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import { ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import {
     SidebarGroup,
@@ -10,7 +11,6 @@ import {
     SidebarMenuSubButton,
     SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
-import { ChevronRight } from 'lucide-react';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import type { NavItem } from '@/types';
 
@@ -20,11 +20,13 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
 
     const toggleGroup = (title: string) => {
         const newOpenGroups = new Set(openGroups);
+
         if (newOpenGroups.has(title)) {
             newOpenGroups.delete(title);
         } else {
             newOpenGroups.add(title);
         }
+
         setOpenGroups(newOpenGroups);
     };
 
@@ -36,6 +38,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                     if (item.children) {
                         const isOpen = openGroups.has(item.title);
                         const anyChildActive = item.children.some((child) => isCurrentUrl(child.href));
+
                         return (
                             <SidebarMenuItem key={item.title}>
                                 <SidebarMenuButton

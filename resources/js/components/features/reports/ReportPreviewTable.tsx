@@ -1,13 +1,11 @@
-import { Link } from '@inertiajs/react';
 import { format, parseISO } from 'date-fns';
 import { id } from 'date-fns/locale';
-import { Search, Eye } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useLayoutEffect, useRef } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import spareparts from '@/routes/spareparts';
 import type { ActivityLog, PaginatedResponse } from '@/types';
 
 interface ReportPreviewTableProps {
@@ -75,7 +73,7 @@ export function ReportPreviewTable({ logs, onReset }: ReportPreviewTableProps) {
                 <div
                     ref={topScrollRef}
                     onScroll={() => syncScroll('top')}
-                    className="overflow-x-scroll overflow-y-hidden border-b border-border/60 bg-transparent [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border/30 [&::-webkit-scrollbar-thumb]:opacity-60 hover:[&::-webkit-scrollbar-thumb]:bg-border/50"
+                    className="overflow-x-scroll overflow-y-hidden border-b border-border/60 bg-transparent scrollbar-thin [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border/30 [&::-webkit-scrollbar-thumb]:opacity-60 hover:[&::-webkit-scrollbar-thumb]:bg-border/50"
                 >
                     <div ref={topScrollSpacerRef} className="h-2" />
                 </div>
@@ -83,9 +81,9 @@ export function ReportPreviewTable({ logs, onReset }: ReportPreviewTableProps) {
                 <div
                     ref={tableScrollRef}
                     onScroll={() => syncScroll('table')}
-                    className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                    className="overflow-x-auto scrollbar-none [&::-webkit-scrollbar]:hidden"
                 >
-                    <table ref={tableRef} className="min-w-300 w-full text-sm text-left border-collapse">
+                    <table ref={tableRef} className="min-w-3xl w-full text-sm text-left border-collapse">
                         <thead>
                             <tr className="bg-muted/40 text-left text-muted-foreground">
                                 <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap">Waktu Transaksi</th>
@@ -94,9 +92,6 @@ export function ReportPreviewTable({ logs, onReset }: ReportPreviewTableProps) {
                                 <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap text-center">Status</th>
                                 <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap text-right">Kuantitas</th>
                                 <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap">Operator</th>
-                                <th className="sticky right-0 z-40 w-44 min-w-44 max-w-44 bg-background px-4 py-3.5 text-center text-[11px] font-semibold uppercase tracking-wide whitespace-nowrap shadow-[-10px_0_14px_-12px_rgba(0,0,0,0.32)] before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-border/60 before:content-['']">
-                                    Actions
-                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -167,26 +162,11 @@ export function ReportPreviewTable({ logs, onReset }: ReportPreviewTableProps) {
                                                 </Tooltip>
                                             </div>
                                         </td>
-                                        <td className="sticky right-0 z-30 w-44 min-w-44 max-w-44 bg-background px-4 py-4 align-middle shadow-[-10px_0_14px_-12px_rgba(0,0,0,0.22)] before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-border/60 before:content-['']">
-                                            <div className="flex h-full w-full flex-nowrap items-center justify-center gap-1.5">
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <Button asChild size="icon" className="size-8" aria-label="View detail">
-                                                            <Link href={log.sparepart ? spareparts.show(log.sparepart.material_number) : '#'}>
-                                                                <Eye className="size-3.5" />
-                                                                <span className="sr-only">View detail</span>
-                                                            </Link>
-                                                        </Button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent side="top">View detail</TooltipContent>
-                                                </Tooltip>
-                                            </div>
-                                        </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={7} className="px-6 py-12 text-center">
+                                    <td colSpan={6} className="px-6 py-12 text-center">
                                         <div className="flex min-h-72 flex-col items-center justify-center gap-2">
                                             <Search className="size-8 text-muted-foreground/60" />
                                             <p className="text-base font-semibold text-foreground">Tidak ada data laporan</p>

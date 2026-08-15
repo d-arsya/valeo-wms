@@ -1,18 +1,20 @@
 import { Head, router } from '@inertiajs/react';
-import React, { useState, useCallback } from 'react';
-import AppLayout from '@/layouts/app-layout';
-import { QrScannerCamera } from '@/components/features/QrScannerCamera';
 import { AlertCircle, Loader2 } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
+import { QrScannerCamera } from '@/components/features/QrScannerCamera';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { show as sparepartsShow } from '@/routes/spareparts';
+import AppLayout from '@/layouts/app-layout';
 import { index as scannerIndex } from '@/routes/scanner';
+import { show as sparepartsShow } from '@/routes/spareparts';
 
 export default function ScannerIndex() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const handleScanSuccess = useCallback(async (decodedText: string) => {
-        if (isProcessing) return;
+        if (isProcessing) {
+return;
+}
 
         setIsProcessing(true);
         setError(null);

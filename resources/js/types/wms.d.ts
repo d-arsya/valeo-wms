@@ -36,6 +36,7 @@ export interface Category {
     name: string;
     created_at: string;
     updated_at: string;
+    spareparts_count?: number;
 }
 
 export interface Rack {

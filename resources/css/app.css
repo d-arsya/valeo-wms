@@ -7,6 +7,37 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ─── iOS Safe Area Utilities (Tailwind v4 @utility) ────────────────────────────── */
+@utility safe-p-top {
+  padding-top: max(0px, env(safe-area-inset-top));
+}
+@utility safe-p-bottom {
+  padding-bottom: max(0px, env(safe-area-inset-bottom));
+}
+@utility safe-p-left {
+  padding-left: max(0px, env(safe-area-inset-left));
+}
+@utility safe-p-right {
+  padding-right: max(0px, env(safe-area-inset-right));
+}
+@utility safe-p-x {
+  padding-left: max(0px, env(safe-area-inset-left));
+  padding-right: max(0px, env(safe-area-inset-right));
+}
+@utility safe-p-y {
+  padding-top: max(0px, env(safe-area-inset-top));
+  padding-bottom: max(0px, env(safe-area-inset-bottom));
+}
+@utility safe-m-bottom {
+  margin-bottom: max(0px, env(safe-area-inset-bottom));
+}
+
+/* Global viewport meta-cooperative body: prevent overflow fix for iPhone notch and hide body padding body safe inset */
+html,
+body {
+  min-height: 100dvh;
+}
+
 @theme {
     --font-sans:
         'Inter', ui-sans-serif, system-ui, sans-serif,

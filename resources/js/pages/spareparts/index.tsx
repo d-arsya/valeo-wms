@@ -13,6 +13,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { FloatingActionButton } from '@/components/ui/floating-action-button';
 import spareparts from '@/routes/spareparts';
 import type { Brand, Category, PaginatedResponse, Sparepart } from '@/types';
 
@@ -101,7 +102,7 @@ export default function Index({
         <>
             <Head title="Spareparts Master" />
 
-            <div className="space-y-6 p-4 md:p-6">
+            <div className="space-y-6 p-3 sm:p-4 md:p-6 pb-[calc(6rem+env(safe-area-inset-bottom))]">
                 <Card className="gap-0 overflow-hidden border-border/70 shadow-sm">
                     <CardHeader className="border-b border-border/60 bg-linear-to-b from-muted/35 via-background to-background pb-4">
                         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
@@ -112,7 +113,7 @@ export default function Index({
                                 </CardTitle>
                             </div>
                             {isAdmin && (
-                                <Button asChild className="w-full gap-2 shadow-sm lg:w-auto">
+                                <Button asChild className="hidden w-full gap-2 shadow-sm lg:flex lg:w-auto">
                                     <Link href={spareparts.create()}>
                                         <Plus className="size-4" />
                                         Add sparepart
@@ -159,6 +160,13 @@ export default function Index({
 
                 <Pagination meta={response} />
             </div>
+
+            {isAdmin && (
+                <FloatingActionButton
+                    href={spareparts.create().url}
+                    label="Add sparepart"
+                />
+            )}
         </>
     );
 }

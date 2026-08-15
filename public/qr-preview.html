@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>Cetak QR Code Sparepart</title>
+<style>
+  @page {
+    size: A4 portrait;
+    margin: 8mm;
+  }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #000000;
+    background: #ffffff;
+  }
+  body {
+    font-size: 12pt;
+    line-height: 1.2;
+  }
+  .page {
+    page-break-after: always;
+    width: 100%;
+  }
+  .page:last-child { page-break-after: auto; }
+
+  /* Grid outer: 2 kolom x 3 baris = 6 label per halaman A4 */
+  .labels-grid {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 5mm 4mm;
+    table-layout: fixed;
+  }
+  .labels-grid > tbody > tr > td {
+    width: 50%;
+    padding: 0;
+    margin: 0;
+    vertical-align: top;
+  }
+
+  /* SATU LABEL = UKURAN TETAP (HEIGHT & WIDTH DALAM MM) */
+  /* Lebar A4=210, Margin 8+8=16, Spacing antar kolom 5 → (210-16-5)/2 ≈ 94.5mm  */
+  .label {
+    width: 94mm;
+    height: 90mm;
+    border: 2px solid #000000;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin: 0 auto;
+  }
+  .label td {
+    border: 2px solid #000000;
+    padding: 1mm 2.2mm;
+    margin: 0;
+    vertical-align: middle;
+    overflow: hidden;
+    word-break: break-all;
+    word-wrap: break-word;
+  }
+
+  /* --- KIRI: QR CODE FIXED 28mm WIDE --- */
+  .qr-cell {
+    width: 28mm;
+    height: 90mm;
+    text-align: center;
+    padding: 2.5mm 1.8mm !important;
+  }
+  .qr-cell img {
+    width: 100%;
+    height: auto;
+    max-height: 86mm;
+    display: block;
+    margin: 0 auto;
+  }
+
+  /* --- KANAN: 5 BARIS INFO (3 FULL + 2 LABELED) --- */
+  .info {
+    width: 66mm;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+  .info-table {
+    width: 100%;
+    height: 90mm;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  .info-table td {
+    border: 2px solid #000;
+    padding: 0.6mm 2.2mm;
+    overflow: hidden;
+    word-break: break-all;
+    word-wrap: break-word;
+    vertical-align: middle;
+  }
+
+  /* HEIGHT TETAP per baris info (total 90mm) */
+  .row-matno    { height: 20mm; }
+  .row-catrank  { height: 16mm; }
+  .row-partname { height: 20mm; }
+  .row-maker    { height: 17mm; }
+  .row-location { height: 17mm; }
+
+  /* STYLE TEXT per baris */
+  .matno {
+    font-size: 20pt;
+    font-weight: 900;
+    letter-spacing: 0.3px;
+    text-align: center;
+  }
+  .catrank {
+    font-size: 13pt;
+    font-weight: 700;
+    text-align: center;
+  }
+  .partname {
+    font-size: 13pt;
+    font-weight: 600;
+    text-align: center;
+  }
+  .lbl {
+    width: 35%;
+    background-color: #f4f4f4;
+    font-weight: 800;
+    font-size: 14pt;
+    text-align: center;
+  }
+  .val {
+    width: 65%;
+    font-weight: 600;
+    font-size: 14pt;
+    text-align: center;
+  }
+
+  /* Empty cell placeholder */
+  .empty-cell {
+    width: 94mm;
+    height: 90mm;
+    border: 2px dashed #bbbbbb;
+    color: #aaaaaa;
+    text-align: center;
+    vertical-align: middle;
+    letter-spacing: 3mm;
+    font-size: 14pt;
+    margin: 0 auto;
+  }
+
+  .footer {
+    position: fixed;
+    bottom: -5mm; left: 0; right: 0;
+    font-size: 8pt;
+    color: #555;
+    text-align: right;
+    padding: 0 3mm;
+  }
+  .footer span { margin-left: 6mm; }
+</style>
+</head>
+<body>
+
+    <table class="page labels-grid">
+    <tbody>
+          <tr>
+              <td>
+                  <table class="label">
+            <tbody>
+              <tr>
+                
+                <td class="qr-cell" rowspan="5">
+                  <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgd2lkdGg9IjI2MCIgaGVpZ2h0PSIyNjAiIHZpZXdCb3g9IjAgMCAyNjAgMjYwIj48cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMjYwIiBoZWlnaHQ9IjI2MCIgZmlsbD0iI2ZlZmVmZSIvPjxnIHRyYW5zZm9ybT0ic2NhbGUoOC45NjYpIj48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyLjAwMCwyLjAwMCkiPjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTggMEw4IDRMOSA0TDkgNUw4IDVMOCA3TDkgN0w5IDZMMTAgNkwxMCA5TDExIDlMMTEgMTBMOSAxMEw5IDEyTDEwIDEyTDEwIDExTDEyIDExTDEyIDEyTDExIDEyTDExIDEzTDggMTNMOCAxMUw3IDExTDcgMTBMOCAxMEw4IDlMNyA5TDcgOEw0IDhMNCAxMUwzIDExTDMgMTBMMSAxMEwxIDlMMiA5TDIgOEwwIDhMMCAxMEwxIDEwTDEgMTFMMiAxMUwyIDEyTDQgMTJMNCAxNEwzIDE0TDMgMTNMMiAxM0wyIDE2TDAgMTZMMCAxN0w1IDE3TDUgMTZMNiAxNkw2IDE3TDggMTdMOCAxOEw5IDE4TDkgMTdMMTAgMTdMMTAgMThMMTEgMThMMTEgMTlMMTAgMTlMMTAgMjBMOSAyMEw5IDE5TDggMTlMOCAyMUwxMCAyMUwxMCAyMkw5IDIyTDkgMjNMOCAyM0w4IDI1TDkgMjVMOSAyM0wxMiAyM0wxMiAyNEwxMCAyNEwxMCAyNUwxMyAyNUwxMyAyM0wxNCAyM0wxNCAyNEwxNSAyNEwxNSAyNUwxNiAyNUwxNiAyMkwxNSAyMkwxNSAxOUwxNCAxOUwxNCAxOEwxNSAxOEwxNSAxN0wxNiAxN0wxNiAyMUwxNyAyMUwxNyAyM0wxOCAyM0wxOCAyNUwxOSAyNUwxOSAyNEwyMiAyNEwyMiAyNUwyNSAyNUwyNSAyNEwyNCAyNEwyNCAyMkwyNSAyMkwyNSAyMUwyNCAyMUwyNCAxOUwyMiAxOUwyMiAxOEwyMyAxOEwyMyAxNkwyNCAxNkwyNCAxNUwyMyAxNUwyMyAxNEwyNCAxNEwyNCAxM0wyNSAxM0wyNSAxMkwyNCAxMkwyNCAxMUwyMyAxMUwyMyAxMEwyNCAxMEwyNCA5TDI1IDlMMjUgOEwyMSA4TDIxIDlMMjAgOUwyMCA4TDE5IDhMMTkgOUwyMCA5TDIwIDEwTDE5IDEwTDE5IDExTDE4IDExTDE4IDEwTDE3IDEwTDE3IDhMMTYgOEwxNiA3TDE3IDdMMTcgNkwxNiA2TDE2IDdMMTUgN0wxNSA2TDE0IDZMMTQgNEwxNSA0TDE1IDVMMTYgNUwxNiA0TDE3IDRMMTcgM0wxNiAzTDE2IDRMMTUgNEwxNSAxTDE2IDFMMTYgMkwxNyAyTDE3IDBMMTUgMEwxNSAxTDE0IDFMMTQgMEwxMyAwTDEzIDFMMTEgMUwxMSAyTDEyIDJMMTIgM0wxMyAzTDEzIDRMMTIgNEwxMiA1TDEzIDVMMTMgNkwxMiA2TDEyIDdMMTEgN0wxMSAzTDEwIDNMMTAgMkw5IDJMOSAwWk0xMyAxTDEzIDNMMTQgM0wxNCAxWk0xMyA2TDEzIDdMMTIgN0wxMiA4TDExIDhMMTEgOUwxMyA5TDEzIDEwTDE0IDEwTDE0IDlMMTYgOUwxNiA4TDE1IDhMMTUgN0wxNCA3TDE0IDZaTTUgOUw1IDEwTDcgMTBMNyA5Wk0yMiA5TDIyIDEwTDIzIDEwTDIzIDlaTTE2IDEwTDE2IDExTDE1IDExTDE1IDEyTDE0IDEyTDE0IDExTDEzIDExTDEzIDEzTDE2IDEzTDE2IDExTDE3IDExTDE3IDEyTDE4IDEyTDE4IDExTDE3IDExTDE3IDEwWk00IDExTDQgMTJMNSAxMkw1IDEzTDYgMTNMNiAxNEw4IDE0TDggMTNMNiAxM0w2IDEyTDcgMTJMNyAxMVpNMjEgMTFMMjEgMTJMMjAgMTJMMjAgMTNMMTcgMTNMMTcgMTRMMTYgMTRMMTYgMTVMMTUgMTVMMTUgMTRMMTQgMTRMMTQgMTVMMTMgMTVMMTMgMTRMMTIgMTRMMTIgMTVMMTMgMTVMMTMgMTZMMTEgMTZMMTEgMTRMMTAgMTRMMTAgMTZMMTEgMTZMMTEgMTdMMTIgMTdMMTIgMThMMTQgMThMMTQgMTdMMTUgMTdMMTUgMTZMMTkgMTZMMTkgMTVMMjEgMTVMMjEgMTRMMjMgMTRMMjMgMTNMMjEgMTNMMjEgMTJMMjIgMTJMMjIgMTFaTTAgMTJMMCAxNEwxIDE0TDEgMTJaTTIwIDEzTDIwIDE0TDIxIDE0TDIxIDEzWk00IDE0TDQgMTVMMyAxNUwzIDE2TDQgMTZMNCAxNUw1IDE1TDUgMTRaTTE3IDE0TDE3IDE1TDE4IDE1TDE4IDE0Wk02IDE1TDYgMTZMOCAxNkw4IDE3TDkgMTdMOSAxNkw4IDE2TDggMTVaTTE0IDE1TDE0IDE2TDE1IDE2TDE1IDE1Wk0xNyAxN0wxNyAyMEwyMCAyMEwyMCAxN1pNMjEgMTdMMjEgMThMMjIgMThMMjIgMTdaTTE4IDE4TDE4IDE5TDE5IDE5TDE5IDE4Wk0xMyAxOUwxMyAyMEwxMSAyMEwxMSAyMUwxMiAyMUwxMiAyMkwxNCAyMkwxNCAxOVpNMjEgMjBMMjEgMjFMMjAgMjFMMjAgMjNMMjMgMjNMMjMgMjJMMjEgMjJMMjEgMjFMMjIgMjFMMjIgMjBaTTAgMEwwIDdMNyA3TDcgMFpNMSAxTDEgNkw2IDZMNiAxWk0yIDJMMiA1TDUgNUw1IDJaTTI1IDBMMTggMEwxOCA3TDI1IDdaTTI0IDFMMTkgMUwxOSA2TDI0IDZaTTIzIDJMMjAgMkwyMCA1TDIzIDVaTTAgMjVMNyAyNUw3IDE4TDAgMThaTTEgMjRMNiAyNEw2IDE5TDEgMTlaTTIgMjNMNSAyM0w1IDIwTDIgMjBaIiBmaWxsPSIjMDAwMDAwIi8+PC9nPjwvZz48L3N2Zz4K" alt="QR" />
+                </td>
+                
+                <td class="info">
+                  <table class="info-table">
+                    <tbody>
+                      <tr class="row-matno">
+                        <td class="matno">MAT-5986-pmop</td>
+                      </tr>
+                      <tr class="row-catrank">
+                        <td class="catrank">
+                                                      Mechanical · Rank A
+                                                  </td>
+                      </tr>
+                      <tr class="row-partname">
+                        <td class="partname">laudantium et dolorem</td>
+                      </tr>
+                      <tr class="row-maker">
+                        <td class="lbl">Maker</td>
+                        <td class="val">Hilpert-Funk</td>
+                      </tr>
+                      <tr class="row-location">
+                        <td class="lbl">Location</td>
+                        <td class="val">RACK-15-dk / BIN-989</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+                </td>
+              <td>
+                  <table class="label">
+            <tbody>
+              <tr>
+                
+                <td class="qr-cell" rowspan="5">
+                  <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgd2lkdGg9IjI2MCIgaGVpZ2h0PSIyNjAiIHZpZXdCb3g9IjAgMCAyNjAgMjYwIj48cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMjYwIiBoZWlnaHQ9IjI2MCIgZmlsbD0iI2ZlZmVmZSIvPjxnIHRyYW5zZm9ybT0ic2NhbGUoOC45NjYpIj48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyLjAwMCwyLjAwMCkiPjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTkgMEw5IDFMOCAxTDggMkw5IDJMOSAzTDggM0w4IDRMMTAgNEwxMCA3TDExIDdMMTEgOEw2IDhMNiA5TDcgOUw3IDEwTDUgMTBMNSA4TDAgOEwwIDlMNCA5TDQgMTBMMiAxMEwyIDExTDEgMTFMMSAxMkwwIDEyTDAgMTdMMSAxN0wxIDE0TDMgMTRMMyAxNUwyIDE1TDIgMTZMMyAxNkwzIDE1TDUgMTVMNSAxM0w3IDEzTDcgMTRMNiAxNEw2IDE1TDcgMTVMNyAxNEwxMCAxNEwxMCAxNUw4IDE1TDggMTZMNCAxNkw0IDE3TDggMTdMOCAxOUw5IDE5TDkgMjBMOCAyMEw4IDI1TDEwIDI1TDEwIDIzTDkgMjNMOSAyMkwxMCAyMkwxMCAyMUw5IDIxTDkgMjBMMTAgMjBMMTAgMTlMMTEgMTlMMTEgMThMMTIgMThMMTIgMTdMMTEgMTdMMTEgMTRMMTIgMTRMMTIgMTVMMTQgMTVMMTQgMTZMMTMgMTZMMTMgMTlMMTQgMTlMMTQgMjBMMTMgMjBMMTMgMjNMMTQgMjNMMTQgMjRMMTIgMjRMMTIgMjNMMTEgMjNMMTEgMjVMMTUgMjVMMTUgMjRMMTggMjRMMTggMjVMMjUgMjVMMjUgMjFMMjQgMjFMMjQgMjBMMjUgMjBMMjUgMThMMjMgMThMMjMgMTZMMjIgMTZMMjIgMTNMMjMgMTNMMjMgMTVMMjQgMTVMMjQgMTZMMjUgMTZMMjUgMTRMMjQgMTRMMjQgMTNMMjUgMTNMMjUgMTBMMjQgMTBMMjQgOEwyMyA4TDIzIDExTDI0IDExTDI0IDEyTDIyIDEyTDIyIDEzTDIxIDEzTDIxIDExTDIyIDExTDIyIDEwTDIwIDEwTDIwIDhMMTkgOEwxOSAxMEwxOCAxMEwxOCAxMUwxNyAxMUwxNyA5TDE4IDlMMTggOEwxNyA4TDE3IDZMMTYgNkwxNiA1TDE1IDVMMTUgMkwxNiAyTDE2IDNMMTcgM0wxNyAwTDE2IDBMMTYgMUwxNSAxTDE1IDBMMTQgMEwxNCAxTDExIDFMMTEgMkwxMCAyTDEwIDBaTTE0IDFMMTQgMkwxMiAyTDEyIDNMMTQgM0wxNCAyTDE1IDJMMTUgMVpNMTAgM0wxMCA0TDExIDRMMTEgN0wxMiA3TDEyIDRMMTEgNEwxMSAzWk0xMyA0TDEzIDhMMTEgOEwxMSA5TDEwIDlMMTAgMTFMMTIgMTFMMTIgMTJMMTQgMTJMMTQgMTFMMTMgMTFMMTMgMTBMMTEgMTBMMTEgOUwxMyA5TDEzIDhMMTUgOEwxNSA3TDE2IDdMMTYgNkwxNSA2TDE1IDdMMTQgN0wxNCA0Wk04IDVMOCA3TDkgN0w5IDVaTTIxIDhMMjEgOUwyMiA5TDIyIDhaTTggOUw4IDEwTDcgMTBMNyAxMUw1IDExTDUgMTBMNCAxMEw0IDEyTDEgMTJMMSAxM0w0IDEzTDQgMTJMOCAxMkw4IDEzTDkgMTNMOSA5Wk0xNCA5TDE0IDEwTDE2IDEwTDE2IDlaTTE1IDExTDE1IDEyTDE3IDEyTDE3IDExWk0xOCAxMUwxOCAxMkwxOSAxMkwxOSAxM0wxNyAxM0wxNyAxNUwxOCAxNUwxOCAxNEwxOSAxNEwxOSAxNUwyMSAxNUwyMSAxM0wyMCAxM0wyMCAxMkwxOSAxMkwxOSAxMVpNMTAgMTJMMTAgMTNMMTEgMTNMMTEgMTJaTTEzIDEzTDEzIDE0TDE0IDE0TDE0IDE1TDE1IDE1TDE1IDE3TDE0IDE3TDE0IDE5TDE1IDE5TDE1IDIwTDE0IDIwTDE0IDIyTDE1IDIyTDE1IDIwTDE2IDIwTDE2IDE4TDE1IDE4TDE1IDE3TDE2IDE3TDE2IDE1TDE1IDE1TDE1IDE0TDE2IDE0TDE2IDEzWk0xOSAxM0wxOSAxNEwyMCAxNEwyMCAxM1pNOCAxNkw4IDE3TDkgMTdMOSAxOEwxMCAxOEwxMCAxN0w5IDE3TDkgMTZaTTIxIDE2TDIxIDE3TDIyIDE3TDIyIDE2Wk0xNyAxN0wxNyAyMEwyMCAyMEwyMCAxN1pNMTggMThMMTggMTlMMTkgMTlMMTkgMThaTTIyIDE5TDIyIDIwTDI0IDIwTDI0IDE5Wk0xMSAyMUwxMSAyMkwxMiAyMkwxMiAyMVpNMTYgMjFMMTYgMjJMMTcgMjJMMTcgMjNMMTggMjNMMTggMjRMMTkgMjRMMTkgMjJMMjAgMjJMMjAgMjNMMjIgMjNMMjIgMjRMMjQgMjRMMjQgMjJMMjMgMjJMMjMgMjNMMjIgMjNMMjIgMjFMMjEgMjFMMjEgMjJMMjAgMjJMMjAgMjFMMTkgMjFMMTkgMjJMMTcgMjJMMTcgMjFaTTAgMEwwIDdMNyA3TDcgMFpNMSAxTDEgNkw2IDZMNiAxWk0yIDJMMiA1TDUgNUw1IDJaTTI1IDBMMTggMEwxOCA3TDI1IDdaTTI0IDFMMTkgMUwxOSA2TDI0IDZaTTIzIDJMMjAgMkwyMCA1TDIzIDVaTTAgMjVMNyAyNUw3IDE4TDAgMThaTTEgMjRMNiAyNEw2IDE5TDEgMTlaTTIgMjNMNSAyM0w1IDIwTDIgMjBaIiBmaWxsPSIjMDAwMDAwIi8+PC9nPjwvZz48L3N2Zz4K" alt="QR" />
+                </td>
+                
+                <td class="info">
+                  <table class="info-table">
+                    <tbody>
+                      <tr class="row-matno">
+                        <td class="matno">MAT-1920-gpbh</td>
+                      </tr>
+                      <tr class="row-catrank">
+                        <td class="catrank">
+                                                      Pneumatic · Rank A
+                                                  </td>
+                      </tr>
+                      <tr class="row-partname">
+                        <td class="partname">quam eius provident</td>
+                      </tr>
+                      <tr class="row-maker">
+                        <td class="lbl">Maker</td>
+                        <td class="val">Gorczany-Feil</td>
+                      </tr>
+                      <tr class="row-location">
+                        <td class="lbl">Location</td>
+                        <td class="val">RACK-15-dk / BIN-198</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+                </td>
+            </tr>
+          <tr>
+              <td>
+                  <table class="label">
+            <tbody>
+              <tr>
+                
+                <td class="qr-cell" rowspan="5">
+                  <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgd2lkdGg9IjI2MCIgaGVpZ2h0PSIyNjAiIHZpZXdCb3g9IjAgMCAyNjAgMjYwIj48cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMjYwIiBoZWlnaHQ9IjI2MCIgZmlsbD0iI2ZlZmVmZSIvPjxnIHRyYW5zZm9ybT0ic2NhbGUoOC45NjYpIj48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyLjAwMCwyLjAwMCkiPjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTggMEw4IDFMMTEgMUwxMSAzTDEwIDNMMTAgMkw5IDJMOSAzTDEwIDNMMTAgNUw5IDVMOSA2TDggNkw4IDhMOSA4TDkgOUw4IDlMOCAxMUw3IDExTDcgMTBMNSAxMEw1IDhMMyA4TDMgOUw0IDlMNCAxMEwzIDEwTDMgMTFMMiAxMUwyIDEwTDEgMTBMMSAxMUwyIDExTDIgMTJMMyAxMkwzIDExTDQgMTFMNCAxMkw2IDEyTDYgMTNMNyAxM0w3IDEyTDggMTJMOCAxM0w5IDEzTDkgMTRMMTIgMTRMMTIgMTVMMTMgMTVMMTMgMTRMMTUgMTRMMTUgMTZMMTYgMTZMMTYgMTlMMTUgMTlMMTUgMThMMTQgMThMMTQgMTZMMTMgMTZMMTMgMThMMTQgMThMMTQgMTlMMTMgMTlMMTMgMjBMMTQgMjBMMTQgMTlMMTUgMTlMMTUgMjFMMTMgMjFMMTMgMjNMMTQgMjNMMTQgMjRMMTUgMjRMMTUgMjNMMTggMjNMMTggMjJMMTkgMjJMMTkgMjRMMTYgMjRMMTYgMjVMMTkgMjVMMTkgMjRMMjEgMjRMMjEgMjVMMjIgMjVMMjIgMjRMMjQgMjRMMjQgMjVMMjUgMjVMMjUgMjFMMjQgMjFMMjQgMjBMMjUgMjBMMjUgMThMMjQgMThMMjQgMTZMMjUgMTZMMjUgMTRMMjQgMTRMMjQgMTNMMjUgMTNMMjUgMTBMMjQgMTBMMjQgOUwyNSA5TDI1IDhMMjQgOEwyNCA5TDE5IDlMMTkgOEwxOCA4TDE4IDlMMTkgOUwxOSAxMEwxNiAxMEwxNiA4TDE3IDhMMTcgNUwxNiA1TDE2IDhMMTUgOEwxNSA1TDE0IDVMMTQgN0wxMyA3TDEzIDZMMTIgNkwxMiA1TDEzIDVMMTMgNEwxNCA0TDE0IDNMMTUgM0wxNSA0TDE3IDRMMTcgM0wxNSAzTDE1IDFMMTQgMUwxNCAwTDEzIDBMMTMgMUwxMiAxTDEyIDBaTTEzIDFMMTMgMkwxMiAyTDEyIDNMMTMgM0wxMyAyTDE0IDJMMTQgMVpNMTYgMUwxNiAyTDE3IDJMMTcgMVpNMTAgNUwxMCA2TDkgNkw5IDdMMTAgN0wxMCA5TDkgOUw5IDEwTDEwIDEwTDEwIDExTDkgMTFMOSAxMkwxMSAxMkwxMSAxM0wxMiAxM0wxMiAxMkwxMyAxMkwxMyAxM0wxNSAxM0wxNSAxMkwxNCAxMkwxNCAxMUwxNSAxMUwxNSAxMEwxNCAxMEwxNCAxMUwxMyAxMUwxMyAxMEwxMiAxMEwxMiAxMUwxMSAxMUwxMSAxMEwxMCAxMEwxMCA5TDE0IDlMMTQgOEwxMSA4TDExIDdMMTIgN0wxMiA2TDExIDZMMTEgNVpNMTAgNkwxMCA3TDExIDdMMTEgNlpNMCA4TDAgOUwyIDlMMiA4Wk02IDhMNiA5TDcgOUw3IDhaTTQgMTBMNCAxMUw1IDExTDUgMTBaTTIwIDEwTDIwIDExTDIxIDExTDIxIDEwWk0yMiAxMEwyMiAxMUwyNCAxMUwyNCAxMFpNNiAxMUw2IDEyTDcgMTJMNyAxMVpNMTcgMTFMMTcgMTJMMTYgMTJMMTYgMTNMMTcgMTNMMTcgMTRMMTYgMTRMMTYgMTZMMTcgMTZMMTcgMTVMMTggMTVMMTggMTRMMjAgMTRMMjAgMTZMMjEgMTZMMjEgMThMMjIgMThMMjIgMTlMMjEgMTlMMjEgMjBMMjIgMjBMMjIgMjJMMjEgMjJMMjEgMjFMMTkgMjFMMTkgMjJMMjEgMjJMMjEgMjRMMjIgMjRMMjIgMjJMMjMgMjJMMjMgMjBMMjQgMjBMMjQgMThMMjMgMThMMjMgMTdMMjIgMTdMMjIgMTVMMjEgMTVMMjEgMTRMMjMgMTRMMjMgMTNMMjQgMTNMMjQgMTJMMjAgMTJMMjAgMTNMMTggMTNMMTggMTJMMTkgMTJMMTkgMTFaTTAgMTJMMCAxN0wxIDE3TDEgMTVMMiAxNUwyIDE2TDMgMTZMMyAxN0w0IDE3TDQgMTZMNSAxNkw1IDE3TDcgMTdMNyAxNkw2IDE2TDYgMTVMOCAxNUw4IDE0TDQgMTRMNCAxNkwzIDE2TDMgMTVMMiAxNUwyIDE0TDMgMTRMMyAxM0wyIDEzTDIgMTRMMSAxNEwxIDEyWk0yMCAxM0wyMCAxNEwyMSAxNEwyMSAxM1pNMTAgMTVMMTAgMTZMOCAxNkw4IDE4TDkgMThMOSAxOUwxMCAxOUwxMCAyMUw5IDIxTDkgMjBMOCAyMEw4IDIyTDkgMjJMOSAyM0w4IDIzTDggMjVMMTEgMjVMMTEgMjNMMTIgMjNMMTIgMjFMMTEgMjFMMTEgMTlMMTIgMTlMMTIgMThMMTEgMThMMTEgMTdMMTIgMTdMMTIgMTZMMTEgMTZMMTEgMTVaTTIzIDE1TDIzIDE2TDI0IDE2TDI0IDE1Wk0xMCAxNkwxMCAxN0w5IDE3TDkgMThMMTAgMThMMTAgMTlMMTEgMTlMMTEgMThMMTAgMThMMTAgMTdMMTEgMTdMMTEgMTZaTTE3IDE3TDE3IDIwTDIwIDIwTDIwIDE3Wk0xOCAxOEwxOCAxOUwxOSAxOUwxOSAxOFpNMTUgMjFMMTUgMjJMMTQgMjJMMTQgMjNMMTUgMjNMMTUgMjJMMTYgMjJMMTYgMjFaTTkgMjNMOSAyNEwxMCAyNEwxMCAyM1pNMTIgMjRMMTIgMjVMMTMgMjVMMTMgMjRaTTAgMEwwIDdMNyA3TDcgMFpNMSAxTDEgNkw2IDZMNiAxWk0yIDJMMiA1TDUgNUw1IDJaTTI1IDBMMTggMEwxOCA3TDI1IDdaTTI0IDFMMTkgMUwxOSA2TDI0IDZaTTIzIDJMMjAgMkwyMCA1TDIzIDVaTTAgMjVMNyAyNUw3IDE4TDAgMThaTTEgMjRMNiAyNEw2IDE5TDEgMTlaTTIgMjNMNSAyM0w1IDIwTDIgMjBaIiBmaWxsPSIjMDAwMDAwIi8+PC9nPjwvZz48L3N2Zz4K" alt="QR" />
+                </td>
+                
+                <td class="info">
+                  <table class="info-table">
+                    <tbody>
+                      <tr class="row-matno">
+                        <td class="matno">MAT-6335-hhcv</td>
+                      </tr>
+                      <tr class="row-catrank">
+                        <td class="catrank">
+                                                      Chemical · Rank A
+                                                  </td>
+                      </tr>
+                      <tr class="row-partname">
+                        <td class="partname">vel voluptatum voluptas</td>
+                      </tr>
+                      <tr class="row-maker">
+                        <td class="lbl">Maker</td>
+                        <td class="val">McGlynn-Muller</td>
+                      </tr>
+                      <tr class="row-location">
+                        <td class="lbl">Location</td>
+                        <td class="val">RACK-15-dk / BIN-786</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+                </td>
+              <td>
+                  <table class="label">
+            <tbody>
+              <tr>
+                
+                <td class="qr-cell" rowspan="5">
+                  <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgd2lkdGg9IjI2MCIgaGVpZ2h0PSIyNjAiIHZpZXdCb3g9IjAgMCAyNjAgMjYwIj48cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMjYwIiBoZWlnaHQ9IjI2MCIgZmlsbD0iI2ZlZmVmZSIvPjxnIHRyYW5zZm9ybT0ic2NhbGUoOC45NjYpIj48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyLjAwMCwyLjAwMCkiPjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTggMEw4IDFMMTEgMUwxMSAzTDEwIDNMMTAgMkw5IDJMOSAzTDEwIDNMMTAgNUw5IDVMOSA2TDggNkw4IDhMOSA4TDkgOUw3IDlMNyA4TDYgOEw2IDlMNSA5TDUgOEwzIDhMMyAxMEw0IDEwTDQgMTFMNSAxMUw1IDEwTDYgMTBMNiAxMUw3IDExTDcgMTBMOSAxMEw5IDExTDggMTFMOCAxMkw5IDEyTDkgMTNMNyAxM0w3IDEyTDYgMTJMNiAxM0w3IDEzTDcgMTRMNiAxNEw2IDE1TDcgMTVMNyAxNkw2IDE2TDYgMTdMOCAxN0w4IDE4TDkgMThMOSAxOUwxMiAxOUwxMiAxOEwxMSAxOEwxMSAxN0wxMiAxN0wxMiAxNkwxMSAxNkwxMSAxNEwxMiAxNEwxMiAxNUwxMyAxNUwxMyAxNEwxNSAxNEwxNSAxNkwxNiAxNkwxNiAxOUwxNSAxOUwxNSAxOEwxNCAxOEwxNCAxNkwxMyAxNkwxMyAxOEwxNCAxOEwxNCAxOUwxMyAxOUwxMyAyMEwxNCAyMEwxNCAxOUwxNSAxOUwxNSAyMUwxMyAyMUwxMyAyM0wxNCAyM0wxNCAyNEwxNSAyNEwxNSAyM0wxOCAyM0wxOCAyMkwxOSAyMkwxOSAyNEwxNiAyNEwxNiAyNUwxOSAyNUwxOSAyNEwyMSAyNEwyMSAyNUwyMiAyNUwyMiAyNEwyNCAyNEwyNCAyNUwyNSAyNUwyNSAyMUwyNCAyMUwyNCAyMEwyNSAyMEwyNSAxOEwyNCAxOEwyNCAxNkwyNSAxNkwyNSAxNEwyNCAxNEwyNCAxM0wyNSAxM0wyNSAxMEwyNCAxMEwyNCA5TDI1IDlMMjUgOEwyNCA4TDI0IDlMMTkgOUwxOSA4TDE4IDhMMTggOUwxOSA5TDE5IDEwTDE2IDEwTDE2IDhMMTcgOEwxNyA1TDE2IDVMMTYgOEwxNSA4TDE1IDVMMTQgNUwxNCA3TDEzIDdMMTMgNEwxNCA0TDE0IDNMMTUgM0wxNSA0TDE3IDRMMTcgM0wxNSAzTDE1IDFMMTQgMUwxNCAwTDEzIDBMMTMgMUwxMiAxTDEyIDBaTTEzIDFMMTMgMkwxMiAyTDEyIDNMMTMgM0wxMyAyTDE0IDJMMTQgMVpNMTYgMUwxNiAyTDE3IDJMMTcgMVpNMTAgNUwxMCA2TDkgNkw5IDdMMTAgN0wxMCA5TDkgOUw5IDEwTDEwIDEwTDEwIDExTDkgMTFMOSAxMkwxMSAxMkwxMSAxM0wxMiAxM0wxMiAxMkwxMyAxMkwxMyAxM0wxNSAxM0wxNSAxMkwxNCAxMkwxNCAxMUwxNSAxMUwxNSAxMEwxNCAxMEwxNCAxMUwxMyAxMUwxMyAxMEwxMiAxMEwxMiAxMUwxMSAxMUwxMSAxMEwxMCAxMEwxMCA5TDE0IDlMMTQgOEwxMyA4TDEzIDdMMTIgN0wxMiA2TDExIDZMMTEgNVpNMTAgNkwxMCA3TDExIDdMMTEgNlpNMCA4TDAgMTFMMSAxMUwxIDEyTDAgMTJMMCAxN0wxIDE3TDEgMTVMMiAxNUwyIDE0TDUgMTRMNSAxMkw0IDEyTDQgMTNMMyAxM0wzIDEyTDIgMTJMMiA4Wk02IDlMNiAxMEw3IDEwTDcgOVpNMjAgMTBMMjAgMTFMMjEgMTFMMjEgMTBaTTIyIDEwTDIyIDExTDI0IDExTDI0IDEwWk0xNyAxMUwxNyAxMkwxNiAxMkwxNiAxM0wxNyAxM0wxNyAxNEwxNiAxNEwxNiAxNkwxNyAxNkwxNyAxNUwxOCAxNUwxOCAxNEwyMCAxNEwyMCAxNkwyMSAxNkwyMSAxOEwyMiAxOEwyMiAxOUwyMSAxOUwyMSAyMEwyMiAyMEwyMiAyMkwyMSAyMkwyMSAyMUwxOSAyMUwxOSAyMkwyMSAyMkwyMSAyNEwyMiAyNEwyMiAyMkwyMyAyMkwyMyAyMEwyNCAyMEwyNCAxOEwyMyAxOEwyMyAxN0wyMiAxN0wyMiAxNUwyMSAxNUwyMSAxNEwyMyAxNEwyMyAxM0wyNCAxM0wyNCAxMkwyMCAxMkwyMCAxM0wxOCAxM0wxOCAxMkwxOSAxMkwxOSAxMVpNMSAxMkwxIDEzTDIgMTNMMiAxMlpNOSAxM0w5IDE0TDggMTRMOCAxNkw5IDE2TDkgMTVMMTAgMTVMMTAgMTNaTTIwIDEzTDIwIDE0TDIxIDE0TDIxIDEzWk0zIDE1TDMgMTZMMiAxNkwyIDE3TDMgMTdMMyAxNkw0IDE2TDQgMTdMNSAxN0w1IDE2TDQgMTZMNCAxNVpNMjMgMTVMMjMgMTZMMjQgMTZMMjQgMTVaTTE3IDE3TDE3IDIwTDIwIDIwTDIwIDE3Wk0xOCAxOEwxOCAxOUwxOSAxOUwxOSAxOFpNOCAyMEw4IDIyTDkgMjJMOSAyM0w4IDIzTDggMjVMOSAyNUw5IDI0TDEwIDI0TDEwIDI1TDExIDI1TDExIDI0TDEwIDI0TDEwIDIzTDEyIDIzTDEyIDIxTDExIDIxTDExIDIyTDkgMjJMOSAyMUwxMCAyMUwxMCAyMFpNMTUgMjFMMTUgMjJMMTQgMjJMMTQgMjNMMTUgMjNMMTUgMjJMMTYgMjJMMTYgMjFaTTEyIDI0TDEyIDI1TDEzIDI1TDEzIDI0Wk0wIDBMMCA3TDcgN0w3IDBaTTEgMUwxIDZMNiA2TDYgMVpNMiAyTDIgNUw1IDVMNSAyWk0yNSAwTDE4IDBMMTggN0wyNSA3Wk0yNCAxTDE5IDFMMTkgNkwyNCA2Wk0yMyAyTDIwIDJMMjAgNUwyMyA1Wk0wIDI1TDcgMjVMNyAxOEwwIDE4Wk0xIDI0TDYgMjRMNiAxOUwxIDE5Wk0yIDIzTDUgMjNMNSAyMEwyIDIwWiIgZmlsbD0iIzAwMDAwMCIvPjwvZz48L2c+PC9zdmc+Cg==" alt="QR" />
+                </td>
+                
+                <td class="info">
+                  <table class="info-table">
+                    <tbody>
+                      <tr class="row-matno">
+                        <td class="matno">MAT-9130-xswl</td>
+                      </tr>
+                      <tr class="row-catrank">
+                        <td class="catrank">
+                                                      Tooling · Rank B
+                                                  </td>
+                      </tr>
+                      <tr class="row-partname">
+                        <td class="partname">ipsa iste omnis</td>
+                      </tr>
+                      <tr class="row-maker">
+                        <td class="lbl">Maker</td>
+                        <td class="val">Gorczany-Feil</td>
+                      </tr>
+                      <tr class="row-location">
+                        <td class="lbl">Location</td>
+                        <td class="val">RACK-62-qt / BIN-795</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+                </td>
+            </tr>
+          <tr>
+              <td>
+                  <table class="label">
+            <tbody>
+              <tr>
+                
+                <td class="qr-cell" rowspan="5">
+                  <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgd2lkdGg9IjI2MCIgaGVpZ2h0PSIyNjAiIHZpZXdCb3g9IjAgMCAyNjAgMjYwIj48cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMjYwIiBoZWlnaHQ9IjI2MCIgZmlsbD0iI2ZlZmVmZSIvPjxnIHRyYW5zZm9ybT0ic2NhbGUoOC45NjYpIj48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyLjAwMCwyLjAwMCkiPjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTkgMEw5IDFMOCAxTDggMkw5IDJMOSAzTDggM0w4IDRMMTAgNEwxMCA3TDExIDdMMTEgNEwxMiA0TDEyIDVMMTMgNUwxMyA0TDE0IDRMMTQgN0wxNSA3TDE1IDhMMTMgOEwxMyA5TDExIDlMMTEgOEw2IDhMNiA5TDUgOUw1IDhMMCA4TDAgMTFMMSAxMUwxIDEwTDIgMTBMMiAxMUwzIDExTDMgMTJMMiAxMkwyIDE0TDMgMTRMMyAxNkwyIDE2TDIgMTdMNCAxN0w0IDE2TDYgMTZMNiAxN0w3IDE3TDcgMTZMOSAxNkw5IDE3TDggMTdMOCAxOUw5IDE5TDkgMjBMOCAyMEw4IDI1TDkgMjVMOSAyMUwxMCAyMUwxMCAyMkwxMiAyMkwxMiAyMUwxMSAyMUwxMSAxOUwxMCAxOUwxMCAxOEwxMiAxOEwxMiAxN0wxMCAxN0wxMCAxNkwxMSAxNkwxMSAxNUwxMCAxNUwxMCAxNkw5IDE2TDkgMTVMNyAxNUw3IDE0TDUgMTRMNSAxNUw0IDE1TDQgMTRMMyAxNEwzIDEyTDUgMTJMNSAxM0wxMCAxM0wxMCAxNEwxMiAxNEwxMiAxNUwxNCAxNUwxNCAxNkwxMyAxNkwxMyAxOUwxNCAxOUwxNCAyMEwxMyAyMEwxMyAyM0wxNCAyM0wxNCAyNEwxMiAyNEwxMiAyM0wxMCAyM0wxMCAyNEwxMSAyNEwxMSAyNUwxNSAyNUwxNSAyNEwxOCAyNEwxOCAyNUwyNSAyNUwyNSAyMUwyNCAyMUwyNCAyMEwyNSAyMEwyNSAxOEwyMyAxOEwyMyAxNkwyMiAxNkwyMiAxM0wyMyAxM0wyMyAxNUwyNCAxNUwyNCAxNkwyNSAxNkwyNSAxNEwyNCAxNEwyNCAxM0wyNSAxM0wyNSAxMEwyNCAxMEwyNCA4TDIzIDhMMjMgMTFMMjQgMTFMMjQgMTJMMjIgMTJMMjIgMTNMMjEgMTNMMjEgMTFMMjIgMTFMMjIgMTBMMjAgMTBMMjAgOEwxOSA4TDE5IDEwTDE4IDEwTDE4IDExTDE3IDExTDE3IDlMMTggOUwxOCA4TDE3IDhMMTcgNkwxNiA2TDE2IDVMMTUgNUwxNSAyTDE2IDJMMTYgM0wxNyAzTDE3IDBMMTYgMEwxNiAxTDE1IDFMMTUgMEwxNCAwTDE0IDFMMTEgMUwxMSAyTDEwIDJMMTAgMFpNMTQgMUwxNCAyTDEyIDJMMTIgM0wxNCAzTDE0IDJMMTUgMkwxNSAxWk0xMCAzTDEwIDRMMTEgNEwxMSAzWk04IDVMOCA3TDkgN0w5IDVaTTEyIDZMMTIgN0wxMyA3TDEzIDZaTTE1IDZMMTUgN0wxNiA3TDE2IDZaTTIxIDhMMjEgOUwyMiA5TDIyIDhaTTIgOUwyIDEwTDMgMTBMMyAxMUw0IDExTDQgMTBMMyAxMEwzIDlaTTYgOUw2IDEwTDUgMTBMNSAxMUw2IDExTDYgMTJMNyAxMkw3IDExTDggMTFMOCAxMkw5IDEyTDkgMTFMOCAxMUw4IDEwTDkgMTBMOSA5Wk0xMCA5TDEwIDExTDEyIDExTDEyIDEyTDE0IDEyTDE0IDExTDEzIDExTDEzIDEwTDExIDEwTDExIDlaTTE0IDlMMTQgMTBMMTYgMTBMMTYgOVpNNiAxMEw2IDExTDcgMTFMNyAxMFpNMTUgMTFMMTUgMTJMMTcgMTJMMTcgMTFaTTE4IDExTDE4IDEyTDE5IDEyTDE5IDEzTDE3IDEzTDE3IDE1TDE4IDE1TDE4IDE0TDE5IDE0TDE5IDE1TDIxIDE1TDIxIDEzTDIwIDEzTDIwIDEyTDE5IDEyTDE5IDExWk0wIDEyTDAgMTdMMSAxN0wxIDEyWk0xMCAxMkwxMCAxM0wxMSAxM0wxMSAxMlpNMTMgMTNMMTMgMTRMMTQgMTRMMTQgMTVMMTUgMTVMMTUgMTdMMTQgMTdMMTQgMTlMMTUgMTlMMTUgMjBMMTQgMjBMMTQgMjJMMTUgMjJMMTUgMjBMMTYgMjBMMTYgMThMMTUgMThMMTUgMTdMMTYgMTdMMTYgMTVMMTUgMTVMMTUgMTRMMTYgMTRMMTYgMTNaTTE5IDEzTDE5IDE0TDIwIDE0TDIwIDEzWk02IDE1TDYgMTZMNyAxNkw3IDE1Wk0yMSAxNkwyMSAxN0wyMiAxN0wyMiAxNlpNMTcgMTdMMTcgMjBMMjAgMjBMMjAgMTdaTTE4IDE4TDE4IDE5TDE5IDE5TDE5IDE4Wk0yMiAxOUwyMiAyMEwyNCAyMEwyNCAxOVpNMTYgMjFMMTYgMjJMMTcgMjJMMTcgMjNMMTggMjNMMTggMjRMMTkgMjRMMTkgMjJMMjAgMjJMMjAgMjNMMjIgMjNMMjIgMjRMMjQgMjRMMjQgMjJMMjMgMjJMMjMgMjNMMjIgMjNMMjIgMjFMMjEgMjFMMjEgMjJMMjAgMjJMMjAgMjFMMTkgMjFMMTkgMjJMMTcgMjJMMTcgMjFaTTAgMEwwIDdMNyA3TDcgMFpNMSAxTDEgNkw2IDZMNiAxWk0yIDJMMiA1TDUgNUw1IDJaTTI1IDBMMTggMEwxOCA3TDI1IDdaTTI0IDFMMTkgMUwxOSA2TDI0IDZaTTIzIDJMMjAgMkwyMCA1TDIzIDVaTTAgMjVMNyAyNUw3IDE4TDAgMThaTTEgMjRMNiAyNEw2IDE5TDEgMTlaTTIgMjNMNSAyM0w1IDIwTDIgMjBaIiBmaWxsPSIjMDAwMDAwIi8+PC9nPjwvZz48L3N2Zz4K" alt="QR" />
+                </td>
+                
+                <td class="info">
+                  <table class="info-table">
+                    <tbody>
+                      <tr class="row-matno">
+                        <td class="matno">MAT-8042-imyt</td>
+                      </tr>
+                      <tr class="row-catrank">
+                        <td class="catrank">
+                                                      Tooling · Rank C
+                                                  </td>
+                      </tr>
+                      <tr class="row-partname">
+                        <td class="partname">dolores nesciunt quae</td>
+                      </tr>
+                      <tr class="row-maker">
+                        <td class="lbl">Maker</td>
+                        <td class="val">Abbott, Langworth and Mohr</td>
+                      </tr>
+                      <tr class="row-location">
+                        <td class="lbl">Location</td>
+                        <td class="val">RACK-15-dk / BIN-198</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+                </td>
+              <td>
+                  <table class="label">
+            <tbody>
+              <tr>
+                
+                <td class="qr-cell" rowspan="5">
+                  <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgd2lkdGg9IjI2MCIgaGVpZ2h0PSIyNjAiIHZpZXdCb3g9IjAgMCAyNjAgMjYwIj48cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMjYwIiBoZWlnaHQ9IjI2MCIgZmlsbD0iI2ZlZmVmZSIvPjxnIHRyYW5zZm9ybT0ic2NhbGUoOC45NjYpIj48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyLjAwMCwyLjAwMCkiPjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTkgMEw5IDFMOCAxTDggMkw5IDJMOSAzTDggM0w4IDRMMTAgNEwxMCA3TDExIDdMMTEgOEw2IDhMNiA5TDUgOUw1IDhMMCA4TDAgOUwyIDlMMiAxMEwxIDEwTDEgMTFMMCAxMUwwIDE3TDEgMTdMMSAxM0wyIDEzTDIgMTFMMyAxMUwzIDEzTDQgMTNMNCAxMUw3IDExTDcgMTBMOCAxMEw4IDExTDkgMTFMOSAxM0w4IDEzTDggMTRMNiAxNEw2IDEzTDcgMTNMNyAxMkw2IDEyTDYgMTNMNSAxM0w1IDE1TDQgMTVMNCAxNEwyIDE0TDIgMTVMMyAxNUwzIDE2TDIgMTZMMiAxN0w0IDE3TDQgMTZMNSAxNkw1IDE3TDggMTdMOCAxOUw5IDE5TDkgMTVMMTAgMTVMMTAgMTZMMTEgMTZMMTEgMTVMMTAgMTVMMTAgMTRMMTIgMTRMMTIgMTVMMTQgMTVMMTQgMTZMMTMgMTZMMTMgMTlMMTQgMTlMMTQgMjBMMTMgMjBMMTMgMjNMMTQgMjNMMTQgMjRMMTIgMjRMMTIgMjNMMTEgMjNMMTEgMjRMMTAgMjRMMTAgMjJMOSAyMkw5IDIxTDEwIDIxTDEwIDIwTDExIDIwTDExIDE5TDEwIDE5TDEwIDIwTDggMjBMOCAyNUw5IDI1TDkgMjRMMTAgMjRMMTAgMjVMMTUgMjVMMTUgMjRMMTggMjRMMTggMjVMMjUgMjVMMjUgMjFMMjQgMjFMMjQgMjBMMjUgMjBMMjUgMThMMjMgMThMMjMgMTZMMjIgMTZMMjIgMTNMMjMgMTNMMjMgMTVMMjQgMTVMMjQgMTZMMjUgMTZMMjUgMTRMMjQgMTRMMjQgMTNMMjUgMTNMMjUgMTBMMjQgMTBMMjQgOEwyMyA4TDIzIDExTDI0IDExTDI0IDEyTDIyIDEyTDIyIDEzTDIxIDEzTDIxIDExTDIyIDExTDIyIDEwTDIwIDEwTDIwIDhMMTkgOEwxOSAxMEwxOCAxMEwxOCAxMUwxNyAxMUwxNyA5TDE4IDlMMTggOEwxNyA4TDE3IDZMMTYgNkwxNiA1TDE1IDVMMTUgMkwxNiAyTDE2IDNMMTcgM0wxNyAwTDE2IDBMMTYgMUwxNSAxTDE1IDBMMTQgMEwxNCAxTDExIDFMMTEgMkwxMCAyTDEwIDBaTTE0IDFMMTQgMkwxMiAyTDEyIDNMMTQgM0wxNCAyTDE1IDJMMTUgMVpNMTAgM0wxMCA0TDExIDRMMTEgN0wxMiA3TDEyIDhMMTEgOEwxMSA5TDEwIDlMMTAgMTFMMTIgMTFMMTIgMTJMMTQgMTJMMTQgMTFMMTMgMTFMMTMgMTBMMTEgMTBMMTEgOUwxMyA5TDEzIDhMMTUgOEwxNSA3TDE2IDdMMTYgNkwxNSA2TDE1IDdMMTQgN0wxNCA0TDEzIDRMMTMgN0wxMiA3TDEyIDRMMTEgNEwxMSAzWk04IDVMOCA3TDkgN0w5IDVaTTIxIDhMMjEgOUwyMiA5TDIyIDhaTTMgOUwzIDEwTDQgMTBMNCA5Wk02IDlMNiAxMEw3IDEwTDcgOVpNMTQgOUwxNCAxMEwxNiAxMEwxNiA5Wk0xNSAxMUwxNSAxMkwxNyAxMkwxNyAxMVpNMTggMTFMMTggMTJMMTkgMTJMMTkgMTNMMTcgMTNMMTcgMTVMMTggMTVMMTggMTRMMTkgMTRMMTkgMTVMMjEgMTVMMjEgMTNMMjAgMTNMMjAgMTJMMTkgMTJMMTkgMTFaTTEwIDEyTDEwIDEzTDExIDEzTDExIDEyWk0xMyAxM0wxMyAxNEwxNCAxNEwxNCAxNUwxNSAxNUwxNSAxN0wxNCAxN0wxNCAxOUwxNSAxOUwxNSAyMEwxNCAyMEwxNCAyMkwxNSAyMkwxNSAyMEwxNiAyMEwxNiAxOEwxNSAxOEwxNSAxN0wxNiAxN0wxNiAxNUwxNSAxNUwxNSAxNEwxNiAxNEwxNiAxM1pNMTkgMTNMMTkgMTRMMjAgMTRMMjAgMTNaTTYgMTVMNiAxNkw3IDE2TDcgMTVaTTIxIDE2TDIxIDE3TDIyIDE3TDIyIDE2Wk0xMCAxN0wxMCAxOEwxMiAxOEwxMiAxN1pNMTcgMTdMMTcgMjBMMjAgMjBMMjAgMTdaTTE4IDE4TDE4IDE5TDE5IDE5TDE5IDE4Wk0yMiAxOUwyMiAyMEwyNCAyMEwyNCAxOVpNMTEgMjFMMTEgMjJMMTIgMjJMMTIgMjFaTTE2IDIxTDE2IDIyTDE3IDIyTDE3IDIzTDE4IDIzTDE4IDI0TDE5IDI0TDE5IDIyTDIwIDIyTDIwIDIzTDIyIDIzTDIyIDI0TDI0IDI0TDI0IDIyTDIzIDIyTDIzIDIzTDIyIDIzTDIyIDIxTDIxIDIxTDIxIDIyTDIwIDIyTDIwIDIxTDE5IDIxTDE5IDIyTDE3IDIyTDE3IDIxWk0wIDBMMCA3TDcgN0w3IDBaTTEgMUwxIDZMNiA2TDYgMVpNMiAyTDIgNUw1IDVMNSAyWk0yNSAwTDE4IDBMMTggN0wyNSA3Wk0yNCAxTDE5IDFMMTkgNkwyNCA2Wk0yMyAyTDIwIDJMMjAgNUwyMyA1Wk0wIDI1TDcgMjVMNyAxOEwwIDE4Wk0xIDI0TDYgMjRMNiAxOUwxIDE5Wk0yIDIzTDUgMjNMNSAyMEwyIDIwWiIgZmlsbD0iIzAwMDAwMCIvPjwvZz48L2c+PC9zdmc+Cg==" alt="QR" />
+                </td>
+                
+                <td class="info">
+                  <table class="info-table">
+                    <tbody>
+                      <tr class="row-matno">
+                        <td class="matno">MAT-4929-rnvr</td>
+                      </tr>
+                      <tr class="row-catrank">
+                        <td class="catrank">
+                                                      Tooling · Rank A
+                                                  </td>
+                      </tr>
+                      <tr class="row-partname">
+                        <td class="partname">temporibus voluptas mollitia</td>
+                      </tr>
+                      <tr class="row-maker">
+                        <td class="lbl">Maker</td>
+                        <td class="val">Hilpert-Funk</td>
+                      </tr>
+                      <tr class="row-location">
+                        <td class="lbl">Location</td>
+                        <td class="val">RACK-15-dk / BIN-765</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+                </td>
+            </tr>
+        </tbody>
+  </table>
+
+<div class="footer">
+  Valeo WMS &mdash; Dicetak: 15/08/2026 07:07
+  <span>6 item</span>
+  <span>1 halaman</span>
+</div>
+
+</body>
+</html>

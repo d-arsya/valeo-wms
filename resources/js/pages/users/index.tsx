@@ -3,8 +3,8 @@ import { Plus, Search, Trash2, UserCheck, ShieldAlert, Edit } from 'lucide-react
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Pagination } from '@/components/pagination';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
@@ -46,8 +46,14 @@ export default function Index({
         event?.preventDefault();
 
         const query: Record<string, string> = {};
-        if (search.trim()) query.search = search.trim();
-        if (role !== 'all') query.role = role;
+
+        if (search.trim()) {
+query.search = search.trim();
+}
+
+        if (role !== 'all') {
+query.role = role;
+}
 
         router.get(users.index().url, query, {
             preserveScroll: true,

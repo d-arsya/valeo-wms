@@ -63,5 +63,9 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('report-export', function (Request $request) {
             return Limit::perMinute(10)->by($request->user()?->id ?: $request->ip());
         });
+
+        RateLimiter::for('qr-print', function (Request $request) {
+            return Limit::perMinute(8)->by($request->user()?->id ?: $request->ip());
+        });
     }
 }

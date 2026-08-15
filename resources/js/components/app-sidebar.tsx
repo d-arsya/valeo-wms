@@ -1,8 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
     BarChart3,
-    BookOpen,
-    FolderGit2,
+    Printer,
     QrCode,
     ScanLine,
     Warehouse,
@@ -11,10 +10,8 @@ import {
     FolderOpen,
     Layers,
     Database,
-    ChevronRight,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
@@ -42,6 +39,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Masterdata',
+        href: '/brands',
         icon: Database,
         children: [
             {
@@ -72,6 +70,11 @@ const mainNavItems: NavItem[] = [
         icon: QrCode,
     },
     {
+        title: 'Cetak QR Code',
+        href: '/qr-codes/print',
+        icon: Printer,
+    },
+    {
         title: 'Users',
         href: '/users',
         icon: Users,
@@ -86,9 +89,15 @@ export function AppSidebar() {
         if (item.href === '/users') {
             return isAdmin;
         }
+
         if (item.title === 'Masterdata') {
             return isAdmin;
         }
+
+        if (item.href === '/qr-codes/print') {
+            return isAdmin;
+        }
+
         return true;
     });
 

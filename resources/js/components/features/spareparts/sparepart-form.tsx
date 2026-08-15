@@ -291,10 +291,10 @@ export function SparepartForm({
                 <CardContent className="flex flex-col gap-3 border-t border-border/60 py-4 sm:flex-row sm:items-center sm:justify-between">
                     <p className="text-sm text-muted-foreground">Pastikan data lokasi dan stok sudah benar sebelum menyimpan.</p>
 
-                    <div className="flex flex-col gap-2 sm:flex-row">
-                        <BackButton fallback={cancelHref} label="Batal" />
-                        <Button type="submit" disabled={processing}>
-                            {submitLabel}
+                    <div className="flex flex-col-reverse gap-2 sm:flex-row sm:gap-3">
+                        <BackButton fallback={cancelHref} label="Batal" variant="outline" disabled={processing} className="h-11 sm:h-10 min-w-24" />
+                        <Button type="submit" disabled={processing} className="h-11 sm:h-10">
+                            {processing ? 'Menyimpan...' : submitLabel}
                         </Button>
                     </div>
                 </CardContent>

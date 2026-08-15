@@ -1,21 +1,31 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { dashboard, login } from '@/routes';
 import { useEffect, useRef, useState } from 'react';
+import { dashboard, login } from '@/routes';
 
 /* ─── Animated Counter ──────────────────────────────────────────────────── */
 function useCountUp(target: number, duration: number = 1800, active: boolean = false) {
     const [count, setCount] = useState(0);
     useEffect(() => {
-        if (!active) return;
+        if (!active) {
+return;
+}
+
         let startTime: number | null = null;
         const tick = (ts: number) => {
-            if (!startTime) startTime = ts;
+            if (!startTime) {
+startTime = ts;
+}
+
             const p = Math.min((ts - startTime) / duration, 1);
             setCount(Math.floor(p * target));
-            if (p < 1) requestAnimationFrame(tick);
+
+            if (p < 1) {
+requestAnimationFrame(tick);
+}
         };
         requestAnimationFrame(tick);
     }, [target, duration, active]);
+
     return count;
 }
 
@@ -87,10 +97,18 @@ export default function Welcome({ canRegister = false }: { canRegister?: boolean
 
     useEffect(() => {
         const io = new IntersectionObserver(
-            ([e]) => { if (e.isIntersecting) setStatsVisible(true); },
+            ([e]) => {
+ if (e.isIntersecting) {
+setStatsVisible(true);
+} 
+},
             { threshold: 0.3 },
         );
-        if (statsRef.current) io.observe(statsRef.current);
+
+        if (statsRef.current) {
+io.observe(statsRef.current);
+}
+
         return () => io.disconnect();
     }, []);
 

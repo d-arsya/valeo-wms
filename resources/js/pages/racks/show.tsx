@@ -1,11 +1,11 @@
 import { Head, Link } from '@inertiajs/react';
-import { BackButton } from '@/components/back-button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Warehouse, Package2, Box } from 'lucide-react';
+import { BackButton } from '@/components/back-button';
+import { StockStatusBadge } from '@/components/features/spareparts/stock-status-badge';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import racks from '@/routes/racks';
 import spareparts from '@/routes/spareparts';
-import { StockStatusBadge } from '@/components/features/spareparts/stock-status-badge';
 import type { Rack, Bin, Sparepart } from '@/types';
 
 interface Props {

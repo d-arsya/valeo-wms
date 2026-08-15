@@ -4,6 +4,7 @@ use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\QrCodeController;
+use App\Http\Controllers\QrCodePrintController;
 use App\Http\Controllers\RackController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SparepartController;
@@ -65,6 +66,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('reports/export', [ReportController::class, 'export'])
         ->middleware('throttle:report-export')
         ->name('reports.export');
+    Route::get('reports/export/excel', [ReportController::class, 'exportExcel'])
+        ->middleware('throttle:report-export')
+        ->name('reports.export-excel');
+
+    // QR Code Mass Print (Admin Only)
+    Route::middleware('admin')->group(function () {
+        Route::get('qr-codes/print', [QrCodePrintController::class, 'index'])->name('qr.print');
+        Route::post('qr-codes/print/generate', [QrCodePrintController::class, 'generate'])
+            ->middleware('throttle:qr-print')
+            ->name('qr.print.generate');
+        Route::post('qr-codes/print/preview', [QrCodePrintController::class, 'preview'])
+            ->middleware('throttle:qr-print')
+            ->name('qr.print.preview');
+    });
 });
 
 require __DIR__.'/settings.php';
