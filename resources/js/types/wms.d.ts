@@ -36,6 +36,7 @@ export interface Category {
     name: string;
     created_at: string;
     updated_at: string;
+    spareparts_count?: number;
 }
 
 export interface Rack {
@@ -70,7 +71,6 @@ export interface Sparepart {
     last_gr_date: string | null;
     price_per_unit: string | null;
     status: StockStatus;
-    qr_code_path: string | null;
     created_at: string;
     updated_at: string;
     brand?: Brand | null;

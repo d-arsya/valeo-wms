@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { ArrowUpRight, ArrowDownRight, Eye } from 'lucide-react';
 import { useLayoutEffect, useRef } from 'react';
 import {
@@ -20,6 +20,8 @@ interface Props {
 }
 
 export function SparepartsTable({ rows }: Props) {
+    const { auth } = usePage().props;
+    const isAdmin = auth.user?.role === 'admin';
     const topScrollRef = useRef<HTMLDivElement | null>(null);
     const topScrollSpacerRef = useRef<HTMLDivElement | null>(null);
     const tableScrollRef = useRef<HTMLDivElement | null>(null);
@@ -79,14 +81,14 @@ export function SparepartsTable({ rows }: Props) {
             <div
                 ref={topScrollRef}
                 onScroll={() => syncScroll('top')}
-                className="overflow-x-scroll overflow-y-hidden border-b border-border/60 bg-transparent [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border/30 [&::-webkit-scrollbar-thumb]:opacity-60 hover:[&::-webkit-scrollbar-thumb]:bg-border/50"
+                className="overflow-x-scroll overflow-y-hidden border-b border-border/60 bg-transparent scrollbar-thin [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border/30 [&::-webkit-scrollbar-thumb]:opacity-60 hover:[&::-webkit-scrollbar-thumb]:bg-border/50"
             >
                 <div ref={topScrollSpacerRef} className="h-2" />
             </div>
             <div
                 ref={tableScrollRef}
                 onScroll={() => syncScroll('table')}
-                className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                className="overflow-x-auto scrollbar-none"
             >
                 <table ref={tableRef} className="min-w-300 w-full border-collapse text-sm">
                     <thead className="bg-muted/40 text-left text-muted-foreground">
@@ -299,25 +301,27 @@ export function SparepartsTable({ rows }: Props) {
                                                 </TooltipTrigger>
                                                 <TooltipContent side="top">Stock out</TooltipContent>
                                             </Tooltip>
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <Button
-                                                        asChild
-                                                        variant="outline"
-                                                        size="icon"
-                                                        className="size-8 border-border/80 bg-background"
-                                                        aria-label="Stock in"
-                                                    >
-                                                        <Link
-                                                            href={stockInForm(sparepart.id, { query: { return_to: spareparts.index().url } })}
+                                            {isAdmin && (
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button
+                                                            asChild
+                                                            variant="outline"
+                                                            size="icon"
+                                                            className="size-8 border-border/80 bg-background"
+                                                            aria-label="Stock in"
                                                         >
-                                                            <ArrowUpRight className="size-3.5" />
-                                                            <span className="sr-only">Stock in</span>
-                                                        </Link>
-                                                    </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent side="top">Stock in</TooltipContent>
-                                            </Tooltip>
+                                                            <Link
+                                                                href={stockInForm(sparepart.id, { query: { return_to: spareparts.index().url } })}
+                                                            >
+                                                                <ArrowUpRight className="size-3.5" />
+                                                                <span className="sr-only">Stock in</span>
+                                                            </Link>
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent side="top">Stock in</TooltipContent>
+                                                </Tooltip>
+                                            )}
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
                                                     <Button

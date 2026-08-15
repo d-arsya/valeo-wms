@@ -1,11 +1,11 @@
 import { Head, useForm, router } from '@inertiajs/react';
 import type { FormEvent } from 'react';
-import reports from '@/routes/reports';
-import { ReportHeader } from '@/components/features/reports/ReportHeader';
 import { ReportFilters } from '@/components/features/reports/ReportFilters';
+import { ReportHeader } from '@/components/features/reports/ReportHeader';
 import { ReportPreviewTable } from '@/components/features/reports/ReportPreviewTable';
 import { Pagination } from '@/components/pagination';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import reports from '@/routes/reports';
 import type { ActivityLog, PaginatedResponse } from '@/types';
 
 interface ReportsProps {

@@ -1,12 +1,14 @@
-import { Head, Link } from '@inertiajs/react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { dashboard } from '@/routes';
-import spareparts from '@/routes/spareparts';
-import reports from '@/routes/reports';
-import { Package, AlertTriangle, CheckCircle2, XCircle, ArrowRight, Activity } from 'lucide-react';
-import { ActivityLog } from '@/types';
-import { cn } from '@/lib/utils';
+import { Head, Link, router } from '@inertiajs/react';
 import { format } from 'date-fns';
+import { Activity, AlertTriangle, ArrowRight, CheckCircle2, Package, RefreshCw, XCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
+import { dashboard } from '@/routes';
+import reports from '@/routes/reports';
+import spareparts from '@/routes/spareparts';
+import type { ActivityLog } from '@/types';
 
 interface DashboardProps {
     stats: {
@@ -22,10 +24,51 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ stats }: DashboardProps) {
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const [lastUpdated, setLastUpdated] = useState(() => new Date());
+
+    const refreshStats = () => {
+        setIsRefreshing(true);
+
+        router.reload({
+            only: ['stats'],
+            onFinish: () => {
+                setIsRefreshing(false);
+                setLastUpdated(new Date());
+            },
+        });
+    };
+
+    useEffect(() => {
+        const intervalId = window.setInterval(() => {
+            refreshStats();
+        }, 30000);
+
+        return () => window.clearInterval(intervalId);
+    }, []);
+
     return (
         <>
             <Head title="Dashboard" />
             <div className="flex h-full flex-1 flex-col gap-6 p-4 md:p-8">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+                        <p className="text-sm text-muted-foreground">
+                            Ringkasan stok gudang dan aktivitas terbaru.
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <span className="text-xs text-muted-foreground">
+                            Diperbarui {format(lastUpdated, 'HH:mm:ss')}
+                        </span>
+                        <Button variant="outline" size="sm" onClick={refreshStats} disabled={isRefreshing}>
+                            <RefreshCw className={cn('mr-2 h-4 w-4', isRefreshing && 'animate-spin')} />
+                            Refresh
+                        </Button>
+                    </div>
+                </div>
+
                 {/* Summary Cards */}
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <Card className="hover:shadow-md transition-shadow">
@@ -171,9 +214,6 @@ export default function Dashboard({ stats }: DashboardProps) {
         </>
     );
 }
-
-// Reuse Button to avoid import error if it's already used but not shown in view
-import { Button } from '@/components/ui/button';
 
 Dashboard.layout = {
     breadcrumbs: [

@@ -43,4 +43,24 @@ class User extends Authenticatable
     {
         return $this->role === UserRole::TECHNICIAN;
     }
+
+    public function canManageStock(): bool
+    {
+        return $this->isAdmin() || $this->isTechnician();
+    }
+
+    public function canManageMasterData(): bool
+    {
+        return $this->isAdmin();
+    }
+
+    public function canViewReports(): bool
+    {
+        return $this->canManageStock();
+    }
+
+    public function activityLogs()
+    {
+        return $this->hasMany(ActivityLog::class);
+    }
 }

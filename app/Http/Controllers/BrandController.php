@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Brand;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -15,9 +16,7 @@ class BrandController extends Controller
     public function index(Request $request)
     {
         $brands = Brand::query()
-            ->when($request->search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%");
-            })
+            ->searchByName($request->search)
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -41,14 +40,35 @@ class BrandController extends Controller
      */
     public function store(Request $request)
     {
+        $request->merge([
+            'name' => trim(strip_tags((string) $request->input('name'))),
+        ]);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 'unique:brands,name'],
         ]);
 
-        Brand::create($validated);
+        $brand = Brand::create($validated);
+        Cache::forget('select.brands');
+
+        if ($request->wantsJson()) {
+            return response()->json($brand, 201);
+        }
 
         return redirect()->route('brands.index')
             ->with('success', 'Brand created successfully.');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Brand $brand)
+    {
+        return Inertia::render('brands/show', [
+            'brand' => $brand->load(['spareparts' => function ($query) {
+                $query->with(['category', 'bin.rack']);
+            }]),
+        ]);
     }
 
     /**
@@ -66,11 +86,21 @@ class BrandController extends Controller
      */
     public function update(Request $request, Brand $brand)
     {
+        $request->merge([
+            'name' => trim(strip_tags((string) $request->input('name'))),
+        ]);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', Rule::unique('brands')->ignore($brand->id)],
         ]);
 
+        /** @var \Illuminate\Database\Eloquent\Model $brand */
         $brand->update($validated);
+        Cache::forget('select.brands');
+
+        if ($request->wantsJson()) {
+            return response()->json($brand);
+        }
 
         return redirect()->route('brands.index')
             ->with('success', 'Brand updated successfully.');
@@ -86,7 +116,9 @@ class BrandController extends Controller
                 ->with('error', 'Cannot delete Brand. It is currently associated with one or more spareparts.');
         }
 
+        /** @var \Illuminate\Database\Eloquent\Model $brand */
         $brand->delete();
+        Cache::forget('select.brands');
 
         return redirect()->route('brands.index')
             ->with('success', 'Brand deleted successfully.');

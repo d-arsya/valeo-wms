@@ -44,6 +44,19 @@ class RackController extends Controller
      */
     public function store(Request $request)
     {
+        $request->merge([
+            'code' => trim(strip_tags((string) $request->input('code'))),
+            'bins' => collect($request->input('bins', []))
+                ->map(function ($bin) {
+                    if (isset($bin['code'])) {
+                        $bin['code'] = trim(strip_tags((string) $bin['code']));
+                    }
+
+                    return $bin;
+                })
+                ->all(),
+        ]);
+
         $validated = $request->validate([
             'code' => ['required', 'string', 'max:255', 'unique:racks,code'],
             'bins' => ['nullable', 'array'],
@@ -55,7 +68,7 @@ class RackController extends Controller
                 function ($attribute, $value, $fail) use ($request) {
                     $codes = collect($request->input('bins'))->pluck('code');
                     if ($codes->countBy()->get($value) > 1) {
-                        $fail('The bin code must be unique in this rack.');
+                        $fail('The bin code must be unique across the system and within this request.');
                     }
                 },
             ],
@@ -75,6 +88,18 @@ class RackController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     */
+    public function show(Rack $rack)
+    {
+        return Inertia::render('racks/show', [
+            'rack' => $rack->load(['bins' => function ($query) {
+                $query->withCount('spareparts')->with('spareparts.brand', 'spareparts.category');
+            }]),
+        ]);
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(Rack $rack)
@@ -89,6 +114,19 @@ class RackController extends Controller
      */
     public function update(Request $request, Rack $rack)
     {
+        $request->merge([
+            'code' => trim(strip_tags((string) $request->input('code'))),
+            'bins' => collect($request->input('bins', []))
+                ->map(function ($bin) {
+                    if (isset($bin['code'])) {
+                        $bin['code'] = trim(strip_tags((string) $bin['code']));
+                    }
+
+                    return $bin;
+                })
+                ->all(),
+        ]);
+
         $validated = $request->validate([
             'code' => ['required', 'string', 'max:255', Rule::unique('racks')->ignore($rack->id)],
             'bins' => ['nullable', 'array'],
@@ -98,18 +136,15 @@ class RackController extends Controller
                 'string',
                 'max:255',
                 function ($attribute, $value, $fail) use ($request) {
-                    // Check duplicate in the request payload
                     $codes = collect($request->input('bins'))->pluck('code');
                     if ($codes->countBy()->get($value) > 1) {
-                        $fail('The bin code must be unique.');
+                        $fail('The bin code must be unique across the system and within this request.');
                     }
 
-                    // Extract index to check if there is an ID
                     preg_match('/bins\.(\d+)\.code/', $attribute, $matches);
                     $index = $matches[1] ?? null;
                     $binId = $request->input("bins.{$index}.id");
 
-                    // Check uniqueness in database
                     $query = Bin::where('code', $value);
                     if ($binId) {
                         $query->where('id', '!=', $binId);
@@ -127,7 +162,6 @@ class RackController extends Controller
 
                 $incomingBinIds = collect($validated['bins'] ?? [])->pluck('id')->filter()->toArray();
 
-                // Before deleting bins, check if any of them are associated with spareparts
                 $binsToDelete = $rack->bins()->whereNotIn('id', $incomingBinIds)->get();
                 foreach ($binsToDelete as $bin) {
                     if ($bin->spareparts()->exists()) {
@@ -135,10 +169,8 @@ class RackController extends Controller
                     }
                 }
 
-                // Delete bins not present in incoming list
                 $rack->bins()->whereNotIn('id', $incomingBinIds)->delete();
 
-                // Update or create bins
                 foreach ($validated['bins'] ?? [] as $binData) {
                     if (! empty($binData['id'])) {
                         $rack->bins()->where('id', $binData['id'])->update(['code' => $binData['code']]);

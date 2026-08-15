@@ -63,8 +63,6 @@ class UserController extends Controller
             'role' => ['required', new Enum(UserRole::class)],
         ]);
 
-        $validated['password'] = bcrypt($validated['password']);
-
         User::create($validated);
 
         return redirect()->route('users.index')
@@ -91,15 +89,13 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max' => 255],
+            'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => ['nullable', 'string', 'min:8'],
             'role' => ['required', new Enum(UserRole::class)],
         ]);
 
-        if (! empty($validated['password'])) {
-            $validated['password'] = bcrypt($validated['password']);
-        } else {
+        if (empty($validated['password'])) {
             unset($validated['password']);
         }
 
@@ -114,10 +110,16 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        // Prevent deleting oneself
         if ($user->id === auth()->id()) {
             return redirect()->route('users.index')
                 ->with('error', 'You cannot delete your own account.');
+        }
+
+        $hasActivityLogs = $user->activityLogs()->exists();
+
+        if ($hasActivityLogs) {
+            return redirect()->route('users.index')
+                ->with('error', 'Cannot delete User. This user is currently associated with one or more activity logs. Deactivate the account instead.');
         }
 
         $user->delete();

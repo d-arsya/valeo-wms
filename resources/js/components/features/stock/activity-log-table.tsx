@@ -1,6 +1,6 @@
+import { formatDateTime } from '@/components/features/spareparts/spareparts-utils';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatDateTime } from '@/components/features/spareparts/spareparts-utils';
 import type { ActivityLog } from '@/types';
 import type { User } from '@/types/auth';
 

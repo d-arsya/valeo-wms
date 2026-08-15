@@ -1,4 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
+import type * as React from 'react';
+import { useState } from 'react';
+
 import { SparepartForm } from '@/components/features/spareparts/sparepart-form';
 import type { SparepartFormValues } from '@/components/features/spareparts/sparepart-form';
 import spareparts from '@/routes/spareparts';
@@ -20,10 +23,16 @@ const initialValues: SparepartFormValues = {
     bin_id: '',
     safety_stock: '',
     actual_stock: '',
+    last_po_number: '',
+    last_supplier: '',
+    last_gr_date: '',
+    price_per_unit: '',
 };
 
 export default function Create({ brands, categories, bins }: Props) {
-    const form = useForm(initialValues);
+    const [localBrands, setLocalBrands] = useState(brands);
+    const [localCategories, setLocalCategories] = useState(categories);
+    const form = useForm<SparepartFormValues>(initialValues);
 
     function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -36,6 +45,7 @@ export default function Create({ brands, categories, bins }: Props) {
             bin_id: Number(data.bin_id),
             safety_stock: Number(data.safety_stock),
             actual_stock: Number(data.actual_stock),
+            price_per_unit: Number(data.price_per_unit),
         }));
 
         form.post(spareparts.store().url, {
@@ -54,14 +64,16 @@ export default function Create({ brands, categories, bins }: Props) {
                     description="Isi data master supaya QR code, lokasi, dan stok dasar langsung tersimpan rapi."
                     values={form.data}
                     errors={form.errors as Partial<Record<keyof SparepartFormValues, string>>}
-                    brands={brands}
-                    categories={categories}
+                    brands={localBrands}
+                    categories={localCategories}
                     bins={bins}
                     processing={form.processing}
                     onSubmit={handleSubmit}
                     onChange={form.setData}
                     submitLabel="Simpan sparepart"
                     cancelHref={spareparts.index().url}
+                    onBrandCreated={(newBrand) => setLocalBrands([...localBrands, newBrand])}
+                    onCategoryCreated={(newCategory) => setLocalCategories([...localCategories, newCategory])}
                 />
             </div>
         </>

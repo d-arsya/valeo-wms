@@ -7,6 +7,37 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ─── iOS Safe Area Utilities (Tailwind v4 @utility) ────────────────────────────── */
+@utility safe-p-top {
+  padding-top: max(0px, env(safe-area-inset-top));
+}
+@utility safe-p-bottom {
+  padding-bottom: max(0px, env(safe-area-inset-bottom));
+}
+@utility safe-p-left {
+  padding-left: max(0px, env(safe-area-inset-left));
+}
+@utility safe-p-right {
+  padding-right: max(0px, env(safe-area-inset-right));
+}
+@utility safe-p-x {
+  padding-left: max(0px, env(safe-area-inset-left));
+  padding-right: max(0px, env(safe-area-inset-right));
+}
+@utility safe-p-y {
+  padding-top: max(0px, env(safe-area-inset-top));
+  padding-bottom: max(0px, env(safe-area-inset-bottom));
+}
+@utility safe-m-bottom {
+  margin-bottom: max(0px, env(safe-area-inset-bottom));
+}
+
+/* Global viewport meta-cooperative body: prevent overflow fix for iPhone notch and hide body padding body safe inset */
+html,
+body {
+  min-height: 100dvh;
+}
+
 @theme {
     --font-sans:
         'Inter', ui-sans-serif, system-ui, sans-serif,
@@ -62,12 +93,12 @@
 }
 
 /* ─── Valeo Brand Color Tokens ─────────────────────────────────────────────
-   Primary:      Valeo Lime Green  #CCFF00
-   Dark:         Valeo Charcoal    #3D3D3D
-   Accent:       Teal              #00A8A8
-   Warning:      Orange            #FF9900
-   Background:   White             #FFFFFF
-   Surface:      Light Gray        #F5F5F5
+   Primary:      Valeo Dark Slate  #4E6B7C (OKLCH: 0.487 0.048 236.4)
+   Dark:         Valeo Charcoal    #3D3D3D (OKLCH: 0.278 0 0)
+   Accent:       Teal              #00A8A8 (OKLCH: 0.635 0.133 191.7)
+   Warning:      Orange            #FF9900 (OKLCH: 0.72 0.178 57.7)
+   Background:   White             #FFFFFF (OKLCH: 1 0 0)
+   Surface:      Light Gray        #F5F5F5 (OKLCH: 0.961 0 0)
 ──────────────────────────────────────────────────────────────────────────── */
 
 :root {
@@ -83,11 +114,11 @@
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.278 0 0);
 
-    /* Primary — Valeo Lime Green #CCFF00 with dark text */
-    --primary: oklch(0.944 0.243 128.7);
-    /* #CCFF00 */
-    --primary-foreground: oklch(0.278 0 0);
-    /* #3D3D3D – dark text on lime */
+    /* Primary — Valeo Dark Slate #4E6B7C with white text */
+    --primary: oklch(0.487 0.048 236.4);
+    /* #4E6B7C */
+    --primary-foreground: oklch(1 0 0);
+    /* #FFFFFF – light text on dark slate */
 
     /* Secondary surface — Light Gray #F5F5F5 */
     --secondary: oklch(0.961 0 0);
@@ -110,12 +141,12 @@
     /* Borders & inputs */
     --border: oklch(0.91 0 0);
     --input: oklch(0.91 0 0);
-    --ring: oklch(0.944 0.243 128.7);
-    /* Lime Green focus ring */
+    --ring: oklch(0.487 0.048 236.4);
+    /* Dark Slate focus ring */
 
     /* Charts */
-    --chart-1: oklch(0.944 0.243 128.7);
-    /* Lime Green */
+    --chart-1: oklch(0.487 0.048 236.4);
+    /* Dark Slate */
     --chart-2: oklch(0.635 0.133 191.7);
     /* Teal */
     --chart-3: oklch(0.278 0 0);
@@ -131,15 +162,14 @@
     --sidebar: oklch(0.278 0 0);
     /* #3D3D3D */
     --sidebar-foreground: oklch(0.92 0 0);
-    --sidebar-primary: oklch(0.944 0.243 128.7);
-    /* Lime Green active */
-    --sidebar-primary-foreground: oklch(0.278 0 0);
+    --sidebar-primary: oklch(0.487 0.048 236.4);
+    /* Dark Slate active */
+    --sidebar-primary-foreground: oklch(1 0 0);
     --sidebar-accent: oklch(0.35 0 0);
     /* Slightly lighter charcoal for hover */
-    --sidebar-accent-foreground: oklch(0.944 0.243 128.7);
-    /* Lime text on hover */
+    --sidebar-accent-foreground: oklch(0.92 0 0);
     --sidebar-border: oklch(0.35 0 0);
-    --sidebar-ring: oklch(0.944 0.243 128.7);
+    --sidebar-ring: oklch(0.487 0.048 236.4);
 }
 
 .dark {

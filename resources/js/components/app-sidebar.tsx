@@ -1,8 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
     BarChart3,
-    BookOpen,
-    FolderGit2,
+    Printer,
     QrCode,
     ScanLine,
     Warehouse,
@@ -10,9 +9,9 @@ import {
     Tag,
     FolderOpen,
     Layers,
+    Database,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
@@ -39,19 +38,26 @@ const mainNavItems: NavItem[] = [
         icon: Warehouse,
     },
     {
-        title: 'Brands',
+        title: 'Masterdata',
         href: '/brands',
-        icon: Tag,
-    },
-    {
-        title: 'Categories',
-        href: '/categories',
-        icon: FolderOpen,
-    },
-    {
-        title: 'Racks',
-        href: '/racks',
-        icon: Layers,
+        icon: Database,
+        children: [
+            {
+                title: 'Brands',
+                href: '/brands',
+                icon: Tag,
+            },
+            {
+                title: 'Categories',
+                href: '/categories',
+                icon: FolderOpen,
+            },
+            {
+                title: 'Racks',
+                href: '/racks',
+                icon: Layers,
+            },
+        ],
     },
     {
         title: 'Scanner',
@@ -64,6 +70,11 @@ const mainNavItems: NavItem[] = [
         icon: QrCode,
     },
     {
+        title: 'Cetak QR Code',
+        href: '/qr-codes/print',
+        icon: Printer,
+    },
+    {
         title: 'Users',
         href: '/users',
         icon: Users,
@@ -72,11 +83,21 @@ const mainNavItems: NavItem[] = [
 
 export function AppSidebar() {
     const { auth } = usePage().props;
+    const isAdmin = auth.user?.role === 'admin';
 
     const filteredNavItems = mainNavItems.filter((item) => {
         if (item.href === '/users') {
-            return auth.user?.role === 'admin';
+            return isAdmin;
         }
+
+        if (item.title === 'Masterdata') {
+            return isAdmin;
+        }
+
+        if (item.href === '/qr-codes/print') {
+            return isAdmin;
+        }
+
         return true;
     });
 

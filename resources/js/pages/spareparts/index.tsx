@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Plus, Warehouse } from 'lucide-react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
@@ -13,6 +13,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { FloatingActionButton } from '@/components/ui/floating-action-button';
 import spareparts from '@/routes/spareparts';
 import type { Brand, Category, PaginatedResponse, Sparepart } from '@/types';
 
@@ -22,9 +23,13 @@ interface Props {
         search?: string | null;
         brand_id?: string | null;
         category_id?: string | null;
+        rank?: string | null;
+        status?: string | null;
     };
     brands: Pick<Brand, 'id' | 'name'>[];
     categories: Pick<Category, 'id' | 'name'>[];
+    ranks: string[];
+    statuses: string[];
 }
 
 function buildQuery(values: FilterValues) {
@@ -32,6 +37,8 @@ function buildQuery(values: FilterValues) {
         ...(values.search ? { search: values.search.trim() } : {}),
         ...(values.brandId && values.brandId !== 'all' ? { brand_id: values.brandId } : {}),
         ...(values.categoryId && values.categoryId !== 'all' ? { category_id: values.categoryId } : {}),
+        ...(values.rank && values.rank !== 'all' ? { rank: values.rank } : {}),
+        ...(values.status && values.status !== 'all' ? { status: values.status } : {}),
     };
 }
 
@@ -40,16 +47,27 @@ export default function Index({
     filters,
     brands,
     categories,
+    ranks,
+    statuses,
 }: Props) {
+    const { auth } = usePage().props;
+    const isAdmin = auth.user?.role === 'admin';
+
     const [filterValues, setFilterValues] = useState<FilterValues>({
         search: filters.search ?? '',
         brandId: filters.brand_id ?? 'all',
         categoryId: filters.category_id ?? 'all',
+        rank: filters.rank ?? 'all',
+        status: filters.status ?? 'all',
     });
 
     const rows = response.data;
     const hasFilters = Boolean(
-        filterValues.search || filterValues.brandId !== 'all' || filterValues.categoryId !== 'all'
+        filterValues.search ||
+        filterValues.brandId !== 'all' ||
+        filterValues.categoryId !== 'all' ||
+        filterValues.rank !== 'all' ||
+        filterValues.status !== 'all'
     );
 
     const handleFilterChange = (field: keyof FilterValues, value: string) => {
@@ -66,7 +84,13 @@ export default function Index({
     }
 
     function resetFilters() {
-        setFilterValues({ search: '', brandId: 'all', categoryId: 'all' });
+        setFilterValues({
+            search: '',
+            brandId: 'all',
+            categoryId: 'all',
+            rank: 'all',
+            status: 'all'
+        });
 
         router.get(spareparts.index().url, {}, {
             preserveScroll: true,
@@ -78,7 +102,7 @@ export default function Index({
         <>
             <Head title="Spareparts Master" />
 
-            <div className="space-y-6 p-4 md:p-6">
+            <div className="space-y-6 p-3 sm:p-4 md:p-6 pb-[calc(6rem+env(safe-area-inset-bottom))]">
                 <Card className="gap-0 overflow-hidden border-border/70 shadow-sm">
                     <CardHeader className="border-b border-border/60 bg-linear-to-b from-muted/35 via-background to-background pb-4">
                         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
@@ -88,12 +112,14 @@ export default function Index({
                                     Sparepart list
                                 </CardTitle>
                             </div>
-                            <Button asChild className="w-full gap-2 shadow-sm lg:w-auto">
-                                <Link href={spareparts.create()}>
-                                    <Plus className="size-4" />
-                                    Add sparepart
-                                </Link>
-                            </Button>
+                            {isAdmin && (
+                                <Button asChild className="hidden w-full gap-2 shadow-sm lg:flex lg:w-auto">
+                                    <Link href={spareparts.create()}>
+                                        <Plus className="size-4" />
+                                        Add sparepart
+                                    </Link>
+                                </Button>
+                            )}
                         </div>
                     </CardHeader>
 
@@ -103,6 +129,8 @@ export default function Index({
                             onChange={handleFilterChange}
                             brands={brands}
                             categories={categories}
+                            ranks={ranks}
+                            statuses={statuses}
                             onApply={applyFilters}
                             onReset={resetFilters}
                             hasFilters={hasFilters}
@@ -132,6 +160,13 @@ export default function Index({
 
                 <Pagination meta={response} />
             </div>
+
+            {isAdmin && (
+                <FloatingActionButton
+                    href={spareparts.create().url}
+                    label="Add sparepart"
+                />
+            )}
         </>
     );
 }

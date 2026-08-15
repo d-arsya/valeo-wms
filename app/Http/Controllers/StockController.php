@@ -2,16 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Stock\StockInAction;
+use App\Actions\Stock\StockOutAction;
 use App\Http\Requests\StockInRequest;
 use App\Http\Requests\StockOutRequest;
-use App\Models\ActivityLog;
 use App\Models\Sparepart;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class StockController extends Controller
 {
+    public function __construct(
+        protected StockInAction $stockInAction,
+        protected StockOutAction $stockOutAction,
+    ) {}
+
     /**
      * Show the form for stock in.
      */
@@ -39,32 +44,13 @@ class StockController extends Controller
      */
     public function in(StockInRequest $request, Sparepart $sparepart)
     {
-        DB::transaction(function () use ($request, $sparepart) {
-            $data = $request->validated();
+        $this->stockInAction->execute(
+            $sparepart,
+            $request->validated(),
+            $request->user()?->id,
+        );
 
-            // Update sparepart stock & last transaction info
-            $sparepart->update([
-                'actual_stock' => $sparepart->actual_stock + $data['quantity'],
-                'last_po_number' => $data['po_number'],
-                'last_supplier' => $data['supplier'],
-                'last_gr_date' => $data['gr_date'],
-                'price_per_unit' => $data['price_per_unit'],
-            ]);
-
-            // Create activity log
-            ActivityLog::create([
-                'sparepart_id' => $sparepart->id,
-                'user_id' => $request->user()?->id,
-                'type' => 'IN',
-                'quantity' => $data['quantity'],
-                'remarks' => $data['remarks'] ?? null,
-                'po_number' => $data['po_number'],
-                'gr_date' => $data['gr_date'],
-                'price_per_unit' => $data['price_per_unit'],
-            ]);
-        });
-
-        return redirect()->route('spareparts.show', $sparepart)
+        return redirect()->route('spareparts.show', ['sparepart' => $sparepart->material_number])
             ->with('success', "Successfully added {$request->quantity} units to stock.");
     }
 
@@ -73,25 +59,13 @@ class StockController extends Controller
      */
     public function out(StockOutRequest $request, Sparepart $sparepart)
     {
-        DB::transaction(function () use ($request, $sparepart) {
-            $data = $request->validated();
+        $this->stockOutAction->execute(
+            $sparepart,
+            $request->validated(),
+            $request->user()->id,
+        );
 
-            // Update sparepart stock
-            $sparepart->update([
-                'actual_stock' => $sparepart->actual_stock - $data['quantity'],
-            ]);
-
-            // Create activity log
-            ActivityLog::create([
-                'sparepart_id' => $sparepart->id,
-                'user_id' => $request->user()->id,
-                'type' => 'OUT',
-                'quantity' => $data['quantity'],
-                'remarks' => $data['remarks'] ?? null,
-            ]);
-        });
-
-        return redirect()->route('spareparts.show', $sparepart)
+        return redirect()->route('spareparts.show', ['sparepart' => $sparepart->material_number])
             ->with('success', "Successfully removed {$request->quantity} units from stock.");
     }
 }

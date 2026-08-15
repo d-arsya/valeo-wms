@@ -1,3 +1,5 @@
+import type { LucideIcon } from 'lucide-react';
+
 import type { Auth } from '@/types/auth';
 
 declare module '@inertiajs/core' {
@@ -9,4 +11,11 @@ declare module '@inertiajs/core' {
             [key: string]: unknown;
         };
     }
+}
+
+export interface NavItem {
+    title: string;
+    href?: string;
+    icon?: LucideIcon;
+    children?: NavItem[];
 }
