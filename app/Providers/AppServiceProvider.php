@@ -31,7 +31,21 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
             URL::forceRootUrl(config('app.url'));
         }
+        $this->ensureStorageDirectories();
         $this->configureDefaults();
+    }
+
+    /**
+     * Pastikan direktori yang dibutuhkan DomPDF sudah ada dan writable.
+     * Penting untuk shared hosting (cPanel) yang tidak menjalankan artisan storage:link otomatis.
+     */
+    protected function ensureStorageDirectories(): void
+    {
+        foreach ([storage_path('fonts'), storage_path('tmp')] as $dir) {
+            if (! is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
+        }
     }
 
     /**

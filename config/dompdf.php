@@ -64,7 +64,9 @@ return [
          * The temporary directory is required to download remote images and when
          * using the PDFLib back end.
          */
-        'temp_dir' => sys_get_temp_dir(),
+        // Gunakan storage/tmp agar writable di shared hosting (cPanel).
+        // sys_get_temp_dir() kadang return /tmp yang tidak writable oleh web user.
+        'temp_dir' => storage_path('tmp'),
 
         /**
          * ==== IMPORTANT ====
