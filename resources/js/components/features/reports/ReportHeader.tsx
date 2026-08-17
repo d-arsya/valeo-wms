@@ -4,13 +4,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import reports from '@/routes/reports';
 
+export function buildExportUrl(baseUrl: string): string {
+    const params = new URLSearchParams(window.location.search);
+    return params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+}
+
 export function ReportHeader() {
-    const buildExportUrl = (baseUrl: string): string => {
-        const params = new URLSearchParams(window.location.search);
-
-        return params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
-    };
-
     const handleExportPdf = () => {
         window.location.href = buildExportUrl(reports.export().url);
     };
@@ -30,32 +29,24 @@ export function ReportHeader() {
             : null;
 
     return (
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-            <div>
-                <h1 className="flex items-center gap-2 text-base font-semibold">
-                    <FileText className="size-4 text-muted-foreground shrink-0" />
-                    Laporan transaksi
-                    {typeof recordCount === 'number' ? (
-                        <Badge variant="secondary" className="ml-1 text-[11px] font-semibold">
-                            {recordCount} record
-                        </Badge>
-                    ) : null}
-                </h1>
-                <p className="mt-1 text-sm text-muted-foreground">
-                    Monitor aktivitas stock IN dan stock OUT dengan detail.
-                </p>
-            </div>
+        <div className="flex items-center justify-between gap-3">
+            <h1 className="flex items-center gap-2 text-base font-semibold">
+                <FileText className="size-4 text-muted-foreground shrink-0" />
+                Laporan transaksi
+                {typeof recordCount === 'number' ? (
+                    <Badge variant="secondary" className="ml-1 text-[11px] font-semibold">
+                        {recordCount} record
+                    </Badge>
+                ) : null}
+            </h1>
 
-            <div className="flex w-full flex-col gap-2 sm:flex-row sm:w-auto">
-                <Button
-                    onClick={handleExportExcel}
-                    className="w-full gap-2 shadow-sm sm:w-auto"
-                    variant="outline"
-                >
+            {/* Tombol export — hanya tampil di desktop */}
+            <div className="hidden gap-2 sm:flex">
+                <Button onClick={handleExportExcel} variant="outline" size="sm" className="gap-2">
                     <FileSpreadsheet className="size-4 shrink-0" />
                     Export Excel
                 </Button>
-                <Button onClick={handleExportPdf} className="w-full gap-2 shadow-sm sm:w-auto">
+                <Button onClick={handleExportPdf} size="sm" className="gap-2">
                     <Download className="size-4 shrink-0" />
                     Export PDF
                 </Button>

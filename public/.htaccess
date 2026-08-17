@@ -1,3 +1,16 @@
+# PHP limits override — diperlukan untuk generate PDF QR code batch di shared hosting.
+# Jika cPanel tidak mengizinkan php_value di .htaccess, naikkan lewat cPanel → PHP Settings.
+<IfModule mod_php.c>
+    php_value memory_limit 256M
+    php_value max_execution_time 120
+    php_value max_input_time 120
+</IfModule>
+<IfModule mod_php8.c>
+    php_value memory_limit 256M
+    php_value max_execution_time 120
+    php_value max_input_time 120
+</IfModule>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes

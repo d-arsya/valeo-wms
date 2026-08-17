@@ -35,7 +35,7 @@ export function FloatingActionButton({
             size="icon"
             className={
                 'fixed right-5 z-40 h-14 w-14 rounded-full shadow-2xl ring-1 ring-black/5 hover:shadow-3xl active:scale-95 transition-all duration-150 ' +
-                'bottom-[max(1.25rem,env(safe-area-inset-bottom))] ' +
+                'bottom-[calc(4.5rem+env(safe-area-inset-bottom))] ' +
                 className
             }
             aria-label={label}

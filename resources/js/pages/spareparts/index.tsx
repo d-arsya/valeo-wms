@@ -1,12 +1,14 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Plus, Warehouse } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { FormEvent } from 'react';
 import type { FilterValues } from '@/components/features/spareparts/spareparts-filters';
 import { SparepartFilters } from '@/components/features/spareparts/spareparts-filters';
+import { SparepartsMobileList } from '@/components/features/spareparts/spareparts-mobile-list';
 import { SparepartsTable } from '@/components/features/spareparts/spareparts-table';
 import { Pagination } from '@/components/pagination';
 import { Button } from '@/components/ui/button';
+import type { SortDir } from '@/components/ui/sortable-header';
 import {
     Card,
     CardContent,
@@ -14,6 +16,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { FloatingActionButton } from '@/components/ui/floating-action-button';
+import { useIsMobile } from '@/hooks/use-mobile';
 import spareparts from '@/routes/spareparts';
 import type { Brand, Category, PaginatedResponse, Sparepart } from '@/types';
 
@@ -26,32 +29,40 @@ interface Props {
         rank?: string | null;
         status?: string | null;
     };
+    sort: string;
+    dir: SortDir;
     brands: Pick<Brand, 'id' | 'name'>[];
     categories: Pick<Category, 'id' | 'name'>[];
     ranks: string[];
     statuses: string[];
 }
 
-function buildQuery(values: FilterValues) {
+function buildQuery(values: FilterValues, sort: string, dir: SortDir) {
     return {
         ...(values.search ? { search: values.search.trim() } : {}),
         ...(values.brandId && values.brandId !== 'all' ? { brand_id: values.brandId } : {}),
         ...(values.categoryId && values.categoryId !== 'all' ? { category_id: values.categoryId } : {}),
         ...(values.rank && values.rank !== 'all' ? { rank: values.rank } : {}),
         ...(values.status && values.status !== 'all' ? { status: values.status } : {}),
+        // Hanya sertakan sort kalau bukan default
+        ...(sort !== 'created_at' ? { sort } : {}),
+        ...(dir !== 'desc' ? { dir } : {}),
     };
 }
 
 export default function Index({
     spareparts: response,
     filters,
+    sort,
+    dir,
     brands,
     categories,
     ranks,
     statuses,
 }: Props) {
     const { auth } = usePage().props;
-    const isAdmin = auth.user?.role === 'admin';
+    const isAdmin  = auth.user?.role === 'admin';
+    const isMobile = useIsMobile();
 
     const [filterValues, setFilterValues] = useState<FilterValues>({
         search: filters.search ?? '',
@@ -76,8 +87,7 @@ export default function Index({
 
     function applyFilters(event?: FormEvent<HTMLFormElement>) {
         event?.preventDefault();
-
-        router.get(spareparts.index().url, buildQuery(filterValues), {
+        router.get(spareparts.index().url, buildQuery(filterValues, sort, dir), {
             preserveScroll: true,
             replace: true,
         });
@@ -89,14 +99,20 @@ export default function Index({
             brandId: 'all',
             categoryId: 'all',
             rank: 'all',
-            status: 'all'
+            status: 'all',
         });
-
         router.get(spareparts.index().url, {}, {
             preserveScroll: true,
             replace: true,
         });
     }
+
+    const handleSort = useCallback((column: string, newDir: SortDir) => {
+        router.get(spareparts.index().url, buildQuery(filterValues, column, newDir), {
+            preserveScroll: true,
+            replace: true,
+        });
+    }, [filterValues]);
 
     return (
         <>
@@ -139,7 +155,11 @@ export default function Index({
 
                     <CardContent className="p-0">
                         {rows.length > 0 ? (
-                            <SparepartsTable rows={rows} />
+                            isMobile ? (
+                                <SparepartsMobileList rows={rows} />
+                            ) : (
+                                <SparepartsTable rows={rows} sort={sort} dir={dir} onSort={handleSort} />
+                            )
                         ) : (
                             <div className="flex min-h-72 flex-col items-center justify-center gap-2 px-6 py-12 text-center">
                                 <p className="text-base font-semibold text-foreground">

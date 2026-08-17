@@ -15,17 +15,33 @@ use Inertia\Inertia;
 
 class QrCodePrintController extends Controller
 {
+    /** Batas maksimum item per cetak — aman di shared hosting cPanel */
+    private const MAX_SELECTED = 60;
+
+    /** 7 baris × 2 kolom = 14 label per halaman A4 */
+    private const CHUNK_SIZE = 14;
+
+    /** Ukuran QR SVG — 150px cukup jelas untuk label, hemat memori */
+    private const QR_SIZE = 150;
+
     /**
-     * Display the QR Code print selection page.
-     * Admin Only (handled via route middleware).
+     * Halaman pilih sparepart untuk dicetak.
+     * Pagination 14 per halaman — sesuai jumlah label per halaman PDF.
      */
     public function index(Request $request)
     {
         $search = trim((string) $request->input('search', ''));
 
+        // Sort
+        $allowedSorts = ['material_number', 'part_name', 'rank', 'created_at'];
+        $sort = in_array($request->input('sort'), $allowedSorts, true)
+            ? $request->input('sort')
+            : 'created_at';
+        $dir = $request->input('dir') === 'asc' ? 'asc' : 'desc';
+
         $query = Sparepart::query()
             ->with(['brand', 'category', 'bin.rack'])
-            ->latest();
+            ->orderBy($sort, $dir);
 
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
@@ -34,205 +50,166 @@ class QrCodePrintController extends Controller
             });
         }
 
-        $spareparts = $query->paginate(15)->withQueryString();
+        // Filter
+        if ($request->filled('brand_id')) {
+            $query->where('brand_id', $request->input('brand_id'));
+        }
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->input('category_id'));
+        }
+        if ($request->filled('rank')) {
+            $query->where('rank', $request->input('rank'));
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+
+        $spareparts = $query->paginate(self::CHUNK_SIZE)->withQueryString();
 
         return Inertia::render('qr-codes/print', [
             'spareparts' => $spareparts,
-            'search' => $search,
+            'search'     => $search,
+            'sort'       => $sort,
+            'dir'        => $dir,
+            'filters'    => $request->only(['brand_id', 'category_id', 'rank', 'status']),
+            'brands'     => \App\Models\Brand::orderBy('name')->get(['id', 'name']),
+            'categories' => \App\Models\Category::orderBy('name')->get(['id', 'name']),
+            'ranks'      => ['A', 'B', 'C'],
+            'statuses'   => ['OK', 'ATTENTION', 'NG'],
         ]);
     }
 
     /**
-     * Generate and download PDF with QR codes for the selected spareparts.
-     * Layout: 3 rows x 2 columns (6 QRs per A4 Portrait page).
+     * Generate dan stream PDF ke browser sebagai download.
+     * Mode: hanya 'selected' — user pilih manual.
      */
     public function generate(Request $request)
     {
-        $mode = $request->input('mode', 'selected'); // 'selected' or 'all'
+        @ini_set('memory_limit', '256M');
+        @set_time_limit(120);
 
-        if (! in_array($mode, ['selected', 'all'], true)) {
-            throw ValidationException::withMessages([
-                'mode' => ['Invalid print mode. Choose "selected" or "all".'],
-            ]);
-        }
-
-        /** @var \Illuminate\Database\Eloquent\Builder $query */
-        $query = Sparepart::query()
-            ->with(['brand', 'category', 'bin.rack'])
-            ->orderBy('material_number', 'asc');
-
-        if ($mode === 'selected') {
-            $ids = $request->input('ids', []);
-            if (! is_array($ids) || count($ids) === 0) {
-                throw ValidationException::withMessages([
-                    'ids' => ['Please select at least 1 sparepart to print.'],
-                ]);
-            }
-
-            if (count($ids) > 200) {
-                throw ValidationException::withMessages([
-                    'ids' => ['Maximum 200 spareparts per print (34 pages).'],
-                ]);
-            }
-
-            $idList = array_map('intval', $ids);
-            $query->whereIn('id', $idList);
-        } else {
-            // Mode 'all'
-            $totalCount = (clone $query)->count();
-            if ($totalCount === 0) {
-                throw ValidationException::withMessages([
-                    'mode' => ['No spareparts found in database to print.'],
-                ]);
-            }
-            if ($totalCount > 500) {
-                // Safety limit for performance
-                throw ValidationException::withMessages([
-                    'mode' => ["Too many spareparts ({$totalCount}). Please use 'Selected' mode or apply filters first. Max 500 allowed."],
-                ]);
-            }
-        }
-
-        /** @var \Illuminate\Database\Eloquent\Collection<int, Sparepart> $spareparts */
-        $spareparts = $query->get();
-
-        $renderer = new ImageRenderer(
-            new RendererStyle(260, 2),
-            new SvgImageBackEnd()
-        );
-        $writer = new Writer($renderer);
-
-        $chunkSize = 6; // 3 rows x 2 cols
-        $pages = $spareparts->chunk($chunkSize)->map(function ($chunk) use ($writer) {
-            return array_values($chunk->map(function (Sparepart $sparepart) use ($writer) {
-                $stockOutUrl = URL::route('stock.out.form', ['sparepart' => $sparepart->id]);
-                $svg = $writer->writeString($stockOutUrl);
-                $qrDataUri = 'data:image/svg+xml;base64,' . base64_encode($svg);
-
-                $rack = $sparepart->bin?->rack?->code ?? '-';
-                $bin = $sparepart->bin?->code ?? '-';
-                $location = ($rack !== '-' && $bin !== '-') ? "{$rack} / {$bin}" : '-';
-
-                return [
-                    'material_number' => $sparepart->material_number ?? '-',
-                    'part_name' => $sparepart->part_name ?? '-',
-                    'rank' => $sparepart->rank ?? '-',
-                    'brand' => $sparepart->brand?->name ?? '-',
-                    'category' => $sparepart->category?->name ?? '-',
-                    'location' => $location,
-                    'qr_img' => $qrDataUri,
-                ];
-            })->all());
-        })->all();
-
-        $totalCount = $spareparts->count();
-        $totalPages = (int) ceil($totalCount / $chunkSize);
+        [$pages, $totalCount, $filename] = $this->buildPdfData($request);
 
         $viewData = [
-            'pages' => $pages,
-            'printed_at' => now()->format('d/m/Y H:i'),
+            'pages'            => $pages,
+            'printed_at'       => now()->format('d/m/Y H:i'),
             'total_spareparts' => $totalCount,
-            'total_pages' => $totalPages,
+            'total_pages'      => (int) ceil($totalCount / self::CHUNK_SIZE),
         ];
 
-        $pdf = Pdf::loadView('qr-codes.print-3x2', $viewData)
-            ->setPaper('a4', 'portrait')
-            ->setOption('margin-top', 8)
-            ->setOption('margin-bottom', 8)
-            ->setOption('margin-left', 8)
-            ->setOption('margin-right', 8)
-            ->setOption('isRemoteEnabled', false);
+        return response()->streamDownload(function () use ($viewData) {
+            $pdf = Pdf::loadView('qr-codes.print-3x2', $viewData)
+                ->setPaper('a4', 'portrait')
+                ->setOptions([
+                    'isRemoteEnabled' => false,
+                    'dpi'             => 72,
+                ]);
 
-        return $pdf->download('QR_CODE_BATCH_'.now()->format('Ymd_His').'.pdf');
+            echo $pdf->output();
+            unset($pdf);
+        }, $filename, ['Content-Type' => 'application/pdf']);
     }
 
     /**
-     * HTML PREVIEW (bukan PDF) - untuk review di browser sebelum cetak.
-     * Logic 100% sama dengan generate(), bedanya return view HTML ke browser.
+     * Preview HTML di browser (bukan PDF) — untuk review sebelum download.
      */
     public function preview(Request $request)
     {
-        $mode = $request->input('mode', 'selected');
+        @ini_set('memory_limit', '128M');
+        @set_time_limit(60);
 
-        if (! in_array($mode, ['selected', 'all'], true)) {
+        [$pages, $totalCount] = $this->buildPdfData($request);
+
+        return response()->view('qr-codes.print-3x2', [
+            'pages'            => $pages,
+            'printed_at'       => now()->format('d/m/Y H:i'),
+            'total_spareparts' => $totalCount,
+            'total_pages'      => (int) ceil($totalCount / self::CHUNK_SIZE),
+        ]);
+    }
+
+    // -------------------------------------------------------------------------
+
+    /**
+     * Validasi request, query DB, build data pages + QR SVG.
+     * Hanya mendukung mode 'selected'.
+     *
+     * @return array{0: array, 1: int, 2: string}  [$pages, $totalCount, $filename]
+     */
+    private function buildPdfData(Request $request): array
+    {
+        $ids = $request->input('ids', []);
+
+        if (! is_array($ids) || count($ids) === 0) {
             throw ValidationException::withMessages([
-                'mode' => ['Invalid print mode. Choose "selected" or "all".'],
+                'ids' => ['Pilih minimal 1 sparepart.'],
             ]);
         }
 
-        /** @var \Illuminate\Database\Eloquent\Builder $query */
-        $query = Sparepart::query()
-            ->with(['brand', 'category', 'bin.rack'])
-            ->orderBy('material_number', 'asc');
-
-        if ($mode === 'selected') {
-            $ids = $request->input('ids', []);
-            if (! is_array($ids) || count($ids) === 0) {
-                throw ValidationException::withMessages([
-                    'ids' => ['Please select at least 1 sparepart to preview.'],
-                ]);
-            }
-            if (count($ids) > 200) {
-                throw ValidationException::withMessages([
-                    'ids' => ['Maximum 200 spareparts per preview.'],
-                ]);
-            }
-            $idList = array_map('intval', $ids);
-            $query->whereIn('id', $idList);
-        } else {
-            $totalCount = (clone $query)->count();
-            if ($totalCount === 0) {
-                throw ValidationException::withMessages([
-                    'mode' => ['No spareparts found for preview.'],
-                ]);
-            }
-            if ($totalCount > 500) {
-                throw ValidationException::withMessages([
-                    'mode' => ["Too many spareparts ({$totalCount}). Max 500 for preview."],
-                ]);
-            }
+        if (count($ids) > self::MAX_SELECTED) {
+            throw ValidationException::withMessages([
+                'ids' => [
+                    'Maksimal ' . self::MAX_SELECTED . ' sparepart per cetak ('
+                    . (int) ceil(self::MAX_SELECTED / self::CHUNK_SIZE)
+                    . ' halaman). Pilih lebih sedikit atau cetak bertahap.',
+                ],
+            ]);
         }
 
-        /** @var \Illuminate\Database\Eloquent\Collection<int, Sparepart> $spareparts */
-        $spareparts = $query->get();
-
-        $renderer = new ImageRenderer(
-            new RendererStyle(260, 2),
-            new SvgImageBackEnd()
-        );
-        $writer = new Writer($renderer);
-
-        $chunkSize = 6;
-        $pages = $spareparts->chunk($chunkSize)->map(function ($chunk) use ($writer) {
-            return array_values($chunk->map(function (Sparepart $sparepart) use ($writer) {
-                $stockOutUrl = URL::route('stock.out.form', ['sparepart' => $sparepart->id]);
-                $svg = $writer->writeString($stockOutUrl);
-                $qrDataUri = 'data:image/svg+xml;base64,' . base64_encode($svg);
-
-                $rack = $sparepart->bin?->rack?->code ?? '-';
-                $bin = $sparepart->bin?->code ?? '-';
-                $location = ($rack !== '-' && $bin !== '-') ? "{$rack} / {$bin}" : '-';
-
-                return [
-                    'material_number' => $sparepart->material_number ?? '-',
-                    'part_name' => $sparepart->part_name ?? '-',
-                    'rank' => $sparepart->rank ?? '-',
-                    'brand' => $sparepart->brand?->name ?? '-',
-                    'category' => $sparepart->category?->name ?? '-',
-                    'location' => $location,
-                    'qr_img' => $qrDataUri,
-                ];
-            })->all());
-        })->all();
+        $spareparts = Sparepart::query()
+            ->with(['brand', 'category', 'bin.rack'])
+            ->whereIn('id', array_map('intval', $ids))
+            ->orderBy('material_number', 'asc')
+            ->get();
 
         $totalCount = $spareparts->count();
-        $totalPages = (int) ceil($totalCount / $chunkSize);
+        $writer     = $this->makeQrWriter();
+        $pages      = [];
 
-        return response()->view('qr-codes.print-3x2', [
-            'pages' => $pages,
-            'printed_at' => now()->format('d/m/Y H:i'),
-            'total_spareparts' => $totalCount,
-            'total_pages' => $totalPages,
-        ]);
+        foreach ($spareparts->chunk(self::CHUNK_SIZE) as $chunk) {
+            $pageCards = [];
+
+            foreach ($chunk as $sparepart) {
+                $stockOutUrl = URL::route('stock.out.form', ['sparepart' => $sparepart->id]);
+                $svg         = $writer->writeString($stockOutUrl);
+                $qrDataUri   = 'data:image/svg+xml;base64,' . base64_encode($svg);
+                unset($svg);
+
+                $rack     = $sparepart->bin?->rack?->code ?? '-';
+                $bin      = $sparepart->bin?->code ?? '-';
+                $location = ($rack !== '-' && $bin !== '-') ? "{$rack} / {$bin}" : '-';
+
+                $pageCards[] = [
+                    'material_number' => $sparepart->material_number ?? '-',
+                    'part_name'       => $sparepart->part_name ?? '-',
+                    'brand'           => $sparepart->brand?->name ?? '-',
+                    'category'        => $sparepart->category?->name ?? '-',
+                    'location'        => $location,
+                    'qr_img'          => $qrDataUri,
+                ];
+
+                unset($qrDataUri);
+            }
+
+            $pages[] = $pageCards;
+            unset($pageCards, $chunk);
+        }
+
+        unset($spareparts, $writer);
+        gc_collect_cycles();
+
+        $filename = 'QR_CODE_BATCH_' . now()->format('Ymd_His') . '.pdf';
+
+        return [$pages, $totalCount, $filename];
+    }
+
+    private function makeQrWriter(): Writer
+    {
+        return new Writer(
+            new ImageRenderer(
+                new RendererStyle(self::QR_SIZE, 1),
+                new SvgImageBackEnd()
+            )
+        );
     }
 }

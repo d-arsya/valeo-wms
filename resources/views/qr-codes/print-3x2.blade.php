@@ -4,233 +4,226 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <title>Cetak QR Code Sparepart</title>
 <style>
+/*
+ * KALKULASI OPTIMAL untuk DomPDF (unit: pt)
+ *
+ * A4 portrait = 595 × 842 pt
+ * Margin pinggir: 35pt semua sisi (≈12.3mm) — aman printer + estetis
+ * Area kerja: 595 - 70 = 525pt lebar | 842 - 70 = 772pt tinggi
+ *
+ * 14 label (2 kol × 7 baris):
+ *   Gap antar kolom: 6pt
+ *   Lebar label = (525 - 6) / 2 = 259.5pt ≈ 260pt
+ *
+ *   Gap antar baris: 4pt × 6 gaps = 24pt
+ *   Tinggi label = (772 - 24) / 7 = 106.85pt ≈ 107pt
+ *
+ * Isi label (5 baris, QR rowspan 3):
+ *   matno + cat + name = total ~55pt (QR 60pt cukup)
+ *   maker + location   = ~26pt × 2 = 52pt
+ *   Total ~107pt ✓
+ */
+
   @page {
     size: A4 portrait;
-    margin: 8mm;
+    margin: 0;
   }
+
   html, body {
-    margin: 0; padding: 0;
+    margin: 0;
+    padding: 0;
     font-family: Arial, Helvetica, sans-serif;
-    color: #000000;
-    background: #ffffff;
+    font-size: 7.5pt;
+    color: #000;
+    background: #fff;
   }
-  body {
-    font-size: 12pt;
-    line-height: 1.2;
+
+  /* Wrapper padding — karena DomPDF sering ignore @page margin */
+  .page-wrapper {
+    padding: 35pt 35pt 35pt 35pt;
+    box-sizing: border-box;
   }
+
   .page {
     page-break-after: always;
     width: 100%;
   }
-  .page:last-child { page-break-after: auto; }
+  .page:last-child {
+    page-break-after: auto;
+  }
 
-  /* Grid outer: 2 kolom x 3 baris = 6 label per halaman A4 */
-  .labels-grid {
+  /* Grid 2 kolom × 7 baris */
+  .grid {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 5mm 4mm;
-    table-layout: fixed;
-  }
-  .labels-grid > tbody > tr > td {
-    width: 50%;
-    padding: 0;
-    margin: 0;
-    vertical-align: top;
-  }
-
-  /* SATU LABEL = UKURAN TETAP (HEIGHT & WIDTH DALAM MM) */
-  /* Lebar A4=210, Margin 8+8=16, Spacing antar kolom 5 → (210-16-5)/2 ≈ 94.5mm  */
-  .label {
-    width: 94mm;
-    height: 90mm;
-    border: 2px solid #000000;
     border-collapse: collapse;
     table-layout: fixed;
-    margin: 0 auto;
   }
-  .label td {
-    border: 2px solid #000000;
-    padding: 1mm 2.2mm;
-    margin: 0;
-    vertical-align: middle;
-    overflow: hidden;
-    word-break: break-all;
-    word-wrap: break-word;
+  .grid td {
+    vertical-align: top;
+  }
+  .grid td.col-l {
+    width: 50%;
+    padding: 0 3pt 4pt 0;
+  }
+  .grid td.col-r {
+    width: 50%;
+    padding: 0 0 4pt 3pt;
+  }
+  .grid tr:last-child td {
+    padding-bottom: 0;
   }
 
-  /* --- KIRI: QR CODE FIXED 28mm WIDE --- */
-  .qr-cell {
-    width: 28mm;
-    height: 90mm;
-    text-align: center;
-    padding: 2.5mm 1.8mm !important;
-  }
-  .qr-cell img {
+  /* Tabel label */
+  .label {
     width: 100%;
-    height: auto;
-    max-height: 86mm;
+    border-collapse: collapse;
+    table-layout: fixed;
+    border: 1.2pt solid #000;
+  }
+  .label td {
+    border: 1pt solid #000;
+    padding: 2.5pt 4pt;
+    vertical-align: middle;
+    overflow: hidden;
+    word-break: break-word;
+    line-height: 1.2;
+  }
+
+  /* QR code — rowspan 3, lebar 60pt */
+  .qr {
+    width: 60pt;
+    text-align: center;
+    padding: 2pt !important;
+  }
+  .qr img {
+    width: 56pt;
+    height: 56pt;
     display: block;
     margin: 0 auto;
   }
 
-  /* --- KANAN: 5 BARIS INFO (3 FULL + 2 LABELED) --- */
-  .info {
-    width: 66mm;
-    padding: 0 !important;
-    border: 0 !important;
-  }
-  .info-table {
-    width: 100%;
-    height: 90mm;
-    border-collapse: collapse;
-    table-layout: fixed;
-  }
-  .info-table td {
-    border: 2px solid #000;
-    padding: 0.6mm 2.2mm;
-    overflow: hidden;
-    word-break: break-all;
-    word-wrap: break-word;
-    vertical-align: middle;
-  }
-
-  /* HEIGHT TETAP per baris info (total 90mm) */
-  .row-matno    { height: 20mm; }
-  .row-catrank  { height: 16mm; }
-  .row-partname { height: 20mm; }
-  .row-maker    { height: 17mm; }
-  .row-location { height: 17mm; }
-
-  /* STYLE TEXT per baris */
+  /* Baris 1: Material Number */
   .matno {
-    font-size: 20pt;
+    font-size: 9pt;
     font-weight: 900;
-    letter-spacing: 0.3px;
     text-align: center;
+    padding: 3pt 4pt !important;
+    letter-spacing: 0.2pt;
   }
-  .catrank {
-    font-size: 13pt;
+
+  /* Baris 2: Category */
+  .cat {
+    font-size: 7.5pt;
     font-weight: 700;
     text-align: center;
+    padding: 2pt 4pt !important;
   }
-  .partname {
-    font-size: 13pt;
-    font-weight: 600;
+
+  /* Baris 3: Part Name */
+  .name {
+    font-size: 7.5pt;
+    font-weight: 500;
     text-align: center;
+    padding: 2pt 4pt !important;
   }
-  .lbl {
-    width: 35%;
-    background-color: #f4f4f4;
-    font-weight: 800;
-    font-size: 14pt;
+
+  /* Baris 4–5: Label kiri (Maker / Location) */
+  .key {
+    width: 30%;
+    font-size: 7pt;
+    font-weight: 700;
     text-align: center;
+    background: #e8e8e8;
+    padding: 2.5pt 2pt !important;
   }
+
+  /* Baris 4–5: Value kanan */
   .val {
-    width: 65%;
-    font-weight: 600;
-    font-size: 14pt;
+    font-size: 7.5pt;
+    font-weight: 500;
     text-align: center;
+    padding: 2.5pt 4pt !important;
   }
 
-  /* Empty cell placeholder */
-  .empty-cell {
-    width: 94mm;
-    height: 90mm;
-    border: 2px dashed #bbbbbb;
-    color: #aaaaaa;
-    text-align: center;
-    vertical-align: middle;
-    letter-spacing: 3mm;
-    font-size: 14pt;
-    margin: 0 auto;
+  /* Sel kosong */
+  .empty {
+    width: 100%;
+    height: 102pt;
+    border: 1pt dashed #d0d0d0;
+    display: block;
   }
-
-  .footer {
-    position: fixed;
-    bottom: -5mm; left: 0; right: 0;
-    font-size: 8pt;
-    color: #555;
-    text-align: right;
-    padding: 0 3mm;
-  }
-  .footer span { margin-left: 6mm; }
 </style>
 </head>
 <body>
 
-@foreach ($pages as $pageIdx => $cards)
-  @php
-    $cardsArr = is_array($cards) ? $cards : $cards->toArray();
-    while (count($cardsArr) < 6) { $cardsArr[] = null; }
-    $rows = array_chunk($cardsArr, 2);
-  @endphp
-  <table class="page labels-grid">
-    <tbody>
-    @foreach ($rows as $rowIdx => $pair)
-      <tr>
-      @foreach ($pair as $colIdx => $c)
-        <td>
-        @if ($c === null)
-          <table class="empty-cell"><tr><td>KOSONG</td></tr></table>
-        @else
-          <table class="label">
-            <tbody>
-              <tr>
-                {{-- KIRI: QR CODE 28mm (rowspan 5) --}}
-                <td class="qr-cell" rowspan="5">
-                  <img src="{{ $c['qr_img'] }}" alt="QR" />
-                </td>
-                {{-- KANAN: 5 ROWS INFO --}}
-                <td class="info">
-                  <table class="info-table">
-                    <tbody>
-                      <tr class="row-matno">
-                        <td class="matno">{{ $c['material_number'] }}</td>
-                      </tr>
-                      <tr class="row-catrank">
-                        <td class="catrank">
-                          @if ($c['category'] !== '-' && $c['rank'] !== '-')
-                            {{ $c['category'] }} · Rank {{ $c['rank'] }}
-                          @elseif ($c['category'] !== '-')
-                            {{ $c['category'] }}
-                          @elseif ($c['rank'] !== '-')
-                            Rank {{ $c['rank'] }}
-                          @else
-                            &nbsp;
-                          @endif
-                        </td>
-                      </tr>
-                      <tr class="row-partname">
-                        <td class="partname">{{ $c['part_name'] }}</td>
-                      </tr>
-                      <tr class="row-maker">
-                        <td class="lbl">Maker</td>
-                        <td class="val">{{ $c['brand'] }}</td>
-                      </tr>
-                      <tr class="row-location">
-                        <td class="lbl">Location</td>
-                        <td class="val">{{ $c['location'] }}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        @endif
-        </td>
-      @endforeach
-      </tr>
-    @endforeach
-    </tbody>
-  </table>
-@endforeach
+@foreach ($pages as $cards)
+@php
+  $arr = is_array($cards) ? $cards : $cards->toArray();
+  while (count($arr) < 14) { $arr[] = null; }
+  $rows = array_chunk($arr, 2);
+@endphp
+<div class="page-wrapper">
+<div class="page">
+<table class="grid"><tbody>
+@foreach ($rows as $pair)
+<tr>
 
-<div class="footer">
-  Valeo WMS &mdash; Dicetak: {{ $printed_at }}
-  <span>{{ $total_spareparts }} item</span>
-  <span>{{ $total_pages }} halaman</span>
+{{-- Kolom kiri --}}
+<td class="col-l">
+@if ($pair[0] === null)
+  <div class="empty"></div>
+@else
+@php $c = $pair[0]; @endphp
+<table class="label"><tbody>
+  <tr>
+    <td class="qr" rowspan="3"><img src="{{ $c['qr_img'] }}" alt="QR"/></td>
+    <td class="matno">{{ $c['material_number'] }}</td>
+  </tr>
+  <tr><td class="cat">{{ $c['category'] !== '-' ? $c['category'] : '&nbsp;' }}</td></tr>
+  <tr><td class="name">{{ $c['part_name'] }}</td></tr>
+  <tr>
+    <td class="key">Maker</td>
+    <td class="val">{{ $c['brand'] !== '-' ? $c['brand'] : '—' }}</td>
+  </tr>
+  <tr>
+    <td class="key">Location</td>
+    <td class="val">{{ $c['location'] !== '-' ? $c['location'] : '—' }}</td>
+  </tr>
+</tbody></table>
+@endif
+</td>
+
+{{-- Kolom kanan --}}
+<td class="col-r">
+@if (!isset($pair[1]) || $pair[1] === null)
+  <div class="empty"></div>
+@else
+@php $c = $pair[1]; @endphp
+<table class="label"><tbody>
+  <tr>
+    <td class="qr" rowspan="3"><img src="{{ $c['qr_img'] }}" alt="QR"/></td>
+    <td class="matno">{{ $c['material_number'] }}</td>
+  </tr>
+  <tr><td class="cat">{{ $c['category'] !== '-' ? $c['category'] : '&nbsp;' }}</td></tr>
+  <tr><td class="name">{{ $c['part_name'] }}</td></tr>
+  <tr>
+    <td class="key">Maker</td>
+    <td class="val">{{ $c['brand'] !== '-' ? $c['brand'] : '—' }}</td>
+  </tr>
+  <tr>
+    <td class="key">Location</td>
+    <td class="val">{{ $c['location'] !== '-' ? $c['location'] : '—' }}</td>
+  </tr>
+</tbody></table>
+@endif
+</td>
+
+</tr>
+@endforeach
+</tbody></table>
 </div>
+</div>
+@endforeach
 
 </body>
 </html>

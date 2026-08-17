@@ -5,6 +5,8 @@ import { useLayoutEffect, useRef } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { ReportMobileList } from '@/components/features/reports/ReportMobileList';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import type { ActivityLog, PaginatedResponse } from '@/types';
 
@@ -14,6 +16,14 @@ interface ReportPreviewTableProps {
 }
 
 export function ReportPreviewTable({ logs, onReset }: ReportPreviewTableProps) {
+    const isMobile = useIsMobile();
+
+    // Mobile — card list
+    if (isMobile) {
+        return <ReportMobileList logs={logs} onReset={onReset} />;
+    }
+
+    // Desktop — tabel dengan sync scroll
     const topScrollRef = useRef<HTMLDivElement | null>(null);
     const topScrollSpacerRef = useRef<HTMLDivElement | null>(null);
     const tableScrollRef = useRef<HTMLDivElement | null>(null);

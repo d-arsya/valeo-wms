@@ -48,23 +48,15 @@ export default function Out({ sparepart, picOptions, returnTo }: Props) {
             <Head title={`Stock OUT ${sparepart.material_number}`} />
 
             <StockTransactionForm
-                title={`Stock OUT - ${sparepart.material_number}`}
-                description="Catat pengambilan barang secara akurat dan biarkan sistem menghitung stok aktual secara otomatis."
+                title={`Stock OUT — ${sparepart.material_number}`}
                 sparepart={sparepart}
                 cancelHref={returnTo ?? spareparts.show(sparepart.material_number).url}
                 submitLabel="Konfirmasi OUT"
                 processing={form.processing}
                 onSubmit={handleSubmit}
                 activityLogs={sparepart.activity_logs ?? []}
-                footerNote="Pastikan jumlah pengambilan sesuai dengan barang yang benar-benar keluar dari bin."
             >
-                <section className="space-y-4">
-                    <div>
-                        <p className="text-sm font-semibold text-foreground">Data Pengambilan</p>
-                        <p className="text-sm text-muted-foreground">Masukkan jumlah barang dan keterangan singkat bila perlu.</p>
-                    </div>
-
-                    <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-4 md:grid-cols-2">
                         <div className="space-y-2">
                             <Label htmlFor="quantity">Quantity</Label>
                             <Input
@@ -85,12 +77,11 @@ export default function Out({ sparepart, picOptions, returnTo }: Props) {
                                 id="remarks"
                                 value={form.data.remarks}
                                 onChange={(event) => form.setData('remarks', event.target.value)}
-                                placeholder="Contoh: Ambil untuk line maintenance"
+                                placeholder="Catatan pengambilan"
                             />
                             <InputError message={form.errors.remarks} />
                         </div>
                     </div>
-                </section>
             </StockTransactionForm>
         </>
     );

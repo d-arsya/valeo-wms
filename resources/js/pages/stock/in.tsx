@@ -54,23 +54,15 @@ export default function In({ sparepart, returnTo }: Props) {
             <Head title={`Stock IN ${sparepart.material_number}`} />
 
             <StockTransactionForm
-                title={`Stock IN - ${sparepart.material_number}`}
-                description="Tambahkan stok masuk beserta informasi PO, GR date, dan harga satuan untuk audit."
+                title={`Stock IN — ${sparepart.material_number}`}
                 sparepart={sparepart}
                 cancelHref={returnTo ?? spareparts.show(sparepart.material_number).url}
                 submitLabel="Konfirmasi IN"
                 processing={form.processing}
                 onSubmit={handleSubmit}
                 activityLogs={sparepart.activity_logs ?? []}
-                footerNote="Pastikan data PO dan GR date sesuai dokumen penerimaan barang."
             >
-                <section className="space-y-4">
-                    <div>
-                        <p className="text-sm font-semibold text-foreground">Data Penerimaan</p>
-                        <p className="text-sm text-muted-foreground">Lengkapi jumlah, nomor PO, tanggal penerimaan, dan harga satuan.</p>
-                    </div>
-
-                    <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-4 md:grid-cols-2">
                         <div className="space-y-2">
                             <Label htmlFor="quantity">Quantity</Label>
                             <Input
@@ -91,7 +83,7 @@ export default function In({ sparepart, returnTo }: Props) {
                                 id="po_number"
                                 value={form.data.po_number}
                                 onChange={(event) => form.setData('po_number', event.target.value)}
-                                placeholder="Contoh: PO-2026-001"
+                                placeholder="PO-2026-001"
                                 autoComplete="off"
                             />
                             <InputError message={form.errors.po_number} />
@@ -103,7 +95,7 @@ export default function In({ sparepart, returnTo }: Props) {
                                 id="supplier"
                                 value={form.data.supplier}
                                 onChange={(event) => form.setData('supplier', event.target.value)}
-                                placeholder="Contoh: PT. Maju Jaya"
+                                placeholder="PT. Maju Jaya"
                                 autoComplete="off"
                             />
                             <InputError message={form.errors.supplier} />
@@ -140,12 +132,11 @@ export default function In({ sparepart, returnTo }: Props) {
                                 id="remarks"
                                 value={form.data.remarks}
                                 onChange={(event) => form.setData('remarks', event.target.value)}
-                                placeholder="Contoh: Barang diterima dari vendor"
+                                placeholder="Catatan penerimaan barang"
                             />
                             <InputError message={form.errors.remarks} />
                         </div>
                     </div>
-                </section>
             </StockTransactionForm>
         </>
     );

@@ -7,6 +7,7 @@ import {
     getBinLabel,
 } from '@/components/features/spareparts/spareparts-utils';
 import { StockStatusBadge } from '@/components/features/spareparts/stock-status-badge';
+import { SortableHeader, type SortDir } from '@/components/ui/sortable-header';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
@@ -17,9 +18,12 @@ import type { Sparepart } from '@/types';
 
 interface Props {
     rows: Sparepart[];
+    sort: string;
+    dir: SortDir;
+    onSort: (column: string, dir: SortDir) => void;
 }
 
-export function SparepartsTable({ rows }: Props) {
+export function SparepartsTable({ rows, sort, dir, onSort }: Props) {
     const { auth } = usePage().props;
     const isAdmin = auth.user?.role === 'admin';
     const topScrollRef = useRef<HTMLDivElement | null>(null);
@@ -93,20 +97,20 @@ export function SparepartsTable({ rows }: Props) {
                 <table ref={tableRef} className="min-w-300 w-full border-collapse text-sm">
                     <thead className="bg-muted/40 text-left text-muted-foreground">
                         <tr>
-                            <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap">Material</th>
-                            <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap">Part</th>
-                            <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap">Specification</th>
-                            <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap">Location</th>
-                            <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap">Brand</th>
-                            <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap">Category</th>
-                            <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap">Stock</th>
-                            <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap">Safety</th>
-                            <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap">Rank</th>
-                            <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap">Status</th>
-                            <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap">PO Number</th>
-                            <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap">Supplier</th>
-                            <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap">GR Date</th>
-                            <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap">Price</th>
+                            <SortableHeader column="material_number" currentSort={sort} currentDir={dir} onSort={onSort}>Material</SortableHeader>
+                            <SortableHeader column="part_name" currentSort={sort} currentDir={dir} onSort={onSort}>Part</SortableHeader>
+                            <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap text-muted-foreground">Specification</th>
+                            <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap text-muted-foreground">Location</th>
+                            <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap text-muted-foreground">Brand</th>
+                            <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap text-muted-foreground">Category</th>
+                            <SortableHeader column="actual_stock" currentSort={sort} currentDir={dir} onSort={onSort}>Stock</SortableHeader>
+                            <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap text-muted-foreground">Safety</th>
+                            <SortableHeader column="rank" currentSort={sort} currentDir={dir} onSort={onSort}>Rank</SortableHeader>
+                            <SortableHeader column="status" currentSort={sort} currentDir={dir} onSort={onSort}>Status</SortableHeader>
+                            <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap text-muted-foreground">PO Number</th>
+                            <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap text-muted-foreground">Supplier</th>
+                            <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap text-muted-foreground">GR Date</th>
+                            <th className="px-5 py-3.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap text-muted-foreground">Price</th>
                             <th className="sticky right-0 z-40 w-44 min-w-44 max-w-44 bg-background px-4 py-3.5 text-center text-[11px] font-semibold uppercase tracking-wide whitespace-nowrap shadow-[-10px_0_14px_-12px_rgba(0,0,0,0.32)] before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-border/60 before:content-['']">
                                 Actions
                             </th>
