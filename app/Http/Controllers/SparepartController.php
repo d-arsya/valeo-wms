@@ -48,11 +48,20 @@ class SparepartController extends Controller
             $query->where('status', $request->input('status'));
         }
 
-        $spareparts = $query->latest()->paginate(10)->withQueryString();
+        // Sort — whitelist kolom yang diizinkan untuk mencegah SQL injection
+        $allowedSorts = ['material_number', 'part_name', 'rank', 'actual_stock', 'status', 'created_at'];
+        $sort = in_array($request->input('sort'), $allowedSorts, true)
+            ? $request->input('sort')
+            : 'created_at';
+        $dir = $request->input('dir') === 'asc' ? 'asc' : 'desc';
+
+        $spareparts = $query->orderBy($sort, $dir)->paginate(10)->withQueryString();
 
         return inertia('spareparts/index', [
             'spareparts' => $spareparts,
             'filters' => $request->only(['search', 'brand_id', 'category_id', 'rank', 'status']),
+            'sort' => $sort,
+            'dir'  => $dir,
             'brands' => $this->brandOptions(),
             'categories' => $this->categoryOptions(),
             'ranks' => ['A', 'B', 'C'],

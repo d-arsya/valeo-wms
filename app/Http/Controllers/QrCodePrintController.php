@@ -32,9 +32,16 @@ class QrCodePrintController extends Controller
     {
         $search = trim((string) $request->input('search', ''));
 
+        // Sort
+        $allowedSorts = ['material_number', 'part_name', 'rank', 'created_at'];
+        $sort = in_array($request->input('sort'), $allowedSorts, true)
+            ? $request->input('sort')
+            : 'created_at';
+        $dir = $request->input('dir') === 'asc' ? 'asc' : 'desc';
+
         $query = Sparepart::query()
             ->with(['brand', 'category', 'bin.rack'])
-            ->latest();
+            ->orderBy($sort, $dir);
 
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
@@ -43,11 +50,32 @@ class QrCodePrintController extends Controller
             });
         }
 
+        // Filter
+        if ($request->filled('brand_id')) {
+            $query->where('brand_id', $request->input('brand_id'));
+        }
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->input('category_id'));
+        }
+        if ($request->filled('rank')) {
+            $query->where('rank', $request->input('rank'));
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+
         $spareparts = $query->paginate(self::CHUNK_SIZE)->withQueryString();
 
         return Inertia::render('qr-codes/print', [
             'spareparts' => $spareparts,
             'search'     => $search,
+            'sort'       => $sort,
+            'dir'        => $dir,
+            'filters'    => $request->only(['brand_id', 'category_id', 'rank', 'status']),
+            'brands'     => \App\Models\Brand::orderBy('name')->get(['id', 'name']),
+            'categories' => \App\Models\Category::orderBy('name')->get(['id', 'name']),
+            'ranks'      => ['A', 'B', 'C'],
+            'statuses'   => ['OK', 'ATTENTION', 'NG'],
         ]);
     }
 

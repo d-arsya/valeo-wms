@@ -3,6 +3,7 @@ import type { FormEvent } from 'react';
 import { ReportFilters } from '@/components/features/reports/ReportFilters';
 import { ReportHeader } from '@/components/features/reports/ReportHeader';
 import { ReportPreviewTable } from '@/components/features/reports/ReportPreviewTable';
+import { FloatingExportButton } from '@/components/features/reports/FloatingExportButton';
 import { Pagination } from '@/components/pagination';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import reports from '@/routes/reports';
@@ -90,6 +91,8 @@ export default function ReportsIndex({ logs, filters }: ReportsProps) {
 
                 <Pagination meta={logs} />
             </div>
+
+            <FloatingExportButton />
         </>
     );
 }
