@@ -38,7 +38,7 @@ export function StockTransactionForm({
                 </Link>
             </Button>
 
-            <form onSubmit={onSubmit} className="space-y-4 max-w-2xl">
+            <form onSubmit={onSubmit} className="space-y-4 max-w-2xl mx-auto md:mx-0">
                 <Card className="gap-0 overflow-hidden border-border/60 shadow-sm">
                     <CardHeader className="border-b border-border/60 py-4">
                         <div>

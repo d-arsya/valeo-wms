@@ -150,6 +150,9 @@ export default function Index({
                             onApply={applyFilters}
                             onReset={resetFilters}
                             hasFilters={hasFilters}
+                            sort={sort}
+                            dir={dir}
+                            onSortChange={handleSort}
                         />
                     </CardContent>
 

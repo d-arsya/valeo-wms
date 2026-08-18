@@ -15,16 +15,18 @@ class ReportController extends Controller
     public function index(Request $request)
     {
         $filters = $request->only(['from', 'to', 'type', 'search', 'control_id']);
+        $dir     = $request->input('dir') === 'asc' ? 'asc' : 'desc';
 
         $logs = ActivityLog::with(['sparepart', 'user'])
             ->filter($filters)
-            ->orderBy('performed_at', 'desc')
+            ->orderBy('performed_at', $dir)
             ->paginate(10)
             ->withQueryString();
 
         return Inertia::render('reports/Index', [
-            'logs' => $logs,
+            'logs'    => $logs,
             'filters' => $filters,
+            'dir'     => $dir,
         ]);
     }
 

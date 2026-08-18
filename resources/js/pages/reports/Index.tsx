@@ -18,9 +18,10 @@ interface ReportsProps {
         search?: string;
         control_id?: string;
     };
+    dir: 'asc' | 'desc';
 }
 
-export default function ReportsIndex({ logs, filters }: ReportsProps) {
+export default function ReportsIndex({ logs, filters, dir }: ReportsProps) {
     const { data, setData, processing, reset } = useForm({
         from: filters.from || '',
         to: filters.to || '',
@@ -34,7 +35,6 @@ export default function ReportsIndex({ logs, filters }: ReportsProps) {
 
     const handleApplyFilters = (event?: FormEvent<HTMLFormElement>) => {
         event?.preventDefault();
-
         router.get(
             reports.index().url,
             {
@@ -42,22 +42,31 @@ export default function ReportsIndex({ logs, filters }: ReportsProps) {
                 to: data.to,
                 type: data.type,
                 search: data.search,
+                ...(dir !== 'desc' ? { dir } : {}),
             },
-            {
-                preserveState: true,
-                preserveScroll: true,
-                replace: true,
-            },
+            { preserveState: true, preserveScroll: true, replace: true },
         );
     };
 
     const handleClearFilters = () => {
         reset();
         router.get(reports.index().url, {}, {
-            preserveState: false,
-            preserveScroll: true,
-            replace: true,
+            preserveState: false, preserveScroll: true, replace: true,
         });
+    };
+
+    const handleDirChange = (newDir: 'asc' | 'desc') => {
+        router.get(
+            reports.index().url,
+            {
+                from: data.from,
+                to: data.to,
+                type: data.type,
+                search: data.search,
+                ...(newDir !== 'desc' ? { dir: newDir } : {}),
+            },
+            { preserveState: true, preserveScroll: true, replace: true },
+        );
     };
 
     return (
@@ -78,6 +87,8 @@ export default function ReportsIndex({ logs, filters }: ReportsProps) {
                             onReset={handleClearFilters}
                             hasFilters={hasFilters}
                             processing={processing}
+                            dir={dir}
+                            onDirChange={handleDirChange}
                         />
                     </CardContent>
 

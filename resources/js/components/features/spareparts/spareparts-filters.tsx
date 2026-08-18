@@ -1,9 +1,17 @@
-import { Filter, Search } from 'lucide-react';
+import { ArrowUpDown, ChevronDown, Filter, Search } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import {
     Select,
@@ -21,6 +29,7 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
+import type { SortDir } from '@/components/ui/sortable-header';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import type { Brand, Category } from '@/types';
@@ -43,7 +52,27 @@ interface Props {
     onApply: (event?: FormEvent<HTMLFormElement>) => void;
     onReset: () => void;
     hasFilters: boolean;
+    /** Sort props — opsional, kalau tidak diberikan sort selector tidak ditampilkan */
+    sort?: string;
+    dir?: SortDir;
+    onSortChange?: (column: string, dir: SortDir) => void;
 }
+
+// Opsi sort yang tersedia di mobile
+const SORT_OPTIONS: { value: string; label: string }[] = [
+    { value: 'created_at:desc', label: 'Terbaru' },
+    { value: 'created_at:asc',  label: 'Terlama' },
+    { value: 'material_number:asc',  label: 'Material Number A–Z' },
+    { value: 'material_number:desc', label: 'Material Number Z–A' },
+    { value: 'part_name:asc',  label: 'Part Name A–Z' },
+    { value: 'part_name:desc', label: 'Part Name Z–A' },
+    { value: 'actual_stock:desc', label: 'Stok terbanyak' },
+    { value: 'actual_stock:asc',  label: 'Stok tersedikit' },
+    { value: 'rank:asc',  label: 'Rank A–C' },
+    { value: 'rank:desc', label: 'Rank C–A' },
+    { value: 'status:asc',  label: 'Status (OK dulu)' },
+    { value: 'status:desc', label: 'Status (NG dulu)' },
+];
 
 const ALL_VALUE = 'all';
 
@@ -192,6 +221,9 @@ export function SparepartFilters({
     onApply,
     onReset,
     hasFilters,
+    sort,
+    dir,
+    onSortChange,
 }: Props) {
     const isMobile = useIsMobile();
     const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -246,24 +278,65 @@ export function SparepartFilters({
 
                 {isMobile ? (
                     <>
-                        {/* Mobile: Filter Button Opens Sheet */}
+                        {/* Mobile toolbar: Sort | Filter | Apply — 3 tombol sejajar */}
                         <div className="grid grid-cols-3 gap-2 sm:hidden">
-                            <Sheet
-                                open={sheetOpen}
-                                onOpenChange={setSheetOpen}
-                            >
+
+                            {/* Tombol Sort — DropdownMenu langsung, tidak perlu buka Sheet */}
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        type="button"
+                                        variant={sort && sort !== 'created_at' ? 'default' : 'secondary'}
+                                        className="col-span-1 h-11 gap-1.5 px-3"
+                                    >
+                                        <ArrowUpDown className="size-4 shrink-0" />
+                                        <span className="truncate text-xs">Urut</span>
+                                        {sort && sort !== 'created_at' && (
+                                            <span className="size-1.5 rounded-full bg-primary-foreground/70" />
+                                        )}
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="start" className="w-52">
+                                    <DropdownMenuLabel className="text-xs text-muted-foreground">
+                                        Urutkan berdasarkan
+                                    </DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    {SORT_OPTIONS.map((opt) => {
+                                        const [col, d] = opt.value.split(':') as [string, SortDir];
+                                        const isActive = sort === col && dir === d;
+                                        return (
+                                            <DropdownMenuItem
+                                                key={opt.value}
+                                                className={cn(
+                                                    'text-sm',
+                                                    isActive && 'bg-primary/10 font-medium text-primary',
+                                                )}
+                                                onSelect={() => onSortChange?.(col, d)}
+                                            >
+                                                {isActive && (
+                                                    <span className="mr-2 size-1.5 rounded-full bg-primary" />
+                                                )}
+                                                {opt.label}
+                                            </DropdownMenuItem>
+                                        );
+                                    })}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+
+                            {/* Tombol Filter — buka Sheet */}
+                            <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
                                 <SheetTrigger asChild>
                                     <Button
                                         type="button"
-                                        variant="secondary"
-                                        className="col-span-2 h-11 gap-2"
+                                        variant={count > 0 ? 'default' : 'secondary'}
+                                        className="col-span-1 h-11 gap-1.5 px-3"
                                     >
-                                        <Filter className="size-4" />
-                                        <span>Filters</span>
+                                        <Filter className="size-4 shrink-0" />
+                                        <span className="truncate text-xs">Filter</span>
                                         {count > 0 && (
                                             <Badge
-                                                variant="default"
-                                                className="ml-1 min-w-[1.3rem] px-1.5 text-[11px] leading-none"
+                                                variant="secondary"
+                                                className="ml-0.5 min-w-[1.1rem] px-1 text-[10px] leading-none"
                                             >
                                                 {count}
                                             </Badge>
@@ -288,8 +361,7 @@ export function SparepartFilters({
                                             )}
                                         </SheetTitle>
                                         <SheetDescription className="sr-only">
-                                            Select filters to apply to the
-                                            spareparts list
+                                            Select filters to apply to the spareparts list
                                         </SheetDescription>
                                     </SheetHeader>
 
@@ -328,8 +400,9 @@ export function SparepartFilters({
                                 </SheetContent>
                             </Sheet>
 
-                            <Button type="submit" className="col-span-1 h-11">
-                                Apply
+                            {/* Tombol Apply */}
+                            <Button type="submit" className="col-span-1 h-11 px-3">
+                                <span className="text-xs">Cari</span>
                             </Button>
                         </div>
                         <div className="hidden items-end gap-2 pb-0 sm:flex lg:hidden">

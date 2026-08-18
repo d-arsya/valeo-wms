@@ -16,6 +16,9 @@ export function FloatingExportButton() {
 
     if (!isMobile) return null;
 
+    // Sementara disembunyikan
+    return null;
+
     const handleExportPdf = () => {
         setOpen(false);
         window.location.href = buildExportUrl(reports.export().url);

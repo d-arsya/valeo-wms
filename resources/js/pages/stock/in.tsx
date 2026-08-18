@@ -2,6 +2,7 @@ import { Head, useForm } from '@inertiajs/react';
 import type { FormEvent } from 'react';
 import { StockTransactionForm } from '@/components/features/stock/stock-transaction-form';
 import InputError from '@/components/input-error';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -103,11 +104,10 @@ export default function In({ sparepart, returnTo }: Props) {
 
                         <div className="space-y-2">
                             <Label htmlFor="gr_date">GR Date</Label>
-                            <Input
-                                id="gr_date"
-                                type="date"
+                            <DatePicker
                                 value={form.data.gr_date}
-                                onChange={(event) => form.setData('gr_date', event.target.value)}
+                                onChange={(val) => form.setData('gr_date', val)}
+                                placeholder="Pilih tanggal GR"
                             />
                             <InputError message={form.errors.gr_date} />
                         </div>

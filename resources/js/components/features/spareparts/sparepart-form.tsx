@@ -1,6 +1,3 @@
-import { format, parseISO } from 'date-fns';
-import { id } from 'date-fns/locale';
-import { Calendar as CalendarIcon } from 'lucide-react';
 import { useEffect } from 'react';
 import type { FormEvent } from 'react';
 import { toast } from 'sonner';
@@ -8,15 +5,13 @@ import { BackButton } from '@/components/back-button';
 import { getBinLocationLabel } from '@/components/features/spareparts/spareparts-utils';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ComboboxCreatable } from '@/components/ui/combobox-creatable';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
 import brandsRoute from '@/routes/brands';
 import categoriesRoute from '@/routes/categories';
 import type { Bin, Brand, Category } from '@/types';
@@ -230,32 +225,11 @@ export function SparepartForm({
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="gr_date">GR Date</Label>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant="outline"
-                                            className={cn(
-                                                "w-full justify-start text-left font-normal",
-                                                !values.last_gr_date && "text-muted-foreground"
-                                            )}
-                                        >
-                                            <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
-                                            {values.last_gr_date ? format(parseISO(values.last_gr_date), "dd MMM yyyy", { locale: id }) : <span>Pilih tanggal GR</span>}
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="start">
-                                        <Calendar
-                                            mode="single"
-                                            locale={id}
-                                            selected={values.last_gr_date ? parseISO(values.last_gr_date) : undefined}
-                                            onSelect={(date) => {
-                                                const formattedDate = date ? format(date, 'yyyy-MM-dd') : '';
-                                                onChange('last_gr_date', formattedDate);
-                                            }}
-                                            initialFocus
-                                        />
-                                    </PopoverContent>
-                                </Popover>
+                                <DatePicker
+                                    value={values.last_gr_date}
+                                    onChange={(val) => onChange('last_gr_date', val)}
+                                    placeholder="Pilih tanggal GR"
+                                />
                                 <InputError message={errors.last_gr_date} />
                             </div>
                             <div className="space-y-2">
