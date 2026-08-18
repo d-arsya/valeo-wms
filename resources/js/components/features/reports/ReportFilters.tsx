@@ -1,11 +1,19 @@
 import { format, parseISO } from 'date-fns';
 import { id } from 'date-fns/locale';
-import { Filter, Search, Calendar as CalendarIcon } from 'lucide-react';
+import { ArrowUpDown, Calendar as CalendarIcon, Filter, Search } from 'lucide-react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
@@ -42,6 +50,8 @@ interface ReportFiltersProps {
     onReset: () => void;
     hasFilters: boolean;
     processing: boolean;
+    dir?: 'asc' | 'desc';
+    onDirChange?: (dir: 'asc' | 'desc') => void;
 }
 
 const ALL_VALUE = 'all';
@@ -196,6 +206,8 @@ export function ReportFilters({
     onReset,
     hasFilters,
     processing,
+    dir = 'desc',
+    onDirChange,
 }: ReportFiltersProps) {
     const isMobile = useIsMobile();
     const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -255,22 +267,59 @@ export function ReportFilters({
                 {isMobile ? (
                     <>
                         <div className="grid grid-cols-3 gap-2 sm:hidden">
-                            <Sheet
-                                open={sheetOpen}
-                                onOpenChange={setSheetOpen}
-                            >
+
+                            {/* Tombol Sort — DropdownMenu langsung */}
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        type="button"
+                                        variant={dir === 'asc' ? 'default' : 'secondary'}
+                                        className="col-span-1 h-11 gap-1.5 px-3"
+                                    >
+                                        <ArrowUpDown className="size-4 shrink-0" />
+                                        <span className="truncate text-xs">Urut</span>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="start" className="w-44">
+                                    <DropdownMenuLabel className="text-xs text-muted-foreground">
+                                        Urutkan waktu
+                                    </DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    {[
+                                        { value: 'desc', label: 'Terbaru dulu' },
+                                        { value: 'asc',  label: 'Terlama dulu' },
+                                    ].map((opt) => (
+                                        <DropdownMenuItem
+                                            key={opt.value}
+                                            className={cn(
+                                                'text-sm',
+                                                dir === opt.value && 'bg-primary/10 font-medium text-primary',
+                                            )}
+                                            onSelect={() => onDirChange?.(opt.value as 'asc' | 'desc')}
+                                        >
+                                            {dir === opt.value && (
+                                                <span className="mr-2 size-1.5 rounded-full bg-primary" />
+                                            )}
+                                            {opt.label}
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+
+                            {/* Tombol Filter — Sheet */}
+                            <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
                                 <SheetTrigger asChild>
                                     <Button
                                         type="button"
-                                        variant="secondary"
-                                        className="col-span-2 h-11 gap-2"
+                                        variant={count > 0 ? 'default' : 'secondary'}
+                                        className="col-span-1 h-11 gap-1.5 px-3"
                                     >
                                         <Filter className="size-4 shrink-0" />
-                                        <span>Filters</span>
+                                        <span className="truncate text-xs">Filter</span>
                                         {count > 0 && (
                                             <Badge
-                                                variant="default"
-                                                className="ml-1 min-w-[1.3rem] px-1.5 text-[11px] leading-none"
+                                                variant="secondary"
+                                                className="ml-0.5 min-w-[1.1rem] px-1 text-[10px] leading-none"
                                             >
                                                 {count}
                                             </Badge>
@@ -286,18 +335,13 @@ export function ReportFilters({
                                         <SheetTitle className="text-left text-base font-semibold">
                                             Filter Laporan
                                             {count > 0 && (
-                                                <Badge
-                                                    variant="secondary"
-                                                    className="ml-2 text-[11px]"
-                                                >
+                                                <Badge variant="secondary" className="ml-2 text-[11px]">
                                                     {count} active
                                                 </Badge>
                                             )}
                                         </SheetTitle>
                                         <SheetDescription className="sr-only">
-                                            Pilih tanggal, tipe transaksi,
-                                            dan pencarian untuk memfilter
-                                            laporan
+                                            Pilih tanggal dan tipe transaksi untuk memfilter laporan
                                         </SheetDescription>
                                     </SheetHeader>
 
@@ -317,9 +361,7 @@ export function ReportFilters({
                                                 variant="outline"
                                                 className="h-11 sm:h-10"
                                                 onClick={handleSheetReset}
-                                                disabled={
-                                                    !hasFilters || processing
-                                                }
+                                                disabled={!hasFilters || processing}
                                             >
                                                 Reset
                                             </Button>
@@ -336,12 +378,9 @@ export function ReportFilters({
                                 </SheetContent>
                             </Sheet>
 
-                            <Button
-                                type="submit"
-                                className="col-span-1 h-11"
-                                disabled={processing}
-                            >
-                                Apply
+                            {/* Tombol Apply */}
+                            <Button type="submit" className="col-span-1 h-11 px-3" disabled={processing}>
+                                <span className="text-xs">Cari</span>
                             </Button>
                         </div>
                         <div className="hidden items-end gap-2 pb-0 sm:flex xl:hidden">

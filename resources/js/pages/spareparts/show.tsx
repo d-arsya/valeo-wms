@@ -265,7 +265,7 @@ export default function Show({ sparepart, qrCodeSvg }: Props) {
                 </div>
 
                 {/* ── Detail + Activity ──────────────────────────────────── */}
-                <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
+                <div className="grid gap-5 lg:grid-cols-[minmax(280px,0.9fr)_minmax(0,1.1fr)]">
 
                     {/* Detail master data */}
                     <Card className="gap-0 overflow-hidden border-border/60 shadow-sm">
@@ -290,10 +290,10 @@ export default function Show({ sparepart, qrCodeSvg }: Props) {
                                     { label: 'Price / unit',  value: formatCurrency(sparepart.price_per_unit) },
                                     { label: 'Dibuat',        value: formatDate(sparepart.created_at) },
                                 ].map(({ label, value, bold }) => (
-                                    <div key={label} className="flex items-center justify-between gap-4 px-4 py-2.5">
-                                        <dt className="text-xs text-muted-foreground shrink-0 w-28">{label}</dt>
+                                    <div key={label} className="flex items-start justify-between gap-4 px-4 py-2.5">
+                                        <dt className="w-28 shrink-0 text-xs text-muted-foreground">{label}</dt>
                                         <dd className={cn(
-                                            'text-sm text-right min-w-0 break-words',
+                                            'min-w-0 break-words text-right text-sm',
                                             bold ? 'font-bold text-foreground' : 'font-medium text-foreground',
                                         )}>
                                             {value}

@@ -40,8 +40,8 @@ export function ReportHeader() {
                 ) : null}
             </h1>
 
-            {/* Tombol export — hanya tampil di desktop */}
-            <div className="hidden gap-2 sm:flex">
+            {/* Tombol export — sementara disembunyikan */}
+            {/* <div className="hidden gap-2 sm:flex">
                 <Button onClick={handleExportExcel} variant="outline" size="sm" className="gap-2">
                     <FileSpreadsheet className="size-4 shrink-0" />
                     Export Excel
@@ -50,7 +50,7 @@ export function ReportHeader() {
                     <Download className="size-4 shrink-0" />
                     Export PDF
                 </Button>
-            </div>
+            </div> */}
         </div>
     );
 }

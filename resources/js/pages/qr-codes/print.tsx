@@ -245,7 +245,6 @@ export default function Print({ spareparts, search, sort, dir, filters, brands, 
                                 <Button type="button" disabled={!canSubmit} onClick={handleOpenPreview} className="hidden gap-2 shadow-sm lg:flex">
                                     <Download className="size-4 shrink-0" />
                                     Download PDF
-                                    {selectedCount > 0 && <span className="text-[10px] opacity-75">~{estimatedPages} hal.</span>}
                                 </Button>
                             )}
                         </div>
@@ -263,6 +262,9 @@ export default function Print({ spareparts, search, sort, dir, filters, brands, 
                             onApply={applyFilters}
                             onReset={resetFilters}
                             hasFilters={hasFilters}
+                            sort={sort}
+                            dir={dir}
+                            onSortChange={handleSort}
                         />
                     </CardContent>
 
@@ -273,7 +275,6 @@ export default function Print({ spareparts, search, sort, dir, filters, brands, 
                                 <span className="flex items-center gap-1.5 text-xs">
                                     <CheckCircle2 className="size-3.5 shrink-0 text-primary" />
                                     <strong>{selectedCount}</strong> item dipilih
-                                    · estimasi <strong>{estimatedPages}</strong> halaman A4
                                 </span>
                                 <Button type="button" variant="ghost" size="sm" onClick={resetSelection} className="h-7 text-xs px-2">
                                     Bersihkan
@@ -296,7 +297,18 @@ export default function Print({ spareparts, search, sort, dir, filters, brands, 
                         ) : isMobile ? (
                             /* Mobile — card list */
                             <div className="divide-y divide-border/50">
-                                {spareparts.data.map((s) => {
+                                {/* Baris pilih semua halaman ini — konsisten dengan desktop */}
+                                <div className="flex items-center gap-3 bg-muted/30 px-4 py-2.5">
+                                    <Checkbox
+                                        checked={allSelected ? true : someSelected ? 'indeterminate' : false}
+                                        onCheckedChange={(c) => togglePageAll(Boolean(c))}
+                                        className="size-5 shrink-0"
+                                        aria-label="Pilih semua di halaman ini"
+                                    />
+                                    <span className="text-xs text-muted-foreground">
+                                        Pilih semua di halaman ini
+                                    </span>
+                                </div>                                {spareparts.data.map((s) => {
                                     const selected = selectedIds.has(s.id);
                                     return (
                                         <label key={s.id}
@@ -387,7 +399,7 @@ export default function Print({ spareparts, search, sort, dir, filters, brands, 
                     style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }}>
                     <Button type="button" onClick={handleOpenPreview} className="h-12 w-full gap-2 shadow-lg" size="lg">
                         <Download className="size-5 shrink-0" />
-                        Download PDF · {selectedCount} item (~{estimatedPages} hal.)
+                        Download PDF · {selectedCount} item
                     </Button>
                 </div>
             )}
