@@ -1,0 +1,95 @@
+name: Deploy to Arenhost cPanel
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # bisa trigger manual dari GitHub
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: ARENHOST
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Setup Node.js (untuk build assets) ───────────────────────────
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # ── 3. Setup PHP (untuk composer) ───────────────────────────────────
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, bcmath, pdo, pdo_mysql
+          coverage: none
+
+      # ── 4. Install PHP dependencies ──────────────────────────────────────
+      - name: Install Composer dependencies
+        run: composer install --no-dev --optimize-autoloader --no-interaction
+
+      # ── 5. Install JS dependencies dan build assets ──────────────────────
+      - name: Install NPM dependencies
+        run: npm ci
+
+      - name: Build frontend assets
+        run: npm run build
+
+      # ── 6. Siapkan file .env untuk production ────────────────────────────
+      - name: Create .env for deployment check
+        run: |
+          cp .env.example .env
+          # Key tidak perlu di-generate, sudah di-set di server
+
+      # ── 7. Upload ke cPanel via FTP ──────────────────────────────────────
+      # Semua file kecuali .git, node_modules, .env lokal
+      - name: Deploy via FTP to Arenhost
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: ${{ secrets.FTP_PORT }}        # biasanya 21
+          local-dir: ./
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}  # contoh: /public_html/ atau /valeo-wms/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            .env
+            .env.example
+            **/.github/**
+            **/tests/**
+            **/docker*
+            **/Dockerfile
+            **/*.md
+            ImportData/**
+
+      # ── 8. Jalankan artisan commands via SSH (opsional, kalau SSH tersedia)
+      # Kalau Arenhost tidak punya SSH, hapus step ini dan jalankan manual
+      # lewat cPanel Terminal
+      - name: Run artisan commands via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        continue-on-error: true   # jangan fail deployment kalau SSH tidak tersedia
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SSH_PORT }}        # biasanya 22
+          script: |
+            cd ${{ secrets.APP_DIR }}
+            php artisan config:clear
+            php artisan config:cache
+            php artisan route:clear
+            php artisan route:cache
+            php artisan view:clear
+            php artisan view:cache
+            php artisan migrate --force
+            php artisan storage:link
