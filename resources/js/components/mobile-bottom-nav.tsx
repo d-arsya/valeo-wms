@@ -94,6 +94,7 @@ function SecondaryNavGroup({
                             <SheetClose asChild key={child.title}>
                                 <Link
                                     href={child.href}
+                                    prefetch
                                     className={cn(
                                         'flex min-h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors',
                                         active
@@ -165,6 +166,7 @@ export function MobileBottomNav() {
                         <Link
                             key={item.title}
                             href={item.href}
+                            prefetch
                             className={cn(
                                 'flex flex-1 flex-col items-center justify-center gap-1 text-[10px] font-medium transition-colors',
                                 active
@@ -249,6 +251,7 @@ export function MobileBottomNav() {
                                     <SheetClose asChild key={item.title}>
                                         <Link
                                             href={item.href!}
+                                            prefetch
                                             className={cn(
                                                 'flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium transition-colors',
                                                 active
