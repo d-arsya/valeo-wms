@@ -8,11 +8,17 @@ type Props = {
     meta: PaginatedResponse<any>;
 };
 
-function normalizePaginationLabel(label: string) {
-    return label
+function normalizePaginationLabel(label: string): string {
+    const cleaned = label
         .replace(/&laquo;|&raquo;|&hellip;/g, '')
         .replace(/\s+/g, ' ')
         .trim();
+
+    // Fallback kalau translation key tidak resolve di server
+    if (cleaned === 'pagination.previous' || cleaned.toLowerCase() === 'previous') return '‹ Prev';
+    if (cleaned === 'pagination.next'     || cleaned.toLowerCase() === 'next')     return 'Next ›';
+
+    return cleaned;
 }
 
 export function Pagination({ meta }: Props) {
