@@ -57,31 +57,31 @@ export default function Out({ sparepart, picOptions, returnTo }: Props) {
                 activityLogs={sparepart.activity_logs ?? []}
             >
                 <div className="grid gap-4 md:grid-cols-2">
-                        <div className="space-y-2">
-                            <Label htmlFor="quantity">Quantity</Label>
-                            <Input
-                                id="quantity"
-                                type="number"
-                                min="1"
-                                step="1"
-                                value={form.data.quantity}
-                                onChange={(event) => form.setData('quantity', event.target.value)}
-                                placeholder="0"
-                            />
-                            <InputError message={form.errors.quantity} />
-                        </div>
-
-                        <div className="space-y-2 md:col-span-2">
-                            <Label htmlFor="remarks">Remarks</Label>
-                            <Textarea
-                                id="remarks"
-                                value={form.data.remarks}
-                                onChange={(event) => form.setData('remarks', event.target.value)}
-                                placeholder="Catatan pengambilan"
-                            />
-                            <InputError message={form.errors.remarks} />
-                        </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="quantity">Quantity</Label>
+                        <Input
+                            id="quantity"
+                            type="number"
+                            min="1"
+                            step="1"
+                            value={form.data.quantity}
+                            onChange={(event) => form.setData('quantity', event.target.value)}
+                            placeholder="0"
+                        />
+                        <InputError message={form.errors.quantity} />
                     </div>
+
+                    <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="remarks">Remarks</Label>
+                        <Textarea
+                            id="remarks"
+                            value={form.data.remarks}
+                            onChange={(event) => form.setData('remarks', event.target.value)}
+                            placeholder="Catatan pengambilan"
+                        />
+                        <InputError message={form.errors.remarks} />
+                    </div>
+                </div>
             </StockTransactionForm>
         </>
     );
