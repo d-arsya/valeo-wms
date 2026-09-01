@@ -161,9 +161,15 @@ class SparepartController extends Controller
      * Export Sparepart Master List ke .xlsx (format asli Excel) sesuai Valeo template.
      * Semua logika layout & styling ada di: app/Exports/SparepartMasterListExport.php
      */
-    public function exportMasterList()
+    public function exportMasterList(Request $request)
     {
-        return SparepartMasterListExport::download();
+        abort_unless($request->user()?->isAdmin(), 403, 'Akses ditolak. Fitur export ini khusus untuk Admin.');
+
+        $docNo = $request->query('doc_no');
+        $revision = $request->query('revision');
+        $pic = $request->query('pic');
+
+        return SparepartMasterListExport::download($docNo, $revision, $pic);
     }
 
     private function brandOptions()

@@ -28,8 +28,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('categories', CategoryController::class);
         Route::resource('racks', RackController::class);
 
-        // Spareparts Create/Edit/Destroy
+        // Spareparts Create/Edit/Destroy & Export
         Route::resource('spareparts', SparepartController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
+        Route::get('spareparts/export/master-list', [SparepartController::class, 'exportMasterList'])
+            ->middleware('throttle:report-export')
+            ->name('spareparts.export-master-list');
+
+        // Activity Log Control Export (IN / OUT Control)
+        Route::get('reports/export/control', [ReportController::class, 'exportControl'])
+            ->middleware('throttle:report-export')
+            ->name('reports.export-control');
 
         // QR Label (Admin Only)
         Route::get('spareparts/{sparepart}/label', [QrCodeController::class, 'show'])->name('spareparts.label');
@@ -38,9 +46,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Spareparts Index & Show (All authenticated users)
     Route::resource('spareparts', SparepartController::class)->only(['index']);
     Route::get('spareparts/{sparepart:material_number}', [SparepartController::class, 'show'])->name('spareparts.show');
-    Route::get('spareparts/export/master-list', [SparepartController::class, 'exportMasterList'])
-        ->middleware('throttle:report-export')
-        ->name('spareparts.export-master-list');
 
     // QR Scanner (All authenticated users)
     Route::inertia('scanner', 'scanner/Index')->name('scanner.index');

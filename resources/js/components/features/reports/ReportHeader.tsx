@@ -1,5 +1,5 @@
 import { usePage } from '@inertiajs/react';
-import { Download, FileSpreadsheet, FileText } from 'lucide-react';
+import { FileSpreadsheet, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import reports from '@/routes/reports';
@@ -9,18 +9,12 @@ export function buildExportUrl(baseUrl: string): string {
     return params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
 }
 
-export function ReportHeader() {
-    const handleExportPdf = () => {
-        window.location.href = buildExportUrl(reports.export().url);
-    };
+interface ReportHeaderProps {
+    isAdmin?: boolean;
+    onExportControl?: () => void;
+}
 
-    const handleExportExcel = () => {
-        const excelRoute = (reports as any)?.['export-excel']
-            ? (reports as any)['export-excel']().url
-            : '/reports/export/excel';
-        window.location.href = buildExportUrl(excelRoute);
-    };
-
+export function ReportHeader({ isAdmin, onExportControl }: ReportHeaderProps) {
     const totalLogs = (usePage().props as { logs?: { total?: number; data?: unknown[] } })?.logs;
     const recordCount = totalLogs?.total
         ? totalLogs.total
@@ -40,17 +34,19 @@ export function ReportHeader() {
                 ) : null}
             </h1>
 
-            {/* Tombol export — sementara disembunyikan */}
-            {/* <div className="hidden gap-2 sm:flex">
-                <Button onClick={handleExportExcel} variant="outline" size="sm" className="gap-2">
-                    <FileSpreadsheet className="size-4 shrink-0" />
-                    Export Excel
-                </Button>
-                <Button onClick={handleExportPdf} size="sm" className="gap-2">
-                    <Download className="size-4 shrink-0" />
-                    Export PDF
-                </Button>
-            </div> */}
+            {isAdmin && onExportControl && (
+                <div className="flex gap-2">
+                    <Button
+                        onClick={onExportControl}
+                        variant="outline"
+                        size="sm"
+                        className="gap-2"
+                    >
+                        <FileSpreadsheet className="size-4 shrink-0 text-emerald-600" />
+                        Export Control
+                    </Button>
+                </div>
+            )}
         </div>
     );
 }
