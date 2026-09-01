@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import { FlashToaster } from '@/components/flash-toaster';
 import { home } from '@/routes';
 import type { AuthLayoutProps } from '@/types';
 
@@ -6,6 +7,7 @@ export default function AuthSimpleLayout({ children, title, description }: AuthL
     return (
         <div className="flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10"
             style={{ background: '#f5f5f5' }}>
+            <FlashToaster />
             <div className="w-full max-w-sm">
                 <div className="flex flex-col gap-8">
                     {/* Valeo Brand Header */}

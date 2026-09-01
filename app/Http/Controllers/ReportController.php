@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ActivityLogControlExport;
 use App\Models\ActivityLog;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -191,5 +192,25 @@ class ReportController extends Controller
             'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
             'Expires' => '0',
         ]);
+    }
+
+    /**
+     * Export IN or OUT Control report to .xlsx (Admin only).
+     * Streams directly to client device, no server storage.
+     */
+    public function exportControl(Request $request)
+    {
+        if (! $request->user()?->isAdmin()) {
+            abort(403, 'Only admin can export control reports.');
+        }
+
+        $type = strtoupper($request->input('type', 'OUT'));
+        $docNo = $request->input('doc_no');
+        $revision = $request->input('revision');
+        $from = $request->input('from');
+        $to = $request->input('to');
+        $search = $request->input('search');
+
+        return ActivityLogControlExport::download($type, $docNo, $revision, $from, $to, $search);
     }
 }

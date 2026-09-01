@@ -17,6 +17,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Internal Access Gate Token
+    |--------------------------------------------------------------------------
+    |
+    | Secret token required to access the application from unauthenticated
+    | devices. If set, accessing raw URLs without passing this token will
+    | result in a 404 Not Found response.
+    |
+    */
+    'internal_access_token' => env('INTERNAL_ACCESS_TOKEN'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
     |
