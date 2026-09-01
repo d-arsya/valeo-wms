@@ -95,6 +95,11 @@ class UserController extends Controller
             'role' => ['required', new Enum(UserRole::class)],
         ]);
 
+        if ($user->id === auth()->id() && $validated['role'] !== UserRole::ADMIN) {
+            return redirect()->route('users.index')
+                ->with('error', 'Anda tidak dapat menurunkan role akun Anda sendiri.');
+        }
+
         if (empty($validated['password'])) {
             unset($validated['password']);
         }

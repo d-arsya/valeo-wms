@@ -69,9 +69,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Reports (All authenticated users)
     Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
-    Route::get('reports/export', [ReportController::class, 'export'])
-        ->middleware('throttle:report-export')
-        ->name('reports.export');
     Route::get('reports/export/excel', [ReportController::class, 'exportExcel'])
         ->middleware('throttle:report-export')
         ->name('reports.export-excel');

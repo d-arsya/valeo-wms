@@ -6,7 +6,6 @@ import { toast } from 'sonner';
 import { ReportFilters } from '@/components/features/reports/ReportFilters';
 import { ReportHeader } from '@/components/features/reports/ReportHeader';
 import { ReportPreviewTable } from '@/components/features/reports/ReportPreviewTable';
-import { FloatingExportButton } from '@/components/features/reports/FloatingExportButton';
 import { Pagination } from '@/components/pagination';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -190,8 +189,6 @@ export default function ReportsIndex({ logs, filters, dir }: ReportsProps) {
 
                 <Pagination meta={logs} />
             </div>
-
-            <FloatingExportButton />
 
             {/* Export IN/OUT Control Dialog (Admin only) */}
             {isAdmin && (
