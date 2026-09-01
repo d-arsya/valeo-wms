@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Exports\ActivityLogControlExport;
 use App\Models\ActivityLog;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -29,27 +28,6 @@ class ReportController extends Controller
             'filters' => $filters,
             'dir'     => $dir,
         ]);
-    }
-
-    /**
-     * Export the filtered reports to PDF.
-     */
-    public function export(Request $request)
-    {
-        $filters = $request->only(['from', 'to', 'type', 'search', 'control_id']);
-
-        $logs = ActivityLog::with(['sparepart', 'user'])
-            ->filter($filters)
-            ->orderBy('performed_at', 'desc')
-            ->get();
-
-        $pdf = Pdf::loadView('reports.pdf', [
-            'logs' => $logs,
-            'filters' => $filters,
-            'generated_at' => now()->format('d/m/Y H:i'),
-        ]);
-
-        return $pdf->download('WMS_Activity_Report_'.now()->format('Ymd_His').'.pdf');
     }
 
     /**

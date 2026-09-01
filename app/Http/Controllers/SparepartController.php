@@ -149,6 +149,11 @@ class SparepartController extends Controller
      */
     public function destroy(Sparepart $sparepart)
     {
+        if ($sparepart->activityLogs()->exists()) {
+            return redirect()->route('spareparts.show', ['sparepart' => $sparepart->material_number])
+                ->with('error', 'Tidak dapat menghapus sparepart ini karena sudah memiliki riwayat transaksi/aktivitas log.');
+        }
+
         /** @var \Illuminate\Database\Eloquent\Model $sparepart */
         $sparepart->delete();
         Cache::forget('dashboard.stats');

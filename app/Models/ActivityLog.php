@@ -44,7 +44,11 @@ class ActivityLog extends Model
     {
         static::creating(function ($activityLog) {
             if (empty($activityLog->control_id)) {
-                $activityLog->control_id = 'CTL-'.strtoupper(Str::random(8));
+                do {
+                    $candidate = 'CTL-'.strtoupper(Str::random(8));
+                } while (static::where('control_id', $candidate)->exists());
+
+                $activityLog->control_id = $candidate;
             }
 
             if (empty($activityLog->performed_at)) {
