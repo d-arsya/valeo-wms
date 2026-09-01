@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\SparepartMasterListExport;
 use App\Http\Requests\StoreSparepartRequest;
 use App\Http\Requests\UpdateSparepartRequest;
 use App\Models\Bin;
@@ -154,6 +155,15 @@ class SparepartController extends Controller
 
         return redirect()->route('spareparts.index')
             ->with('success', 'Sparepart deleted successfully.');
+    }
+
+    /**
+     * Export Sparepart Master List ke .xlsx (format asli Excel) sesuai Valeo template.
+     * Semua logika layout & styling ada di: app/Exports/SparepartMasterListExport.php
+     */
+    public function exportMasterList()
+    {
+        return SparepartMasterListExport::download();
     }
 
     private function brandOptions()

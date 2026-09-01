@@ -38,6 +38,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Spareparts Index & Show (All authenticated users)
     Route::resource('spareparts', SparepartController::class)->only(['index']);
     Route::get('spareparts/{sparepart:material_number}', [SparepartController::class, 'show'])->name('spareparts.show');
+    Route::get('spareparts/export/master-list', [SparepartController::class, 'exportMasterList'])
+        ->middleware('throttle:report-export')
+        ->name('spareparts.export-master-list');
 
     // QR Scanner (All authenticated users)
     Route::inertia('scanner', 'scanner/Index')->name('scanner.index');

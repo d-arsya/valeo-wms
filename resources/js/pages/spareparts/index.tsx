@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Plus, Warehouse } from 'lucide-react';
+import { FileSpreadsheet, Plus, Warehouse } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import type { FormEvent } from 'react';
 import type { FilterValues } from '@/components/features/spareparts/spareparts-filters';
@@ -8,7 +8,6 @@ import { SparepartsMobileList } from '@/components/features/spareparts/sparepart
 import { SparepartsTable } from '@/components/features/spareparts/spareparts-table';
 import { Pagination } from '@/components/pagination';
 import { Button } from '@/components/ui/button';
-import type { SortDir } from '@/components/ui/sortable-header';
 import {
     Card,
     CardContent,
@@ -16,6 +15,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { FloatingActionButton } from '@/components/ui/floating-action-button';
+import type { SortDir } from '@/components/ui/sortable-header';
 import { useIsMobile } from '@/hooks/use-mobile';
 import spareparts from '@/routes/spareparts';
 import type { Brand, Category, PaginatedResponse, Sparepart } from '@/types';
@@ -128,14 +128,27 @@ export default function Index({
                                     Sparepart list
                                 </CardTitle>
                             </div>
-                            {isAdmin && (
-                                <Button asChild className="hidden w-full gap-2 shadow-sm lg:flex lg:w-auto">
-                                    <Link href={spareparts.create()}>
-                                        <Plus className="size-4" />
-                                        Add sparepart
-                                    </Link>
+                            <div className="hidden w-full flex-col gap-2 lg:flex lg:w-auto lg:flex-row">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="gap-2 shadow-sm"
+                                    onClick={() => {
+                                        window.location.href = '/spareparts/export/master-list';
+                                    }}
+                                >
+                                    <FileSpreadsheet className="size-4 shrink-0 text-emerald-600" />
+                                    Export Excel
                                 </Button>
-                            )}
+                                {isAdmin && (
+                                    <Button asChild className="gap-2 shadow-sm">
+                                        <Link href={spareparts.create()}>
+                                            <Plus className="size-4" />
+                                            Add sparepart
+                                        </Link>
+                                    </Button>
+                                )}
+                            </div>
                         </div>
                     </CardHeader>
 
