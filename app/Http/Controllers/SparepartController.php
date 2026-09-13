@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\SparepartMasterListExport;
+use App\Imports\SparepartMasterListImport;
 use App\Http\Requests\StoreSparepartRequest;
 use App\Http\Requests\UpdateSparepartRequest;
 use App\Models\Bin;
@@ -175,6 +176,73 @@ class SparepartController extends Controller
         $pic = $request->query('pic');
 
         return SparepartMasterListExport::download($docNo, $revision, $pic);
+    }
+
+    public function import(Request $request, SparepartMasterListImport $importer)
+    {
+        abort_unless($request->user()?->isAdmin(), 403, 'Akses ditolak. Fitur import ini khusus untuk Admin.');
+
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:xlsx,xls', 'max:20480'],
+        ], [
+            'file.required' => 'File Excel wajib dipilih.',
+            'file.file'     => 'File yang diunggah tidak valid.',
+            'file.mimes'    => 'Format file harus berupa Excel (.xlsx atau .xls).',
+            'file.max'      => 'Ukuran file maksimal adalah 20MB.',
+        ]);
+
+        $isDryRun = filter_var($request->input('dry_run', false), FILTER_VALIDATE_BOOLEAN);
+
+        try {
+            $uploadedFile = $request->file('file');
+            $filePath     = $uploadedFile->getRealPath();
+
+            // ── DRY RUN: Preview only, no DB writes ──
+            if ($isDryRun) {
+                $preview = $importer->dryRun($filePath);
+
+                return response()->json([
+                    'success' => true,
+                    'preview' => $preview,
+                ]);
+            }
+
+            // ── EXECUTE: Real import with DB transaction ──
+            $result = $importer->import($filePath);
+
+            Cache::forget('select.brands');
+            Cache::forget('select.categories');
+
+            $message = sprintf(
+                'Import selesai: %d sparepart baru ditambahkan, %d diperbarui.',
+                $result['created'],
+                $result['updated']
+            );
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'result'  => $result,
+                ]);
+            }
+
+            return redirect()->back()
+                ->with('success', $message)
+                ->with('import_result', $result);
+
+        } catch (\Throwable $e) {
+            if ($isDryRun || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                ], 422);
+            }
+
+            return redirect()->back()->withErrors([
+                'import' => $e->getMessage(),
+            ]);
+        }
     }
 
     private function brandOptions()

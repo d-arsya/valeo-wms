@@ -696,6 +696,10 @@ class SparepartMasterListExport
             return '';
         }
 
+        if (!empty($rackCode) && str_starts_with(strtoupper($binCode), strtoupper($rackCode))) {
+            return $binCode;
+        }
+
         return "{$rackCode}{$binCode}";
     }
 

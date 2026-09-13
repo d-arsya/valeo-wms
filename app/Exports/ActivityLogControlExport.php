@@ -363,7 +363,11 @@ class ActivityLogControlExport
             if ($sparepart && $sparepart->bin) {
                 $rackCode = $sparepart->bin->rack?->code ?? '';
                 $binCode  = $sparepart->bin->code ?? '';
-                $binNumber = "{$rackCode}{$binCode}";
+                if (!empty($rackCode) && str_starts_with(strtoupper($binCode), strtoupper($rackCode))) {
+                    $binNumber = $binCode;
+                } else {
+                    $binNumber = "{$rackCode}{$binCode}";
+                }
             }
 
             // B: No

@@ -18,15 +18,19 @@ export function FlashToaster() {
         if (!flash) return;
 
         if (flash.success && lastFlash.current !== `success:${flash.success}`) {
+            toast.dismiss();
             toast.success(flash.success);
             lastFlash.current = `success:${flash.success}`;
         } else if (flash.error && lastFlash.current !== `error:${flash.error}`) {
+            toast.dismiss();
             toast.error(flash.error);
             lastFlash.current = `error:${flash.error}`;
         } else if (flash.warning && lastFlash.current !== `warning:${flash.warning}`) {
+            toast.dismiss();
             toast.warning(flash.warning);
             lastFlash.current = `warning:${flash.warning}`;
         } else if (flash.info && lastFlash.current !== `info:${flash.info}`) {
+            toast.dismiss();
             toast.info(flash.info);
             lastFlash.current = `info:${flash.info}`;
         }
