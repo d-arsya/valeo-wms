@@ -120,10 +120,13 @@ class SparepartMasterListImport
                     if ($clone->isDirty()) {
                         $diffList = [];
                         foreach ($clone->getDirty() as $field => $newVal) {
-                            if (in_array($field, ['updated_at', 'created_at'])) {
+                            if (in_array($field, ['updated_at', 'created_at', 'status'])) {
                                 continue;
                             }
                             $oldVal = $clone->getOriginal($field);
+                            if (! $this->isFieldActuallyChanged($field, $oldVal, $newVal)) {
+                                continue;
+                            }
                             $diffList[] = [
                                 'field'    => $field,
                                 'label'    => $this->humanizeField($field),
@@ -132,14 +135,18 @@ class SparepartMasterListImport
                             ];
                         }
 
-                        $updated++;
-                        if (count($updatedItems) < 150) {
-                            $updatedItems[] = [
-                                'material_number' => $materialNumber,
-                                'part_name'       => $existing->part_name,
-                                'type'            => 'updated',
-                                'changes'         => $diffList,
-                            ];
+                        if (! empty($diffList)) {
+                            $updated++;
+                            if (count($updatedItems) < 150) {
+                                $updatedItems[] = [
+                                    'material_number' => $materialNumber,
+                                    'part_name'       => $existing->part_name,
+                                    'type'            => 'updated',
+                                    'changes'         => $diffList,
+                                ];
+                            }
+                        } else {
+                            $unchanged++;
                         }
                     } else {
                         $unchanged++;
@@ -281,10 +288,13 @@ class SparepartMasterListImport
                         if ($existing->isDirty()) {
                             $diffList = [];
                             foreach ($existing->getDirty() as $field => $newVal) {
-                                if (in_array($field, ['updated_at', 'created_at'])) {
+                                if (in_array($field, ['updated_at', 'created_at', 'status'])) {
                                     continue;
                                 }
                                 $oldVal = $existing->getOriginal($field);
+                                if (! $this->isFieldActuallyChanged($field, $oldVal, $newVal)) {
+                                    continue;
+                                }
                                 $diffList[] = [
                                     'field'    => $field,
                                     'label'    => $this->humanizeField($field),
@@ -293,16 +303,20 @@ class SparepartMasterListImport
                                 ];
                             }
 
-                            $existing->save();
-                            $updated++;
+                            if (! empty($diffList)) {
+                                $existing->save();
+                                $updated++;
 
-                            if (count($updatedItems) < 150) {
-                                $updatedItems[] = [
-                                    'material_number' => $materialNumber,
-                                    'part_name'       => $existing->part_name,
-                                    'type'            => 'updated',
-                                    'changes'         => $diffList,
-                                ];
+                                if (count($updatedItems) < 150) {
+                                    $updatedItems[] = [
+                                        'material_number' => $materialNumber,
+                                        'part_name'       => $existing->part_name,
+                                        'type'            => 'updated',
+                                        'changes'         => $diffList,
+                                    ];
+                                }
+                            } else {
+                                $unchanged++;
                             }
                         } else {
                             $unchanged++;
@@ -494,6 +508,53 @@ class SparepartMasterListImport
         }
 
         return (string) $val;
+    }
+
+    protected function isFieldActuallyChanged(string $field, mixed $oldVal, mixed $newVal): bool
+    {
+        // 1. Periksa format visual - jika setelah diformat hasilnya identik, maka tidak ada perubahan nyata
+        $oldFormatted = $this->formatDisplayValue($field, $oldVal);
+        $newFormatted = $this->formatDisplayValue($field, $newVal);
+        if ($oldFormatted === $newFormatted) {
+            return false;
+        }
+
+        // 2. Kolom harga (price_per_unit): perbandingan toleransi float (< 0.01 rupiah)
+        if ($field === 'price_per_unit') {
+            $oldNum = ($oldVal !== null && $oldVal !== '') ? (float) $oldVal : null;
+            $newNum = ($newVal !== null && $newVal !== '') ? (float) $newVal : null;
+            if ($oldNum === null && $newNum === null) {
+                return false;
+            }
+            if ($oldNum !== null && $newNum !== null) {
+                return abs($oldNum - $newNum) >= 0.01;
+            }
+            return true;
+        }
+
+        // 3. Kolom integer (stok & ID relasi)
+        if (in_array($field, ['safety_stock', 'actual_stock', 'brand_id', 'category_id', 'bin_id'], true)) {
+            $oldInt = ($oldVal !== null && $oldVal !== '') ? (int) $oldVal : 0;
+            $newInt = ($newVal !== null && $newVal !== '') ? (int) $newVal : 0;
+            return $oldInt !== $newInt;
+        }
+
+        // 4. Kolom tanggal (last_gr_date)
+        if ($field === 'last_gr_date') {
+            $oldDate = $oldVal ? Carbon::parse($oldVal)->format('Y-m-d') : null;
+            $newDate = $newVal ? Carbon::parse($newVal)->format('Y-m-d') : null;
+            return $oldDate !== $newDate;
+        }
+
+        // 5. Kolom string nullable (kosong dan null dianggap sama)
+        $cleanOld = trim((string) $oldVal);
+        $cleanNew = trim((string) $newVal);
+
+        if ($cleanOld === '' && $cleanNew === '') {
+            return false;
+        }
+
+        return $cleanOld !== $cleanNew;
     }
 
     protected function getCellValue(Worksheet $sheet, string $coord): mixed
@@ -722,7 +783,7 @@ class SparepartMasterListImport
         return [
             'material_number' => $materialNumber,
             'part_name'       => $partName,
-            'specification'   => $specification,
+            'specification'   => $specification !== '' ? $specification : '-',
             'brand_id'        => $brandId,
             'category_id'     => $categoryId,
             'bin_id'          => $binId,
@@ -733,7 +794,7 @@ class SparepartMasterListImport
             'last_po_number'  => $lastPoNumber !== '' ? $lastPoNumber : null,
             'last_supplier'   => $lastSupplier !== '' ? $lastSupplier : null,
             'last_gr_date'    => $lastGrDate,
-            'price_per_unit'  => $pricePerUnit > 0 ? $pricePerUnit : null,
+            'price_per_unit'  => $pricePerUnit > 0 ? number_format($pricePerUnit, 2, '.', '') : null,
             'rank'            => $rank,
         ];
     }
@@ -755,8 +816,35 @@ class SparepartMasterListImport
         if (is_bool($v)) return 1.0;
         if (is_numeric($v)) return (float) $v;
         if (is_string($v)) {
-            $clean = preg_replace('/[^0-9.\-]/', '', $v);
-            if (is_numeric($clean)) return (float) $clean;
+            $str = trim($v);
+            $str = preg_replace('/[^\d.,\-]/', '', $str);
+            if ($str === '') return 0.0;
+
+            // Kasus format angka dengan ribuan & desimal
+            if (str_contains($str, ',') && str_contains($str, '.')) {
+                if (strrpos($str, ',') > strrpos($str, '.')) {
+                    // ID format: 1.000,50
+                    $str = str_replace('.', '', $str);
+                    $str = str_replace(',', '.', $str);
+                } else {
+                    // EN format: 1,000.50
+                    $str = str_replace(',', '', $str);
+                }
+            } elseif (str_contains($str, ',')) {
+                // Hanya koma: jika 3 digit di akhir (misal 42,000), anggap ribuan
+                if (preg_match('/,\d{3}$/', $str)) {
+                    $str = str_replace(',', '', $str);
+                } else {
+                    $str = str_replace(',', '.', $str);
+                }
+            } elseif (str_contains($str, '.')) {
+                // Hanya titik: jika 3 digit di akhir (misal 42.000), anggap ribuan ID
+                if (preg_match('/\.\d{3}$/', $str)) {
+                    $str = str_replace('.', '', $str);
+                }
+            }
+
+            if (is_numeric($str)) return (float) $str;
         }
         return 0.0;
     }

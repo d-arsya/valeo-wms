@@ -34,6 +34,15 @@ class Sparepart extends Model
         'rank',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'price_per_unit' => 'decimal:2',
+            'safety_stock'   => 'integer',
+            'actual_stock'   => 'integer',
+        ];
+    }
+
     public function brand()
     {
         return $this->belongsTo(Brand::class);

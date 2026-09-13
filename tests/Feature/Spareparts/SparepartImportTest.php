@@ -268,4 +268,96 @@ class SparepartImportTest extends TestCase
 
         @unlink($tempPath);
     }
+
+    public function test_identical_price_and_data_are_treated_as_unchanged(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $brand = Brand::factory()->create(['name' => 'OMRON']);
+        $category = Category::factory()->create(['name' => 'Sensors']);
+        $rack = \App\Models\Rack::firstOrCreate(['code' => 'GEN']);
+        $bin = \App\Models\Bin::firstOrCreate(['code' => 'LOC-STOCKROOM', 'rack_id' => $rack->id]);
+
+        Sparepart::factory()->create([
+            'material_number' => 'A23000143',
+            'part_name'       => 'Push Button',
+            'specification'   => 'K22-21R',
+            'brand_id'        => $brand->id,
+            'category_id'     => $category->id,
+            'bin_id'          => $bin->id,
+            'safety_stock'    => 2,
+            'actual_stock'    => 0,
+            'price_per_unit'  => 42000,
+            'rank'            => 'C',
+            'unit'            => 'Ea',
+            'resource'        => 'Part Project',
+            'last_po_number'  => '-',
+            'last_supplier'   => '-',
+            'last_gr_date'    => null,
+        ]);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Master List');
+
+        // Row 13 Headers
+        $sheet->setCellValue('C13', 'Material Number');
+        $sheet->setCellValue('D13', 'Location Rack Number');
+        $sheet->setCellValue('E13', 'Part Name');
+        $sheet->setCellValue('F13', 'Specification');
+        $sheet->setCellValue('G13', 'Brand');
+        $sheet->setCellValue('H13', 'Category');
+        $sheet->setCellValue('I13', 'Safety Stock');
+        $sheet->setCellValue('J13', 'WH Stock');
+        $sheet->setCellValue('L13', 'Unit');
+        $sheet->setCellValue('M13', 'Resource');
+        $sheet->setCellValue('N13', 'Last PO Number');
+        $sheet->setCellValue('O13', 'Last PO Supplier');
+        $sheet->setCellValue('Q13', 'Value per pcs');
+        $sheet->setCellValue('S13', 'Rank');
+
+        // Row 14: Same exact data including price 42000
+        $sheet->setCellValue('C14', 'A23000143');
+        $sheet->setCellValue('D14', 'LOC-STOCKROOM');
+        $sheet->setCellValue('E14', 'Push Button');
+        $sheet->setCellValue('F14', 'K22-21R');
+        $sheet->setCellValue('G14', 'OMRON');
+        $sheet->setCellValue('H14', 'Sensors');
+        $sheet->setCellValue('I14', 2);
+        $sheet->setCellValue('J14', 0);
+        $sheet->setCellValue('L14', 'Ea');
+        $sheet->setCellValue('M14', 'Part Project');
+        $sheet->setCellValue('N14', '-');
+        $sheet->setCellValue('O14', '-');
+        $sheet->setCellValue('Q14', 42000);
+        $sheet->setCellValue('S14', 'C');
+
+        $tempPath = tempnam(sys_get_temp_dir(), 'test_identical_') . '.xlsx';
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($tempPath);
+
+        $file = new UploadedFile(
+            $tempPath,
+            'MasterList_Same.xlsx',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            null,
+            true
+        );
+
+        // Dry run request
+        $response = $this
+            ->actingAs($admin)
+            ->postJson(route('spareparts.import'), [
+                'file'    => $file,
+                'dry_run' => true,
+            ]);
+
+        $response->assertOk();
+        $response->assertJsonPath('preview.created', 0);
+        $response->assertJsonPath('preview.updated', 0);
+        $response->assertJsonPath('preview.unchanged', 1);
+        $response->assertJsonCount(0, 'preview.updated_items');
+
+        @unlink($tempPath);
+    }
 }
