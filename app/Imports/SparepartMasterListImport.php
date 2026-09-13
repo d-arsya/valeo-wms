@@ -418,7 +418,9 @@ class SparepartMasterListImport
                             $this->columnMap['safety_stock'] = $colLetter;
                         } elseif (str_contains($val, 'wh') || str_contains($val, 'actual') || str_contains($val, 'stock') || str_contains($val, 'stok')) {
                             if (! str_contains($val, 'safety')) {
-                                $this->columnMap['actual_stock'] = $colLetter;
+                                if (str_contains($val, 'wh') || ! isset($this->columnMap['actual_stock'])) {
+                                    $this->columnMap['actual_stock'] = $colLetter;
+                                }
                             }
                         } elseif (str_contains($val, 'unit') || str_contains($val, 'satuan')) {
                             $this->columnMap['unit'] = $colLetter;
@@ -685,6 +687,7 @@ class SparepartMasterListImport
         $categoryName  = trim((string) $this->getCellValue($sheet, "{$m['category']}{$row}"));
 
         $safetyStock = $this->toIntOrZero($this->getCellValue($sheet, "{$m['safety_stock']}{$row}"));
+        // WH Stock dan Actual Stock diperlakukan sama — keduanya = actual_stock di DB
         $actualStock = $this->toIntOrZero($this->getCellValue($sheet, "{$m['actual_stock']}{$row}"));
 
         $unit     = trim((string) $this->getCellValue($sheet, "{$m['unit']}{$row}"));
