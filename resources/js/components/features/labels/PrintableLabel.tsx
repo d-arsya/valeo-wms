@@ -12,51 +12,54 @@ export function PrintableLabel({ sparepart, qrCodeSvg }: PrintableLabelProps) {
         : 'Lokasi Tidak Diketahui';
 
     return (
-        <Card className="w-full max-w-100 border-2 border-dashed border-border print:border-solid print:border-black print:shadow-none bg-white">
-            <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
+        <Card
+            className="w-[70mm] h-[26mm] min-w-[70mm] max-w-[70mm] min-h-[26mm] max-h-[26mm] border-2 border-dashed border-border print:border-solid print:border-black print:shadow-none bg-white overflow-hidden box-border shadow-none"
+            style={{ width: '70mm', height: '26mm' }}
+        >
+            <CardContent className="p-1 flex flex-col items-center justify-between text-center h-full space-y-0.5 box-border">
                 {/* QR Code Container */}
-                <div className="w-48 h-48 flex items-center justify-center bg-muted/20 rounded-lg overflow-hidden border">
+                <div className="w-[10mm] h-[10mm] flex items-center justify-center bg-muted/20 rounded overflow-hidden border shrink-0">
                     <div
-                        className="w-full h-full p-4 [&>svg]:w-full [&>svg]:h-full"
+                        className="w-full h-full p-0.5 [&>svg]:w-full [&>svg]:h-full"
                         dangerouslySetInnerHTML={{ __html: qrCodeSvg }}
                     />
                 </div>
 
                 {/* Textual Information */}
-                <div className="space-y-2 w-full pt-4 border-t border-dashed print:border-solid print:border-black">
+                <div className="w-full border-t border-dashed print:border-solid print:border-black pt-0.5 space-y-0.5">
                     <div>
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold print:text-black">
+                        <p className="text-[5px] text-muted-foreground uppercase tracking-wider font-semibold print:text-black leading-none">
                             Material Number
                         </p>
-                        <p className="font-mono text-lg font-bold print:text-black">
+                        <p className="font-mono text-[8px] font-bold print:text-black leading-tight truncate">
                             {sparepart.material_number}
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 text-left pt-2">
-                        <div>
-                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold print:text-black">
+                    <div className="grid grid-cols-2 gap-1 text-left">
+                        <div className="overflow-hidden">
+                            <p className="text-[5px] text-muted-foreground uppercase tracking-wider font-semibold print:text-black leading-none">
                                 Location
                             </p>
-                            <p className="font-semibold text-sm truncate print:text-black">
+                            <p className="font-semibold text-[6px] truncate print:text-black leading-tight">
                                 {location}
                             </p>
                         </div>
-                        <div>
-                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold print:text-black">
+                        <div className="overflow-hidden">
+                            <p className="text-[5px] text-muted-foreground uppercase tracking-wider font-semibold print:text-black leading-none">
                                 Brand
                             </p>
-                            <p className="font-semibold text-sm truncate print:text-black">
+                            <p className="font-semibold text-[6px] truncate print:text-black leading-tight">
                                 {sparepart.brand?.name || '-'}
                             </p>
                         </div>
                     </div>
 
-                    <div className="text-left pt-1">
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold print:text-black">
+                    <div className="text-left overflow-hidden">
+                        <p className="text-[5px] text-muted-foreground uppercase tracking-wider font-semibold print:text-black leading-none">
                             Specification
                         </p>
-                        <p className="text-xs line-clamp-2 print:text-black">
+                        <p className="text-[6px] truncate print:text-black leading-tight">
                             {sparepart.specification || '-'}
                         </p>
                     </div>
