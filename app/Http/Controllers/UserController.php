@@ -58,15 +58,17 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
             'role' => ['required', new Enum(UserRole::class)],
         ]);
+
+        $validated['email_verified_at'] = now();
 
         User::create($validated);
 
         return redirect()->route('users.index')
-            ->with('success', 'User created successfully.');
+            ->with('success', 'User berhasil dibuat.');
     }
 
     /**
@@ -90,24 +92,31 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'password' => ['nullable', 'string', 'min:8'],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
             'role' => ['required', new Enum(UserRole::class)],
         ]);
 
-        if ($user->id === auth()->id() && $validated['role'] !== UserRole::ADMIN) {
+        $roleValue = $validated['role'] instanceof UserRole ? $validated['role']->value : (string) $validated['role'];
+
+        if ($user->id === auth()->id() && $roleValue !== UserRole::ADMIN->value) {
             return redirect()->route('users.index')
                 ->with('error', 'Anda tidak dapat menurunkan role akun Anda sendiri.');
         }
 
-        if (empty($validated['password'])) {
-            unset($validated['password']);
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->role = $validated['role'];
+
+        if (!empty($validated['password'])) {
+            $user->password = $validated['password'];
         }
 
-        $user->update($validated);
+        $user->email_verified_at = now();
+        $user->save();
 
         return redirect()->route('users.index')
-            ->with('success', 'User updated successfully.');
+            ->with('success', 'User berhasil diperbarui.');
     }
 
     /**

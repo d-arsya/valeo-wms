@@ -1,7 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { PrintableLabel } from '@/components/features/labels/PrintableLabel';
 import spareparts from '@/routes/spareparts';
 import type { Sparepart } from '@/types';
 
@@ -14,10 +14,6 @@ export default function LabelShow({ sparepart, qrCodeSvg }: LabelShowProps) {
     const handlePrint = () => {
         window.print();
     };
-
-    const location = sparepart.bin && sparepart.bin.rack
-        ? `${sparepart.bin.rack.code} - ${sparepart.bin.code}`
-        : 'Unknown Location';
 
     return (
         <>
@@ -35,7 +31,7 @@ export default function LabelShow({ sparepart, qrCodeSvg }: LabelShowProps) {
                         <div>
                             <h1 className="text-2xl font-bold tracking-tight">Cetak Label QR</h1>
                             <p className="text-sm text-muted-foreground">
-                                Cetak label ini untuk ditempelkan pada fisik bin/rak.
+                                Cetak label ini untuk ditempelkan pada fisik bin/rak (70x26mm).
                             </p>
                         </div>
                     </div>
@@ -50,48 +46,14 @@ export default function LabelShow({ sparepart, qrCodeSvg }: LabelShowProps) {
                 {/* Print Preview Container */}
                 <div className="flex items-center justify-center bg-muted/30 p-8 rounded-xl border print:p-0 print:border-none print:bg-transparent">
                     {/* The Actual Label Card */}
-                    <Card className="w-full max-w-100 border-2 border-dashed border-border print:border-solid print:border-black print:shadow-none bg-white">
-                        <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
-                            {/* QR Code Container */}
-                            <div className="w-48 h-48 flex items-center justify-center bg-muted/20 rounded-lg overflow-hidden border p-4">
-                                <div
-                                    className="w-full h-full [&>svg]:w-full [&>svg]:h-full"
-                                    dangerouslySetInnerHTML={{ __html: qrCodeSvg }}
-                                />
-                            </div>
-
-                            {/* Textual Information */}
-                            <div className="space-y-2 w-full pt-4 border-t border-dashed print:border-solid print:border-black">
-                                <div>
-                                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold print:text-black">Material Number</p>
-                                    <p className="font-mono text-lg font-bold print:text-black">{sparepart.material_number}</p>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-2 text-left pt-2">
-                                    <div>
-                                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold print:text-black">Location</p>
-                                        <p className="font-semibold text-sm truncate print:text-black">{location}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold print:text-black">Brand</p>
-                                        <p className="font-semibold text-sm truncate print:text-black">{sparepart.brand?.name || '-'}</p>
-                                    </div>
-                                </div>
-
-                                <div className="text-left pt-1">
-                                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold print:text-black">Specification</p>
-                                    <p className="text-xs line-clamp-2 print:text-black">{sparepart.specification || '-'}</p>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                    <PrintableLabel sparepart={sparepart} qrCodeSvg={qrCodeSvg} />
                 </div>
 
                 {/* Print Styles */}
                 <style dangerouslySetInnerHTML={{__html: `
                     @media print {
-                        @page { size: auto; margin: 0mm; }
-                        body { background: white; }
+                        @page { size: 70mm 26mm; margin: 0mm; }
+                        body { background: white; margin: 0; padding: 0; }
                         #app-sidebar { display: none !important; }
                         header { display: none !important; }
                         main { padding: 0 !important; margin: 0 !important; }

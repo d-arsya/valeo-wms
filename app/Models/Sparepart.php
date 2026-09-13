@@ -24,6 +24,8 @@ class Sparepart extends Model
         'bin_id',
         'safety_stock',
         'actual_stock',
+        'unit',
+        'resource',
         'last_po_number',
         'last_supplier',
         'last_gr_date',

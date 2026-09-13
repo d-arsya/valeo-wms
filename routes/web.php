@@ -33,6 +33,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('spareparts/export/master-list', [SparepartController::class, 'exportMasterList'])
             ->middleware('throttle:report-export')
             ->name('spareparts.export-master-list');
+        Route::post('spareparts/import', [SparepartController::class, 'import'])
+            ->name('spareparts.import');
 
         // Activity Log Control Export (IN / OUT Control)
         Route::get('reports/export/control', [ReportController::class, 'exportControl'])
